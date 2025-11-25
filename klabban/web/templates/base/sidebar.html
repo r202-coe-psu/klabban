@@ -26,8 +26,8 @@
         </li>
 
         <li>
-          <a class="{{ 'drawer-menu-active' if '/dashboard' in request.path else '' }}"
-            href="{{ url_for('dashboard.index') }}">
+          <a class="{{ 'drawer-menu-active' if '/' in request.path else '' }}"
+            href="{{ url_for('index.index') }}">
             <i class="ph ph-layout-grid text-lg"></i>
             แดชบอร์ด
           </a>

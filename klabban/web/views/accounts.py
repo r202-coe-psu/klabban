@@ -48,7 +48,7 @@ def login():
     if next:
         return redirect(next)
 
-    return redirect(url_for("dashboard.index"))
+    return redirect(url_for("index.index"))
 
 
 @module.route("/login/<name>")
