@@ -6,6 +6,8 @@ from flask_login import UserMixin
 
 USER_ROLES = [
     ("user", "ผู้ใช้งานทั่วไป"),
+    ("admin", "ผู้ดูแลระบบ"),
+    ("refugee_camp_staff", "เจ้าหน้าที่ศูนย์พักพิง"),
 ]
 
 TITLE_CHOICES = ["นาย", "นางสาว", "นาง"]
@@ -21,15 +23,14 @@ class User(me.Document, UserMixin):
     meta = {"collection": "users", "indexes": ["first_name", "last_name"]}
 
     """ข้อมูลทั่วไป"""
-    username = me.StringField(required=True, min_length=3, max_length=64)  # ชื่อผู้ใช้งาน
-    password = me.StringField(required=True, default="")  # รหัสผ่านผู้ใช้งาน
-    title = me.StringField(choices=TITLE_CHOICES)  # ชื่อต้น
+    display_name = me.StringField(default="")  # ชื่อที่แสดง
     first_name = me.StringField(max_length=128)  # ชื่อ
     last_name = me.StringField(max_length=128)  # นามสกุล
-
-    display_name = me.StringField(default="")  # ชื่อที่แสดง
-    """ข้อมูลติดต่อ"""
+    username = me.StringField(required=True, min_length=3, max_length=64)  # ชื่อผู้ใช้งาน
+    password = me.StringField(required=True, default="")  # รหัสผ่านผู้ใช้งาน
     email = me.StringField(max_length=128)  # email ผู้ใช้งาน
+
+    """ข้อมูลติดต่อ"""
     emergency_contact = me.StringField(max_length=128, default="")  # เบอร์โทรฉุกเฉิน
 
     """ข้อมูลผู้ใช้งาน"""
