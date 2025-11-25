@@ -1,0 +1,39 @@
+services:
+    mongodb:
+        image: mongo
+        container_name: klabban-mongodb
+        volumes:
+            - ../deployment/klabban/mongodb/data/db:/data/db
+            - /etc/localtime:/etc/localtime:ro
+        restart: always
+        networks:
+            - default
+        logging:
+            options:
+                max-size: "10m"
+                max-file: "3"
+
+    web:
+        build: .
+        image: klabban-image
+        container_name: klabban-web
+        volumes:
+            - ../deployment:/deployment
+            - /etc/localtime:/etc/localtime:ro
+        ports:
+            - 9070:8080
+        links:
+            - mongodb
+        networks:
+            - default
+        restart: always
+        environment:
+            KLABBAN_SETTINGS: /app/.env
+        command: /venv/bin/gunicorn --keep-alive 10 --timeout 1200 --log-level=DEBUG --bind 0.0.0.0:8080 "klabban.web:create_app()"
+        logging:
+            options:
+                max-size: "10m"
+                max-file: "6"
+
+networks:
+    default:
