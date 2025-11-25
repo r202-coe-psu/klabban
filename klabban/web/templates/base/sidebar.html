@@ -41,38 +41,19 @@
             ศูนย์พักพิง
           </a>
         </li>
-
-        <li>
-          <a class="{{ 'drawer-menu-active' if '/settings' in request.path else '' }}"
-             href="#">
-            <i class="ph ph-gear text-lg"></i>
-            Settings
+        <li class="">
+          <a class="{{ 'drawer-menu-active' if '/refugees' in request.path else '' }}"
+            href="{{ url_for('refugees.index') }}">
+            <span class="material-symbols-outlined">dashboard</span>
+            ผู้อพยพ
           </a>
         </li>
-
-        <!-- Other menu header -->
-        <li class="menu-title px-6 pt-6">
-          <span class="text-xs uppercase opacity-80 text-blue-100">Other</span>
-        </li>
-
-        <li>
+         <li>
           <a class="{{ 'drawer-menu-active' if '/users' in request.path else '' }}"
              href="#">
             <i class="ph ph-users text-lg"></i>
             ผู้ใช้งาน
           </a>
         </li>
-
-        <li>
-          <a class="{{ 'drawer-menu-active' if '/help' in request.path else '' }}"
-             href="#">
-            <i class="ph ph-info text-lg"></i>
-            Help & Support
-          </a>
-        </li>
-
-      </ul>
-    </div>
-
   </div>
 </div>
