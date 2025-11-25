@@ -20,7 +20,7 @@ def init_admin():
         status="active",
         roles=["admin"],
     )
-    admin_user.set_password("p@ssw0rd")
+    admin_user.set_password("r202@k1abb4n")
     admin_user.save()
 
 
