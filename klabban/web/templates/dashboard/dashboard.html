@@ -1,0 +1,122 @@
+{% extends "/base/default_page.html" %}
+
+{% set title_page="แดชบอร์ด" %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white rounded-3xl border border-gray-300 p-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-gray-500 mb-1">ผู้อพยพทั้งหมด</p>
+        <p class="text-3xl font-bold text-primary">{{ total_refugees }}</p>
+      </div>
+      <div class="text-4xl text-primary opacity-20">
+        <span class="material-symbols-outlined">people</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-3xl border border-gray-300 p-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-gray-500 mb-1">กำลังพักพิง</p>
+        <p class="text-3xl font-bold text-blue-600">{{ total_active_refugees }}</p>
+      </div>
+      <div class="text-4xl text-blue-600 opacity-20">
+        <span class="material-symbols-outlined">home</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-3xl border border-gray-300 p-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-gray-500 mb-1">กลับบ้านแล้ว</p>
+        <p class="text-3xl font-bold text-green-600">{{ total_back_home }}</p>
+      </div>
+      <div class="text-4xl text-green-600 opacity-20">
+        <span class="material-symbols-outlined">check_circle</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-3xl border border-gray-300 p-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-gray-500 mb-1">ศูนย์พักพิง</p>
+        <p class="text-3xl font-bold text-purple-600">{{ total_camps }}</p>
+      </div>
+      <div class="text-4xl text-purple-600 opacity-20">
+        <span class="material-symbols-outlined">location_city</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+  <div class="bg-white rounded-3xl border border-gray-300 p-6">
+    <h3 class="text-lg font-semibold text-gray-700 mb-4">ผู้อพยพตามศูนย์พักพิง</h3>
+    {% if camps_with_counts %}
+    <div class="space-y-3">
+      {% for item in camps_with_counts %}
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-gray-400">location_city</span>
+          <span class="font-medium text-gray-700">{{ item.camp.name }}</span>
+        </div>
+        <span class="badge badge-primary">{{ item.count }} คน</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-500 text-center py-4">ไม่มีข้อมูล</p>
+    {% endif %}
+  </div>
+
+  <div class="bg-white rounded-3xl border border-gray-300 p-6">
+    <h3 class="text-lg font-semibold text-gray-700 mb-4">สถิติเพิ่มเติม</h3>
+    <div class="space-y-4">
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-gray-400">schedule</span>
+          <span class="text-gray-700">ลงทะเบียนล่าสุด (7 วัน)</span>
+        </div>
+        <span class="badge badge-info">{{ recently_registered }} คน</span>
+      </div>
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-gray-400">trending_up</span>
+          <span class="text-gray-700">อัตราการกลับบ้าน</span>
+        </div>
+        <span class="text-gray-700 font-medium">
+          {% if total_refugees > 0 %}
+          {{ "%.1f"|format((total_back_home / total_refugees * 100)) }}%
+          {% else %}
+          0%
+          {% endif %}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bg-white rounded-3xl border border-gray-300 p-6">
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-semibold text-gray-700">การดำเนินการด่วน</h3>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <a href="{{ url_for('refugees.index') }}" class="btn btn-outline btn-lg justify-start">
+      <span class="material-symbols-outlined">search</span>
+      ค้นหาผู้อพยพ
+    </a>
+    <a href="{{ url_for('refugee_camps.index') }}" class="btn btn-outline btn-lg justify-start">
+      <span class="material-symbols-outlined">location_city</span>
+      จัดการศูนย์พักพิง
+    </a>
+    <a href="{{ url_for('refugees.create_or_edit') }}" class="btn btn-outline btn-lg justify-start">
+      <span class="material-symbols-outlined">add</span>
+      เพิ่มผู้อพยพ
+    </a>
+  </div>
+</div>
+{% endblock %}
