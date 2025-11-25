@@ -4,17 +4,19 @@
   <div class="flex flex-col h-full bg-gradient-to-b from-blue-600 to-blue-800 text-white w-64">
 
     <!-- Header -->
-    <div class="py-4 flex items-center gap-3 border-b border-blue-400/30 px-8">
-      <div class="avatar">
-        <div class="w-12 h-12 rounded-full ring ring-white/40 ring-offset-1">
-          <img src="{{ url_for('static', filename='images/klabban.png') }}" alt="ระบบงานพระ"
-            class="w-full h-full object-cover" />
+    <div class="px-8 py-5 flex items-center justify-between border-b border-blue-400/30">
+      <div class="flex items-center gap-3">
+        <div class="p-2 rounded-xl">
+          <i class="ph ph-user-check text-2xl"></i>
+        </div>
+        <div>
+          <div class="text-xl font-bold">
+            Klabban
+          </div>
         </div>
       </div>
-      <div>
-        <div class="text-xl font-bold">Klabban</div>
-      </div>
     </div>
+
 
     <!-- Menu -->
     <div class="flex-grow text-sm menu w-full">
