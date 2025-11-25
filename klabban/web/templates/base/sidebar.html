@@ -1,34 +1,78 @@
 <div class="drawer-side shadow">
   <label for="drawer-menu" aria-label="close sidebar" class="drawer-overlay h-full"></label>
-  <div class="flex flex-col h-full bg-gradient-to-b from-orange-600 to-orange-700 text-white w-64">
+
+  <div class="flex flex-col h-full bg-gradient-to-b from-blue-600 to-blue-800 text-white w-64">
+
     <!-- Header -->
-    <div class="py-4 flex items-center gap-2 border-b border-urgent px-8">
+    <div class="py-4 flex items-center gap-3 border-b border-blue-400/30 px-8">
       <div class="avatar">
-        <div class="w-12 h-12 rounded-full">
-          <img src="{{ url_for('static', filename='images/klabban.png') }}" alt="ระบบงานพระ"
-            class="w-full h-full object-cover" />
+        <div class="w-12 h-12 rounded-full ring ring-white/40 ring-offset-1">
+          <img src="{{ url_for('static', filename='images/klabban.png') }}" 
+               alt="ระบบงานพระ" 
+               class="w-full h-full object-cover" />
         </div>
       </div>
       <div>
         <div class="text-xl font-bold">Klabban</div>
       </div>
     </div>
+
     <!-- Menu -->
     <div class="flex-grow text-sm menu w-full">
       <ul class="menu gap-2 w-full">
-        <li class="">
+
+        <!-- Main menu header -->
+        <li class="menu-title px-6 pt-4">
+          <span class="text-xs uppercase opacity-80 text-blue-100">Main menu</span>
+        </li>
+
+        <li>
           <a class="{{ 'drawer-menu-active' if '/dashboard' in request.path else '' }}"
-            href="{{ url_for('dashboard.index') }}">
-            <span class="material-symbols-outlined">dashboard</span>
+             href="{{ url_for('dashboard.index') }}">
+            <i class="ph ph-layout-grid text-lg"></i>
             แดชบอร์ด
           </a>
         </li>
-        <li class="">
-          <a class="{{ 'drawer-menu-active' if '/refugee_camp' in request.path else '' }}"
-            href="{{ url_for('refugee_camps.index') }}">
-            <span class="material-symbols-outlined">dashboard</span>
+
+        <li>
+          <a class="{{ 'drawer-menu-active' if '/projects' in request.path else '' }}"
+             href="{{ url_for('refugee_camps.index') }}">
+            <i class="ph ph-briefcase text-lg"></i>
             ศูนย์พักพิง
           </a>
         </li>
+
+        <li>
+          <a class="{{ 'drawer-menu-active' if '/settings' in request.path else '' }}"
+             href="#">
+            <i class="ph ph-gear text-lg"></i>
+            Settings
+          </a>
+        </li>
+
+        <!-- Other menu header -->
+        <li class="menu-title px-6 pt-6">
+          <span class="text-xs uppercase opacity-80 text-blue-100">Other</span>
+        </li>
+
+        <li>
+          <a class="{{ 'drawer-menu-active' if '/users' in request.path else '' }}"
+             href="#">
+            <i class="ph ph-users text-lg"></i>
+            ผู้ใช้งาน
+          </a>
+        </li>
+
+        <li>
+          <a class="{{ 'drawer-menu-active' if '/help' in request.path else '' }}"
+             href="#">
+            <i class="ph ph-info text-lg"></i>
+            Help & Support
+          </a>
+        </li>
+
+      </ul>
+    </div>
+
   </div>
 </div>
