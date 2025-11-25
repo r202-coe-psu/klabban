@@ -3,25 +3,28 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div class="min-h-[20vh] flex flex-col gap-4">
         <h5 class="text-lg md:text-base lg:text-lg font-semibold">Hakon web</h5>
-        <img width="50%"
-             src="{{ url_for('static', filename='images/logo/diis-logo.png') }}" />
-        <div class="flex items-center gap-2 mt-2">
-          <img src="{{ url_for('static', filename='images/logo/psu_square.png') }}"
-               alt="PSU" class="h-10 w-10 mr-2 aspect-auto" />
-          <img src="{{ url_for('static', filename='images/logo/coe_psu.jpg') }}"
-               alt="COE PSU" class="h-10 w-10 mr-2" />
-          <img src="{{ url_for('static', filename='images/logo/r202.png') }}"
-               alt="R202" class="h-10 w-10 mr-2" />
-          <img src="{{ url_for('static', filename='images/logo/import_star.png') }}"
-               alt="Import Star" class="h-10 w-10 mr-2" />
+
+        <div class="flex flex-row items-center gap-6">
+          <img src="{{ url_for('static', filename='images/logo/psu-logo.png') }}"
+                alt="PSU logo" class="h-20 md:h-24 w-auto object-contain" />
+          <img src="{{ url_for('static', filename='images/logo/diis-logo.png') }}"
+               alt="DIIS logo" class="h-16 md:h-16 w-auto object-contain" />
         </div>
 
-        <p class="text-sm md:text-base">Develop by R202 and Import Star</p>
+        <div class="flex items-center gap-2 mt-2">
+          <img src="{{ url_for('static', filename='images/logo/coe_psu.jpg') }}"
+               alt="COE PSU" class="h-10 w-auto mr-2" />
+          <img src="{{ url_for('static', filename='images/logo/r202.png') }}"
+               alt="R202" class="h-10 w-auto mr-2" />
+          <img src="{{ url_for('static', filename='images/logo/import_star.png') }}"
+               alt="Import Star" class="h-10 w-auto mr-2" />
+        </div>
+
+        <p class="text-sm md:text-base">Develop by R202 and Import Star Co.</p>
       </div>
 
       <div class="flex flex-col gap-4">
-        <p class="text-sm md:text-base lg:text-lg">Office of Digital Innovation and Intelligent Systems</p>
-        <p class="text-sm md:text-base">Prince of Songkla university<br />Hat Yai, Thailand</p>
+        <p class="text-sm md:text-base lg:text-lg">Prince of Songkla university<br />Hat Yai, Thailand</p>
       </div>
 
       <div class="flex flex-col gap-4">
