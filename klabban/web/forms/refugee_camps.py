@@ -11,8 +11,10 @@ BaseRefugeeCampForm = model_form(
         "contact_info": {"label": "ข้อมูลติดต่อ"},
         "line_id": {"label": "Line ID"},
         "other_link": {"label": "ลิงก์อื่น ๆ"},
-    }
+        "description": {"label": "รายละเอียด"},
+    },
 )
+
 
 class RefugeeCampForm(BaseRefugeeCampForm):
     pass

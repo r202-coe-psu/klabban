@@ -38,7 +38,7 @@
   --color-base-300: oklch(86% 0.022 252.894);
  
   --color-base-content: oklch(13% 0.028 261.692);
-  --color-primary: oklch(54% 0.245 262.881);
+  --color-primary: #1C5FDB;
   --color-primary-content: oklch(93% 0.034 272.788);
   --color-secondary: #00B9C3;
   --color-secondary-content: oklch(94% 0.028 342.258);
@@ -174,3 +174,4 @@
 .klabban-personal-info-detail {
   @apply border-b border-b-base-400 space-y-2 flex flex-col
 }
+

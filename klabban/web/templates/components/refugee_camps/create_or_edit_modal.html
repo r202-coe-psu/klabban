@@ -6,7 +6,8 @@
   <div class="modal-box">
     <h3 class="text-lg">{{ modal_header }}</h3>
     <span class="text-sm text-gray-600">กรอกข้อมูลศูนย์พักพิงใหม่ในแบบฟอร์มด้านล่าง</span>
-    <form method="post" action="{{ url_for('refugee_camps.create_or_edit_refugee_camp', refugee_camp_id=refugee_camp_id) }}">
+    <form method="post"
+      action="{{ url_for('refugee_camps.create_or_edit_refugee_camp', refugee_camp_id=refugee_camp_id) }}">
       {{ form.csrf_token }}
       <div class="flex flex-col">
         {{ renderer.base_render(form.name) }}
@@ -19,6 +20,9 @@
       </div>
       <div class="flex flex-col">
         {{ renderer.base_render(form.other_link) }}
+      </div>
+      <div class="flex flex-col">
+        {{ renderer.render_text_area_field(form.description) }}
       </div>
       <div class="modal-action justify-end">
         <button type="button" class="btn"

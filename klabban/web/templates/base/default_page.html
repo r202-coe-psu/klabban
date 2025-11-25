@@ -5,8 +5,10 @@
   <div id="change-password-modal"></div>
   <input id="drawer-menu" type="checkbox" class="drawer-toggle" />
   <div class="drawer-content bg-base-100">
-    <div class="drawer-content 2xl:hidden">
-      <label for="drawer-menu" class="drawer-button btn btn-outline ml-4 mt-4
+    <div
+      class="drawer-content {{ 'flex flex-row  border-b border-transparent shadow-md' if current_user.is_authenticated else '' }} ">
+      {% if current_user.is_authenticated %}
+      <label for="drawer-menu" class="drawer-button btn btn-outline ml-4 mt-4  2xl:hidden
             h-11 w-11 p-0 flex items-center justify-center
             rounded-xl border-gray-300
             hover:bg-gray-100 hover:border-gray-400
@@ -14,7 +16,29 @@
         <span class="material-symbols-outlined text-2xl text-gray-700">
           menu
         </span>
+
       </label>
+      {% endif %}
+      <div
+        class="navbar bg-base-100 {{ 'border-b border-transparent shadow-md px-4 py-6' if not current_user.is_authenticated else '' }} max-sm:flex-col max-sm: justify-center">
+        <div class="navbar-start max-sm:justify-center">
+          <img src="/static/images/logo/psu_square.png" alt="diisLogio" class="h-10 w-10 mr-2 aspect-auto" />
+          <img src="/static/images/logo/coe_psu.jpg" alt="diisLogio" class="h-10 w-10 mr-2" />
+          <img src="/static/images/logo/r202.png" alt="diisLogio" class="h-10 w-10 mr-2" />
+          <img src="/static/images/logo/import_star.png" alt="diisLogio" class="h-10 w-10 mr-2" />
+        </div>
+        <div class="navbar-end gap-3 max-sm:justify-center max-sm:mt-2">
+          {% if not current_user.is_authenticated %}
+          <a class="btn btn-primary rounded-full px-6 font-normal"
+            href="{{ url_for('accounts.login') }}">เข้าสู่ระบบ</a>
+          <a class="btn btn-primary btn-outline rounded-full px-6 font-normal"
+            href="{{ url_for('accounts.login') }}">สำหรับเจ้าหน้าที่</a>
+          {% else %}
+          <a href="{{ url_for('accounts.logout') }}"
+            class="btn btn-primary btn-outline rounded-full px-6 font-normal">ออกจากระบบ</a>
+          {% endif %}
+        </div>
+      </div>
     </div>
 
 
