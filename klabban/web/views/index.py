@@ -7,7 +7,6 @@ module = Blueprint("index", __name__)
 
 
 @module.route("/")
-@login_required
 def index():
 
     return redirect(url_for("dashboard.index"))

@@ -6,7 +6,6 @@ module = Blueprint("dashboard", __name__, url_prefix="/dashboard")
 
 
 @module.route("/")
-@login_required
 def index():
 
     return render_template("/dashboard/index.html")
