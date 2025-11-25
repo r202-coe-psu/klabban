@@ -1,5 +1,6 @@
 {% extends "/base/default_page.html" %}
 {% import "base/html_renderer.html" as renderer %}
+{% import "/components/dialogs.html" as dialog %}
 {% set title_page="รายชื่อผู้อพยพ" %}
 
 {% block content %}
@@ -56,6 +57,18 @@
                                 edit_square
                             </span>
                         </a>
+                        <button class="btn btn-outline btn-sm border-gray-300 text-error"
+                           onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
+                            <span class="material-symbols-outlined">
+                            delete
+                            </span>
+                        </button>
+                        {{ dialog.DisactiveDialog(
+                            id="%s-disactive-dialog" | format(refugee.id),
+                            title="ยืนยันการลบรายการผู้อพยพ",
+                            body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+                            url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
+                        )}}
                     </td>
                 </tr>
                 {% endfor %}

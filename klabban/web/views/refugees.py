@@ -17,12 +17,12 @@ def index():
     search_form = forms.refugees.RefugeeSearchForm(request.args)
     search_form.refugee_camp.choices = [("", "ทั้งหมด")] + [
         (str(camp.id), camp.name)
-        for camp in models.RefugeeCamp.objects().order_by("name")
+        for camp in models.RefugeeCamp.objects(status__ne="deactive").order_by("name")
     ]
     search = search_form.search.data
     refugee_camp_id = search_form.refugee_camp.data
 
-    refugees = models.Refugee.objects(status="active").order_by("name")
+    refugees = models.Refugee.objects(status__ne="deactive").order_by("name")
     if search:
         refugees = refugees.filter(
             Q(name__icontains=search) | Q(nick_name__icontains=search)
@@ -40,6 +40,10 @@ def index():
 # @login_required
 def create_or_edit(refugee_id):
     form = forms.refugees.RefugeeForm()
+    form.refugee_camp.choices = [
+        (str(camp.id), camp.name)
+        for camp in models.RefugeeCamp.objects(status__ne="deactive").order_by("name")
+    ]
     refugee = models.Refugee()
 
     if refugee_id:
@@ -73,7 +77,9 @@ def create_or_edit(refugee_id):
 @module.route("/delete/<refugee_id>", methods=["POST"])
 # @login_required
 def delete_refugee(refugee_id):
+    print("Deleting refugee:", refugee_id)
     refugee = models.Refugee.objects(id=refugee_id).first()
     if refugee:
         refugee.status = "deactive"
+        refugee.save()
     return redirect(url_for("refugees.index"))
