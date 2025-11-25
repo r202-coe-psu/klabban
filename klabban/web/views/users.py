@@ -32,7 +32,7 @@ def index():
 
     pagination = Pagination(users, page, 20, total)
 
-    form = forms.users.SearchUserForm()
+    form = forms.users.SearchCreateUserForm()
     form.search.data = search
 
     return render_template("/users/index.html", users_pagination=pagination, form=form)
@@ -42,55 +42,41 @@ def index():
 @module.route("/<user_id>/edit", methods=["GET", "POST"])
 @login_required
 def create_or_edit_user(user_id):
-    form = forms.accounts.CreateAccountForm()
+    form = forms.users.CreateUserForm()
     user = models.User()
 
     if user_id:
         user = models.User.objects.get(id=user_id)
-        form = forms.accounts.CreateAccountForm(obj=user)
+        form = forms.users.CreateUserForm(obj=user)
+        form.role.data = user.roles[0] if user.roles else "user"
 
     if not form.validate_on_submit():
         print("Form errors:", form.errors)
         return render_template("/users/create_or_edit.html", form=form, user_id=user_id)
 
-    # ตรวจสอบ email ซ้ำ (ยกเว้นกรณี edit ตัวเอง)
-    existing_email = models.User.objects(email=form.email.data).first()
-    if existing_email and (not user_id or str(existing_email.id) != user_id):
-        flash("อีเมลนี้ถูกใช้แล้ว", "error")
+    if models.User.objects(username=form.username.data, id__ne=user_id).first():
+        flash("ชื่อบัญชีนี้มีผู้ใช้งานแล้ว กรุณาเปลี่ยนชื่อบัญชีใหม่", "error")
         return render_template("/users/create_or_edit.html", form=form, user_id=user_id)
 
-    # อัปเดตข้อมูลผู้ใช้
-    if not user_id:
-        # สร้างใหม่
-        user.created_date = datetime.datetime.now()
-        user.status = "active"  # default status
-        user.roles = ["user"]  # default role
-        user.last_login_date = datetime.datetime.now()
+    if "refugee_camp_staff" == form.role.data:
+        if not form.refugee_camp.data:
+            flash("กรุณาเลือกศูนย์พักพิงสำหรับเจ้าหน้าที่ศูนย์พักพิง", "error")
+            return render_template(
+                "/users/create_or_edit.html", form=form, user_id=user_id
+            )
 
-    user.first_name = form.first_name.data
-    user.last_name = form.last_name.data
-    user.username = form.email.data
-    user.email = form.email.data
-    user.phone_number = form.phone_number.data or ""
-    user.updated_date = datetime.datetime.now()
+    form.populate_obj(user)
+    user.roles = [form.role.data]
+    user.set_password(form.password.data)
+    user.save()
 
-    if form.password.data:
-        user.set_password(form.password.data)
-
-    try:
-        user.save()
-        if user_id:
-            flash("อัปเดตบัญชีเรียบร้อยแล้ว", "success")
-        else:
-            flash("สร้างบัญชีเรียบร้อยแล้ว", "success")
-        return redirect(url_for("users.index"))
-    except Exception as e:
-        flash(f"เกิดข้อผิดพลาด: {str(e)}", "error")
-        return render_template("/users/create_or_edit.html", form=form, user_id=user_id)
+    return redirect(url_for("users.index"))
 
 
 @module.route("/<user_id>/delete", methods=["POST"])
 @login_required
 def delete_user(user_id):
-    # TODO: ลบบัญชี
+    user = models.User.objects(id=user_id).first()
+    if user:
+        user.delete()
     return redirect(url_for("users.index"))

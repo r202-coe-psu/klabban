@@ -34,13 +34,13 @@
         </div>
       </div>
       <div class="flex gap-2 w-full md:mb-5 md:w-auto justify-end">
-        <button class="btn-ghost-orange">
+        <button class="btn">
           <span class="material-symbols-outlined">
             search
           </span>
           ค้นหา
         </button>
-        <a href="{{ url_for('users.create_or_edit_user') }}" class="btn btn-orange">
+        <a href="{{ url_for('users.create_or_edit_user') }}" class="btn btn-primary">
           <span class="material-symbols-outlined">
             add
           </span>
@@ -74,8 +74,6 @@
         <tr class="border-b border-gray-200">
           <th class="text-left py-3 px-4 text-gray-600">ชื่อผู้ใช้งาน</th>
           <th class="text-left py-3 px-4 text-gray-600">ชื่อ-นามสกุล</th>
-          <th class="text-left py-3 px-4 text-gray-600">อีเมล</th>
-          <th class="text-left py-3 px-4 text-gray-600">เบอร์โทร</th>
           <th class="text-left py-3 px-4 text-gray-600">บทบาท</th>
           <th class="text-left py-3 px-4 text-gray-600">ศูนย์พักพิง</th>
           <th class="text-left py-3 px-4 text-gray-600">สถานะ</th>
@@ -88,8 +86,6 @@
         <tr class="hover:bg-base-100">
           <td class="py-3 px-4">{{ user.username }}</td>
           <td class="py-3 px-4">{{ user.get_fullname() }}</td>
-          <td class="py-3 px-4">{{ user.email }}</td>
-          <td class="py-3 px-4">{{ user.phone_number or '-' }}</td>
           <td class="py-3 px-4 min-w-72 gap-2">
             <div class="flex flex-wrap gap-2">
               {% for role in user.get_display_roles() %}
@@ -118,13 +114,12 @@
           </td>
           <td class="py-3 px-4">
             <div class="flex lg:flex-row flex-col">
-              <button class="btn btn-sm btn-ghost hover:bg-orange-100/50 hover:border-0 border-0 hover:text-orange-700"
-                hx-target="#create-edit-user"
-                hx-get="{{ url_for('users.create_or_edit_user', user_id=user.id, **request.args) }}">
+              <a class="btn btn-sm btn-ghost hover:bg-orange-100/50 hover:border-0 border-0 hover:text-orange-700"
+                href="{{ url_for('users.create_or_edit_user', user_id=user.id, **request.args) }}">
                 <span class="material-symbols-outlined">
                   edit_square
                 </span>
-              </button>
+              </a>
               <button
                 class="btn btn-sm btn-ghost hover:bg-red-100/50 hover:border-0 border-0 text-red-500 hover:text-red-700"
                 onclick="$('#{{user.id}}-delete-dialog')[0].showModal()">

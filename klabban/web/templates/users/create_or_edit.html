@@ -1,144 +1,44 @@
 {% extends "/base/default_page.html" %}
+{% import "base/html_renderer.html" as renderer %}
 
 {% set title_page="สร้างบัญชีใหม่" %}
 {% set description_page="สมัครสมาชิกเข้าสู่ระบบ" %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-  <div class="sm:mx-auto sm:w-full sm:max-w-md">
-    <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-      <div class="text-center mb-6">
-        <h2 class="text-2xl md:text-3xl font-semibold text-gray-900">สร้างบัญชีใหม่</h2>
-        <p class="text-gray-600 mt-1 text-base md:text-lg">สำหรับผู้สมัครที่ยังไม่เคยสมัครบัญชี</p>
+
+<!-- แสดงข้อความ flash -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert {% if category == 'error' %}alert-error{% else %}alert-success{% endif %} mb-4">
+        <span class="text-white">{{ message }}</span>
       </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
-      <!-- แสดงข้อความ flash -->
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for category, message in messages %}
-            <div class="alert {% if category == 'error' %}alert-error{% else %}alert-success{% endif %} mb-4">
-              <span class="text-white">{{ message }}</span>
-            </div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
+<form method="POST" class="space-y-6 w-full bg-white p-4 rounded-lg">
+  {{ form.hidden_tag() }}
 
-      <form method="POST" class="space-y-6 w-full">
-        {{ form.hidden_tag() }}
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-          <div class="form-control w-full">
-            {{ form.first_name.label(class="label") }}
-            {{ form.first_name(class="input input-bordered w-full") }}
-            {% if form.first_name.errors %}
-              <div class="label">
-                {% for error in form.first_name.errors %}
-                  <span class="label-text-alt text-error">{{ error }}</span>
-                {% endfor %}
-              </div>
-            {% endif %}
-          </div>
-
-          <div class="form-control w-full">
-            {{ form.last_name.label(class="label") }}
-            {{ form.last_name(class="input input-bordered w-full") }}
-            {% if form.last_name.errors %}
-              <div class="label">
-                {% for error in form.last_name.errors %}
-                  <span class="label-text-alt text-error">{{ error }}</span>
-                {% endfor %}
-              </div>
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="form-control w-full">
-          {{ form.email.label(class="label") }}
-          {{ form.email(class="input input-bordered w-full") }}
-          {% if form.email.errors %}
-            <div class="label">
-              {% for error in form.email.errors %}
-                <span class="label-text-alt text-error">{{ error }}</span>
-              {% endfor %}
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="form-control w-full">
-          {{ form.phone_number.label(class="label") }}
-          {{ form.phone_number(class="input input-bordered w-full") }}
-          {% if form.phone_number.errors %}
-            <div class="label">
-              {% for error in form.phone_number.errors %}
-                <span class="label-text-alt text-error">{{ error }}</span>
-              {% endfor %}
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="form-control w-full">
-          {{ form.password.label(class="label") }}
-          {{ form.password(class="input input-bordered w-full", id="password") }}
-          {% if form.password.errors %}
-            <div class="label">
-              {% for error in form.password.errors %}
-                <span class="label-text-alt text-error">{{ error }}</span>
-              {% endfor %}
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="form-control w-full">
-          {{ form.confirm_password.label(class="label") }}
-          {{ form.confirm_password(class="input input-bordered w-full", id="confirm_password") }}
-          {% if form.confirm_password.errors %}
-            <div class="label">
-              {% for error in form.confirm_password.errors %}
-                <span class="label-text-alt text-error">{{ error }}</span>
-              {% endfor %}
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="form-control mt-6">
-          <label class="label cursor-pointer justify-start gap-3">
-            <input type="checkbox" class="checkbox" id="showPassword">
-            <span class="label-text">แสดงรหัสผ่าน</span>
-          </label>
-        </div>
-
-        <div class="flex flex-col items-center pt-6">
-          <button type="submit" class="btn btn-primary w-full md:w-auto px-8 py-2 text-base md:text-lg">
-            สร้างบัญชี
-          </button>
-        </div>
-
-        <div class="text-center mt-6">
-          <p class="text-sm text-gray-600">
-            มีบัญชีอยู่แล้ว? 
-            <a href="{{ url_for('accounts.login') }}" class="text-primary hover:underline">เข้าสู่ระบบ</a>
-          </p>
-        </div>
-      </form>
-    </div>
+  <div class="form-control w-full">
+    {{ renderer.base_render(form.username) }}
+    {% if 'edit' not in request.path %}
+      {{ renderer.base_render(form.password) }}
+    {% endif %}
+    {{ renderer.base_render(form.first_name) }}
+    {{ renderer.base_render(form.last_name) }}
+    {{ renderer.base_render(form.refugee_camp) }}
+    {{ renderer.base_render(form.role) }}
   </div>
-</div>
+  <div class="flex justify-end gap-4">
+    <a href="{{ url_for('users.index') }}"
+      class="btn">
+      ปิด
+    </a>
+    <button type="submit" class="btn btn-primary">
+      {{'แก้ไข' if 'edit' in request.path else 'สร้าง'}}บัญชี
+    </button>
+  </div>
+</form>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const showPasswordCheckbox = document.getElementById('showPassword');
-  const passwordInput = document.getElementById('password');
-  const confirmPasswordInput = document.getElementById('confirm_password');
-  
-  showPasswordCheckbox.addEventListener('change', function() {
-    if (this.checked) {
-      if (passwordInput) passwordInput.type = 'text';
-      if (confirmPasswordInput) confirmPasswordInput.type = 'text';
-    } else {
-      if (passwordInput) passwordInput.type = 'password';
-      if (confirmPasswordInput) confirmPasswordInput.type = 'password';
-    }
-  });
-});
-</script>
 {% endblock %}

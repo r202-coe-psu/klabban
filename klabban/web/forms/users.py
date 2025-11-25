@@ -11,99 +11,44 @@ from wtforms import (
 )
 from flask_mongoengine.wtf import model_form
 from klabban.web import models
+from klabban.models.users import USER_ROLES
+
+BaseCreateUserForm = model_form(
+    models.User,
+    FlaskForm,
+    field_args={
+        "username": {"label": "ชื่อบัญชี (Username)"},
+        "refugee_camp": {"label": "ศูนย์พักพิง", "label_attr": "name"},
+        "first_name": {"label": "ชื่อจริง"},
+        "last_name": {"label": "นามสกุล"},
+    },
+    exclude=[
+        "roles",
+        "status",
+        "created_date",
+        "updated_date",
+        "last_login_date",
+    ],
+)
 
 
-class UserForm(FlaskForm):
-    username = StringField(
-        "ชื่อผู้ใช้งาน",
-        [validators.InputRequired(), validators.Length(min=3, max=64)],
-        description="ระบุชื่อผู้ใช้",
-        render_kw={"autocomplete": "new-password"},
-    )
+class CreateUserForm(BaseCreateUserForm):
     password = PasswordField(
         "รหัสผ่าน",
-        description="ระบุรหัสผ่าน",
-        render_kw={"autocomplete": "new-password"},
+        [validators.DataRequired(), validators.Length(min=6)],
+        description="รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร",
     )
-    display_name = StringField(
-        "ชื่อที่แสดง",
-        [validators.InputRequired()],
-        description="ชื่อใช้งานที่แสดงในระบบ",
-    )
-
-    selected_roles = StringField()
-
-    choose_denomination = SelectMultipleField(
-        "เลือกนิกาย",
-        [validators.Optional()],
-        choices=[],
-    )
-    choose_zone = SelectMultipleField(
-        "เลือกเขต",
-        [validators.Optional()],
-        choices=[],
-    )
-    choose_provincial = SelectMultipleField(
-        "เลือกจังหวัด",
-        [validators.Optional()],
-        choices=[],
-    )
-    choose_district = SelectMultipleField(
-        "เลือกอำเภอ/เขต",
-        [validators.Optional()],
-        choices=[],
-    )
-    choose_sub_district = SelectMultipleField(
-        "เลือกตำบล/แขวง",
-        [validators.Optional()],
-        choices=[],
-    )
-    choose_temple = SelectMultipleField(
-        "เลือกวัด",
-        [validators.Optional()],
-        choices=[],
+    role = SelectField(
+        "บทบาทผู้ใช้งาน",
+        choices=USER_ROLES,
+        coerce=str,
+        validators=[validators.DataRequired()],
     )
 
 
-class EditUserRolesForm(FlaskForm):
-    selected_roles = StringField()
-    choose_denomination = SelectMultipleField(
-        "เลือกนิกาย", [validators.Optional()], choices=[]
-    )
-    search_denomination = SelectField(
-        "ค้นหานิกาย", validators=[validators.Optional()], validate_choice=False
-    )
-    choose_zone = SelectMultipleField("เลือกเขต", [validators.Optional()], choices=[])
-    search_zone = SelectField(
-        "ค้นหาเขต", validators=[validators.Optional()], validate_choice=False
-    )
-    choose_provincial = SelectMultipleField(
-        "เลือกจังหวัด", [validators.Optional()], choices=[]
-    )
-    search_provincial = SelectField(
-        "ค้นหาจังหวัด", validators=[validators.Optional()], validate_choice=False
-    )
-    choose_district = SelectMultipleField(
-        "เลือกอำเภอ/เขต", [validators.Optional()], choices=[]
-    )
-    search_district = SelectField(
-        "ค้นหาอำเภอ/เขต", validators=[validators.Optional()], validate_choice=False
-    )
-    choose_sub_district = SelectMultipleField(
-        "เลือกตำบล/แขวง", [validators.Optional()], choices=[]
-    )
-    search_sub_district = SelectField(
-        "ค้นหาตำบล/แขวง", validators=[validators.Optional()], validate_choice=False
-    )
-    choose_temple = SelectMultipleField("เลือกวัด", [validators.Optional()], choices=[])
-
-
-class SearchUserForm(FlaskForm):
+class SearchCreateUserForm(FlaskForm):
     search = StringField(
         "ค้นหาผู้ใช้งาน",
         [validators.Optional(), validators.Length(min=0, max=64)],
         description="ค้นหาผู้ใช้งานโดยชื่อผู้ใช้งาน, ชื่อที่แสดง, บทบาท, สถานะ",
-    )
-    denomination = SelectField(
-        "นิกาย", validators=[validators.Optional()], validate_choice=False
     )

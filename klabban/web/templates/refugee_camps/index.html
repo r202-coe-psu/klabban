@@ -10,12 +10,14 @@
             <span class="text-xl font-medium text-gray-700">
                 ศูนย์พักพิง
             </span>
-            <button class="btn btn-success btn-sm text-white" 
-            hx-target="#create_or_edit_refugee_camp-modal" 
-            hx-get="{{ url_for('refugee_camps.create_or_edit_refugee_camp', **request.args) }}">
-                <span class="material-symbols-outlined text-sm">add</span>
-                เพิ่มศูนย์พักพิง
-            </button>
+            {% if "admin" in current_user.roles %}
+                <button class="btn btn-success btn-sm text-white" 
+                hx-target="#create_or_edit_refugee_camp-modal" 
+                hx-get="{{ url_for('refugee_camps.create_or_edit_refugee_camp', **request.args) }}">
+                    <span class="material-symbols-outlined text-sm">add</span>
+                    เพิ่มศูนย์พักพิง
+                </button>
+            {% endif %}
         </div>
         <table class="table  w-full text-sm border-x border-t border-gray-200 ">
             <thead class=" text-gray-700">

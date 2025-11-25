@@ -65,9 +65,6 @@
       </div>
     </div>
   </div>
-  {% for category, message in get_flashed_messages(with_categories=true) %}
-  {{ render_toast(message, category) }}
-  {% endfor %}
   {% include "base/sidebar.html" %}
 </div>
 {% endblock body %}

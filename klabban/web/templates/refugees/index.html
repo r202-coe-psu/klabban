@@ -19,7 +19,7 @@
                     </button>
                 </div>
             </form>
-            {% if 'admin' in current_user.roles %}
+            {% if 'admin' in current_user.roles or 'refugee_camp_staff' in current_user.roles %}
                 <a class="btn btn-primary text-white" href="{{ url_for('refugees.create_or_edit', **request.args) }}">
                     <span class="material-symbols-outlined text-sm">add</span>
                     เพิ่มผู้อพยพ
