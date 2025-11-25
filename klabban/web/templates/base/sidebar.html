@@ -30,5 +30,12 @@
             ศูนย์พักพิง
           </a>
         </li>
+        <li class="">
+          <a class="{{ 'drawer-menu-active' if '/refugees' in request.path else '' }}"
+            href="{{ url_for('refugees.index') }}">
+            <span class="material-symbols-outlined">dashboard</span>
+            ผู้อพยพ
+          </a>
+        </li>
   </div>
 </div>
