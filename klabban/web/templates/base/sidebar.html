@@ -34,7 +34,7 @@
             แดชบอร์ด
           </a>
         </li>
-
+        {% if "admin" in current_user.roles %}
         <li>
           <a class="{{ 'drawer-menu-active' if '/refugee_camps' in request.path else '' }}"
             href="{{ url_for('refugee_camps.index') }}">
@@ -42,6 +42,7 @@
             ศูนย์พักพิง
           </a>
         </li>
+        {% endif %}
         <li class="">
           <a class="{{ 'drawer-menu-active' if '/refugees' in request.path else '' }}"
             href="{{ url_for('refugees.index') }}">
