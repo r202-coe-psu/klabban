@@ -19,38 +19,38 @@ STATUS_CHOICES = [
 class User(me.Document, UserMixin):
     meta = {"collection": "users", "indexes": ["username", "email"]}
 
-    # ข้อมูลผู้ใช้
-    first_name = me.StringField(required=True, max_length=128)  # ชื่อ
-    last_name = me.StringField(required=True, max_length=128)  # นามสกุล
-    username = me.StringField(
-        required=True, unique=True, min_length=3, max_length=64)  # ชื่อผู้ใช้งาน
-    password = me.StringField(required=True)  # รหัสผ่านผู้ใช้งาน
-    email = me.StringField(required=True, unique=True,
-                           max_length=128)  # email ผู้ใช้งาน
-    phone_number = me.StringField(default="", max_length=20)  # เบอร์โทร
+    """ข้อมูลทั่วไป"""
+    display_name = me.StringField(default="")  # ชื่อที่แสดง
+    first_name = me.StringField(max_length=128)  # ชื่อ
+    last_name = me.StringField(max_length=128)  # นามสกุล
+    username = me.StringField(required=True, min_length=3, max_length=64)  # ชื่อผู้ใช้งาน
+    password = me.StringField(required=True, default="")  # รหัสผ่านผู้ใช้งาน
+    email = me.StringField(max_length=128)  # email ผู้ใช้งาน
 
     # สถานะและบทบาท
     status = me.StringField(
-        required=True, default="active", choices=[status[0] for status in STATUS_CHOICES]
+        required=True,
+        default="active",
+        choices=[status[0] for status in STATUS_CHOICES],
     )  # สถานะ ผู้ใช้งาน
 
     roles = me.ListField(
-        me.StringField(choices=[role[0] for role in USER_ROLES]),
-        default=["user"]
+        me.StringField(choices=USER_ROLES, default=["user"])
     )  # สิทธิ์การใช้งาน
+
+    resources = me.DictField()  # ข้อมูลเพิ่มเติมของผู้ใช้งานจาก OAuth2
 
     # ความสัมพันธ์
     refugee_camp = me.ReferenceField(
-        "RefugeeCamp", required=False)  # ศูนย์พักพิง (optional)
+        "RefugeeCamp", required=False
+    )  # ศูนย์พักพิง (optional)
 
-    created_date = me.DateTimeField(
-        required=True, default=datetime.datetime.now)
+    created_date = me.DateTimeField(required=True, default=datetime.datetime.now)
     creator = me.ReferenceField("User", dbref=True, required=False)  # ผู้สร้าง
     updated_date = me.DateTimeField(
         required=True, default=datetime.datetime.now, auto_now=True
     )
-    updater = me.ReferenceField(
-        "User", dbref=True, required=False)  # ผู้แก้ไขล่าสุด
+    updater = me.ReferenceField("User", dbref=True, required=False)  # ผู้แก้ไขล่าสุด
     last_login_date = me.DateTimeField(
         required=True, default=datetime.datetime.now, auto_now=True
     )

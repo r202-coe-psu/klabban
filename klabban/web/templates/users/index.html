@@ -1,6 +1,7 @@
 {% extends "/base/default_page.html" %}
 {% import "/components/paginations.html" as paginations %}
 {% import "base/html_renderer.html" as renderer %}
+{% import "/components/dialogs.html" as dialog %}
 
 
 {% set title_page="จัดการผู้ใช้งาน" %}
@@ -24,7 +25,7 @@
     <h4 class="max-w-sm min-w-32">
       รายการผู้ใช้งาน
     </h4>
-    {% if current_user.is_authenticated and hasattr(current_user, 'is_admin') and current_user.is_admin() %}
+    {% if "admin" in current_user.roles %}
     <form action="{{ url_for('users.index') }}" method="get"
       class="flex md:flex-row flex-col gap-2 w-full items-end justify-end flex-wrap">
       <div class="flex md:flex-row flex-col gap-2 flex-wrap justify-end max-md:w-full">
@@ -39,7 +40,7 @@
           </span>
           ค้นหา
         </button>
-        <a href="{{ url_for('users.create') }}" class="btn btn-orange">
+        <a href="{{ url_for('users.create_or_edit_user') }}" class="btn btn-orange">
           <span class="material-symbols-outlined">
             add
           </span>
@@ -117,26 +118,13 @@
           </td>
           <td class="py-3 px-4">
             <div class="flex lg:flex-row flex-col">
-
-              <button class="btn btn-sm btn-ghost hover:bg-purple-100/50 hover:border-0 border-0 hover:text-purple-700"
-                hx-target="#login-history-modal" hx-get="{{ url_for('users.login_history', user_id=user.id) }}">
-                <span class="material-symbols-outlined">
-                  history
-                </span>
-              </button>
               <button class="btn btn-sm btn-ghost hover:bg-orange-100/50 hover:border-0 border-0 hover:text-orange-700"
                 hx-target="#create-edit-user"
-                hx-get="{{ url_for('users.create_or_edit', user_id=user.id, **request.args) }}">
+                hx-get="{{ url_for('users.create_or_edit_user', user_id=user.id, **request.args) }}">
                 <span class="material-symbols-outlined">
                   edit_square
                 </span>
               </button>
-              <a class="btn btn-sm btn-ghost hover:bg-sky-100/50 hover:border-0 border-0 hover:text-sky-700"
-                href="{{ url_for('users.create_or_edit_roles', user_id=user.id, **request.args) }}">
-                <span class="material-symbols-outlined">
-                  person_edit
-                </span>
-              </a>
               <button
                 class="btn btn-sm btn-ghost hover:bg-red-100/50 hover:border-0 border-0 text-red-500 hover:text-red-700"
                 onclick="$('#{{user.id}}-delete-dialog')[0].showModal()">
@@ -145,11 +133,11 @@
                 </span>
               </button>
               {{ dialog.DisactiveDialog(
-              id="%s-delete-dialog" | format(user.id),
-              title="ยืนยันการลบผู้ใช้งาน",
-              body="คุณต้องการที่จะลบผู้ใช้งานชื่อ <b>%s</b> ใช่หรือไม่?" | format(user.get_fullname()),
-              url=url_for("users.delete",
-              user_id=user.id, **request.args)
+                id="%s-delete-dialog" | format(user.id),
+                title="ยืนยันการลบผู้ใช้งาน",
+                body="คุณต้องการที่จะลบผู้ใช้งานชื่อ <b>%s</b> ใช่หรือไม่?" | format(user.get_fullname()),
+                url=url_for("users.delete_user",
+                user_id=user.id, **request.args)
               )}}
             </div>
 

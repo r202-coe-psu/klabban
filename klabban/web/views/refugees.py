@@ -37,7 +37,7 @@ def index():
 
 @module.route("/create", methods=["GET", "POST"], defaults={"refugee_id": None})
 @module.route("/<refugee_id>/edit", methods=["GET", "POST"])
-# @login_required
+@login_required
 def create_or_edit(refugee_id):
     form = forms.refugees.RefugeeForm()
     form.refugee_camp.choices = [
@@ -75,7 +75,7 @@ def create_or_edit(refugee_id):
 
 
 @module.route("/delete/<refugee_id>", methods=["POST"])
-# @login_required
+@login_required
 def delete_refugee(refugee_id):
     print("Deleting refugee:", refugee_id)
     refugee = models.Refugee.objects(id=refugee_id).first()

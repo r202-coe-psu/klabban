@@ -51,56 +51,6 @@ def login():
     return redirect(url_for("dashboard.index"))
 
 
-@module.route("/create", methods=["GET", "POST"], defaults={"account_id": None})
-@module.route("/<account_id>/edit", methods=["GET", "POST"])
-def create_or_edit_account(account_id):
-    form = forms.accounts.CreateAccountForm()
-    user = models.User()
-
-    if account_id:
-        user = models.User.objects.get(id=account_id)
-        form = forms.accounts.CreateAccountForm(obj=user)
-
-    if not form.validate_on_submit():
-        print("Form errors:", form.errors)
-        return render_template("/accounts/create_or_edit.html", form=form, account_id=account_id)
-
-    # ตรวจสอบ email ซ้ำ (ยกเว้นกรณี edit ตัวเอง)
-    existing_email = models.User.objects(email=form.email.data).first()
-    if existing_email and (not account_id or str(existing_email.id) != account_id):
-        flash("อีเมลนี้ถูกใช้แล้ว", "error")
-        return render_template("/accounts/create_or_edit.html", form=form, account_id=account_id)
-
-    # อัปเดตข้อมูลผู้ใช้
-    if not account_id:
-        # สร้างใหม่
-        user.created_date = datetime.datetime.now()
-        user.status = "active"  # default status
-        user.roles = ["user"]  # default role
-        user.last_login_date = datetime.datetime.now()
-
-    user.first_name = form.first_name.data
-    user.last_name = form.last_name.data
-    user.username = form.email.data
-    user.email = form.email.data
-    user.phone_number = form.phone_number.data or ""
-    user.updated_date = datetime.datetime.now()
-
-    if form.password.data:
-        user.set_password(form.password.data)
-
-    try:
-        user.save()
-        if account_id:
-            flash("อัปเดตบัญชีเรียบร้อยแล้ว", "success")
-        else:
-            flash("สร้างบัญชีเรียบร้อยแล้ว", "success")
-        return redirect(url_for("accounts.login"))
-    except Exception as e:
-        flash(f"เกิดข้อผิดพลาด: {str(e)}", "error")
-        return render_template("/accounts/create_or_edit.html", form=form, account_id=account_id)
-
-
 @module.route("/login/<name>")
 def login_oauth(name):
     client = oauth2.oauth2_client
