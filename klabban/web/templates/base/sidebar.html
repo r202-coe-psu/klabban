@@ -13,6 +13,9 @@
           <div class="text-xl font-bold">
             หาคน
           </div>
+          {% if current_user.is_authenticated %}
+          {{ current_user.get_fullname() }}
+          {% endif %}
         </div>
       </div>
     </div>
