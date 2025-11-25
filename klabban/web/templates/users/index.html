@@ -1,5 +1,4 @@
 {% extends "/base/default_page.html" %}
-{% import "/components/dialogs.html" as dialog %}
 {% import "/components/paginations.html" as paginations %}
 {% import "base/html_renderer.html" as renderer %}
 
@@ -25,15 +24,12 @@
     <h4 class="max-w-sm min-w-32">
       รายการผู้ใช้งาน
     </h4>
-    {% if current_user.get_denominations()|length > 1 %}
+    {% if current_user.is_authenticated and hasattr(current_user, 'is_admin') and current_user.is_admin() %}
     <form action="{{ url_for('users.index') }}" method="get"
       class="flex md:flex-row flex-col gap-2 w-full items-end justify-end flex-wrap">
       <div class="flex md:flex-row flex-col gap-2 flex-wrap justify-end max-md:w-full">
         <div class="flex md:w-80 w-full">
-          {{ renderer.render_select_field(form.denomination) }}
-        </div>
-        <div class="flex md:w-80 w-full">
-          {{ renderer.base_render(form.search, placeholder="ค้นหาชื่อผู้ใช้งาน, ชื่อที่แสดง, บทบาท, สถานะ") }}
+          {{ renderer.base_render(form.search, placeholder="ค้นหาชื่อผู้ใช้งาน, ชื่อ-นามสกุล, อีเมล, บทบาท") }}
         </div>
       </div>
       <div class="flex gap-2 w-full md:mb-5 md:w-auto justify-end">
@@ -43,21 +39,20 @@
           </span>
           ค้นหา
         </button>
-        <button class="btn btn-orange" hx-target="#create-edit-user"
-          hx-get="{{ url_for('users.create_or_edit', **request.args) }}" type="button">
+        <a href="{{ url_for('users.create') }}" class="btn btn-orange">
           <span class="material-symbols-outlined">
             add
           </span>
-          เพิ่มผู้ใช้งาน</button>
+          เพิ่มผู้ใช้งาน
+        </a>
       </div>
     </form>
     {% else %}
     <div class="flex gap-2 md:flex-row flex-col items-end w-full">
-
       <form action="{{ url_for('users.index') }}" method="get"
         class="flex md:flex-row flex-col gap-2 w-full items-end justify-end">
         <div class="flex md:w-80 w-full">
-          {{ renderer.base_render(form.search, placeholder="ค้นหาชื่อผู้ใช้งาน, ชื่อที่แสดง, บทบาท, สถานะ") }}
+          {{ renderer.base_render(form.search, placeholder="ค้นหาชื่อผู้ใช้งาน, ชื่อ-นามสกุล, อีเมล, บทบาท") }}
         </div>
         <div class="flex gap-2 w-full md:mb-5 md:w-auto justify-end">
           <button class="btn-ghost-orange">
@@ -66,12 +61,7 @@
             </span>
             ค้นหา
           </button>
-          <button class="btn btn-orange" hx-target="#create-edit-user"
-            hx-get="{{ url_for('users.create_or_edit', **request.args) }}" type="button">
-            <span class="material-symbols-outlined">
-              add
-            </span>
-            เพิ่มผู้ใช้งาน</button>
+          <!-- ซ่อนปุ่มเพิ่มผู้ใช้งานสำหรับ non-admin -->
         </div>
       </form>
     </div>
@@ -82,11 +72,11 @@
       <thead>
         <tr class="border-b border-gray-200">
           <th class="text-left py-3 px-4 text-gray-600">ชื่อผู้ใช้งาน</th>
-          <th class="text-left py-3 px-4 text-gray-600">ชื่อที่แสดง</th>
+          <th class="text-left py-3 px-4 text-gray-600">ชื่อ-นามสกุล</th>
+          <th class="text-left py-3 px-4 text-gray-600">อีเมล</th>
+          <th class="text-left py-3 px-4 text-gray-600">เบอร์โทร</th>
           <th class="text-left py-3 px-4 text-gray-600">บทบาท</th>
-          {% if current_user.get_denominations()|length > 1 %}
-          <th class="text-left py-3 px-4 text-gray-600">นิกาย</th>
-          {% endif %}
+          <th class="text-left py-3 px-4 text-gray-600">ศูนย์พักพิง</th>
           <th class="text-left py-3 px-4 text-gray-600">สถานะ</th>
           <th class="text-left py-3 px-4 text-gray-600">เข้าใช้งานล่าสุด</th>
           <th class="text-left py-3 px-4 text-gray-600">การจัดการ</th>
@@ -96,7 +86,9 @@
         {% for user in users_pagination.items %}
         <tr class="hover:bg-base-100">
           <td class="py-3 px-4">{{ user.username }}</td>
-          <td class="py-3 px-4">{{ user.display_name }}</td>
+          <td class="py-3 px-4">{{ user.get_fullname() }}</td>
+          <td class="py-3 px-4">{{ user.email }}</td>
+          <td class="py-3 px-4">{{ user.phone_number or '-' }}</td>
           <td class="py-3 px-4 min-w-72 gap-2">
             <div class="flex flex-wrap gap-2">
               {% for role in user.get_display_roles() %}
@@ -106,21 +98,19 @@
               {% endfor %}
             </div>
           </td>
-          {% if current_user.get_denominations()|length > 1 %}
-          <td class="py-3 px-4 min-w-32 gap-2">
-            <div class="flex flex-wrap gap-2">
-              {% for denomination in user.get_denominations() %}
-              <div class="badge bg-white border border-blue-500 text-blue-500">
-                <span>{{ denomination.name }}</span>
-              </div>
-              {% endfor %}
-            </div>
+          <td class="py-3 px-4">
+            {% if user.refugee_camp %}
+              <span class="badge bg-white border border-blue-500 text-blue-500">
+                {{ user.refugee_camp.name }}
+              </span>
+            {% else %}
+              <span class="text-gray-400">-</span>
+            {% endif %}
           </td>
-          {% endif %}
           <td class="py-3 px-4">
             <span
-              class="badge text-white w-32 {{ 'bg-green-500' if user.status == 'active' else ('bg-red-500' if user.status == 'disactive' else 'bg-black') }}">
-              {{ user.get_status_display() }}</span>
+              class="badge text-white w-32 {{ 'bg-green-500' if user.status == 'active' else 'bg-red-500' }}">
+              {{ user.display_status() }}</span>
           </td>
           <td class="py-3 px-4 text-gray-400 min-w-[160px]">
             {{ user.last_login_date.strftime('%Y-%m-%d %H:%M') if user.last_login_date else '-' }}
@@ -157,7 +147,7 @@
               {{ dialog.DisactiveDialog(
               id="%s-delete-dialog" | format(user.id),
               title="ยืนยันการลบผู้ใช้งาน",
-              body="คุณต้องการที่จะลบผู้ใช้งานชื่อ <b>%s</b> ใช่หรือไม่?" | format(user.display_name),
+              body="คุณต้องการที่จะลบผู้ใช้งานชื่อ <b>%s</b> ใช่หรือไม่?" | format(user.get_fullname()),
               url=url_for("users.delete",
               user_id=user.id, **request.args)
               )}}
@@ -195,87 +185,25 @@
   <div class="grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5">
     <h4 class="leading-none mb-2">บทบาทและสิทธิ์การใช้งาน</h4>
   </div>
-  <div class="px-6 grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+  <div class="px-6 grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
     <div class="space-y-4">
       {{ role_description(
-        name="ผู้ดูแลระบบ",
-        description="จัดการข้อมูลทั้งหมดในระบบ รวมถึงการตั้งค่าผู้ใช้งานและสิทธิ์การเข้าถึงระบบ",
+        name="ผู้ดูแลระบบ (Admin)",
+        description="จัดการศูนย์พักพิง (RefugeeCamp) ทั้งหมดในระบบ รวมถึงการตั้งค่าผู้ใช้งานและสิทธิ์การเข้าถึงระบบ",
       ) }}
-      {{ role_description(
-        name="ผู้ดูแลเขตปกครอง (ภาค)",
-        description="จัดการข้อมูลภายในเขตปกครองที่รับผิดชอบ",
-      ) }}
-      {{ role_description(
-        name="ผู้ดูแลสมณศักดิ์",
-        description="จัดการข้อมูลสมณศักดิ์ภายในนิกายที่รับผิดชอบ",
-      ) }}
-
-      {{ role_description(
-        name="ผู้ดูแลจังหวัด",
-        description="จัดการข้อมูลภายในจังหวัดที่รับผิดชอบ",
-      ) }}
-      {{ role_description(
-        name="ผู้ดูแลอำเภอ/เขต",
-        description="จัดการข้อมูลภายในอำเภอที่รับผิดชอบ",
-      ) }}
-      {{ role_description(
-        name="ผู้ดูแลตำบล/แขวง",
-        description="จัดการข้อมูลภายในตำบลที่รับผิดชอบ",
-      ) }}
-      {{ role_description(
-        name="ผู้ดูแลวัด",
-        description="จัดการข้อมูลวัดที่รับผิดชอบ",
-      ) }}
-      {{ role_description(
-        name="ผู้ใช้ทั่วไป",
-        description="ดูรายงานและข้อมูลทั่วไป",
-        watch_only=false,
-      ) }}
-
     </div>
     <div class="space-y-4">
       {{ role_description(
-        name="ผู้ดูแลระบบ (ดูได้อย่างเดียว)",
-        description="เข้าถึงข้อมูลทั้งหมดในระบบ แต่ไม่สามารถแก้ไขข้อมูลได้",
-        watch_only=true,
+        name="เจ้าหน้าที่ศูนย์พักพิง (Staff)",
+        description="เพิ่มและจัดการข้อมูลผู้อพยพ (Refugee) ภายในศูนย์พักพิงที่รับผิดชอบ",
       ) }}
+    </div>
+    <div class="space-y-4">
       {{ role_description(
-        name="ผู้ดูแลเขตปกครอง (ภาค) (ดูได้อย่างเดียว)",
-        description="เข้าถึงข้อมูลภายในเขตปกครองที่กำหนด แต่ไม่สามารถแก้ไขข้อมูลได้",
-        watch_only=true,
+        name="ผู้ใช้ทั่วไป (User)",
+        description="ค้นหาและดูข้อมูลทั่วไป สามารถเข้าถึงข้อมูล Sensitive เช่น รูปภาพของผู้อพยพได้",
+        watch_only=false,
       ) }}
-      {{ role_description(
-        name="ผู้ดูแลสมณศักดิ์ (ดูได้อย่างเดียว)",
-        description="เข้าถึงข้อมูลสมณศักดิ์ภายในนิกายที่กำหนด แต่ไม่สามารถแก้ไขข้อมูลได้",
-        watch_only=true,
-      ) }}
-
-      {{ role_description(
-        name="ผู้ดูแลจังหวัด (ดูได้อย่างเดียว)",
-        description="เข้าถึงข้อมูลภายในจังหวัดที่กำหนด แต่ไม่สามารถแก้ไขข้อมูลได้",
-        watch_only=true,
-      ) }}
-      {{ role_description(
-        name="ผู้ดูแลอำเภอ/เขต (ดูได้อย่างเดียว)",
-        description="เข้าถึงข้อมูลภายในอำเภอที่กำหนด แต่ไม่สามารถแก้ไขข้อมูลได้",
-        watch_only=true,
-      ) }}
-      {{ role_description(
-        name="ผู้ดูแลตำบล/แขวง (ดูได้อย่างเดียว)",
-        description="เข้าถึงข้อมูลภายในตำบลที่กำหนด แต่ไม่สามารถแก้ไขข้อมูลได้",
-        watch_only=true,
-      ) }}
-      {{ role_description(
-        name="ผู้ดูแลวัด (ดูได้อย่างเดียว)",
-        description="เข้าถึงข้อมูลวัดที่กำหนด แต่ไม่สามารถแก้ไขข้อมูลได้",
-        watch_only=true,
-      ) }}
-      {{ role_description(
-        name="ผู้ใช้ทั่วไป (ดูได้อย่างเดียว)",
-        description="ดูรายงานและข้อมูลทั่วไป แต่ไม่สามารถแก้ไขข้อมูลได้",
-        watch_only=true,
-      ) }}
-
     </div>
   </div>
 </div>
