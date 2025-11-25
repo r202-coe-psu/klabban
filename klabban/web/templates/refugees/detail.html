@@ -1,0 +1,90 @@
+{% extends "/base/default_page.html" %}
+
+{% set title_page="รายละเอียดผู้อพยพ" %}
+
+{% block back_button %}
+<a href="{{ url_for('refugees.index') }}" class="btn btn-outline btn-sm mb-2">
+  <span class="material-symbols-outlined">arrow_back</span>
+  กลับ
+</a>
+{% endblock back_button %}
+
+{% block content %}
+<div class="bg-white rounded-3xl border border-gray-300 p-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div>
+      <h3 class="text-lg font-semibold text-gray-700 mb-4">ข้อมูลส่วนตัว</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="text-sm text-gray-500">ชื่อ-นามสกุล</label>
+          <p class="text-base font-medium">{{ refugee.name }}</p>
+        </div>
+        {% if refugee.nick_name %}
+        <div>
+          <label class="text-sm text-gray-500">ชื่อเล่น</label>
+          <p class="text-base font-medium">{{ refugee.nick_name }}</p>
+        </div>
+        {% endif %}
+        {% if refugee.nationality %}
+        <div>
+          <label class="text-sm text-gray-500">สัญชาติ</label>
+          <p class="text-base font-medium">{{ refugee.nationality }}</p>
+        </div>
+        {% endif %}
+        {% if refugee.ethnicity %}
+        <div>
+          <label class="text-sm text-gray-500">เชื้อชาติ</label>
+          <p class="text-base font-medium">{{ refugee.ethnicity }}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div>
+      <h3 class="text-lg font-semibold text-gray-700 mb-4">ข้อมูลศูนย์พักพิง</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="text-sm text-gray-500">ศูนย์พักพิง</label>
+          <p class="text-base font-medium">
+            {% if refugee.refugee_camp %}
+            <a href="{{ url_for('refugee_camps.detail', refugee_camp_id=refugee.refugee_camp.id) }}"
+              class="text-blue-600 hover:underline">
+              {{ refugee.refugee_camp.name }}
+              <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+            {% else %}
+            -
+            {% endif %}
+          </p>
+        </div>
+        <div>
+          <label class="text-sm text-gray-500">สถานะ</label>
+          <div class="mt-1">
+            <div class="border rounded-lg py-1 px-2 size-fit inline-block
+                            {{ 'text-blue-500 border-blue-500' if refugee.status == 'active' else '' }}
+                            {{ 'text-red-500 border-red-500' if refugee.status == 'deactive' else '' }}
+                            {{ 'text-green-500 border-green-500' if refugee.status == 'back_home' else '' }}">
+              {{ refugee.get_status_display() }}
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="text-sm text-gray-500">วันที่ลงทะเบียน</label>
+          <p class="text-base font-medium">
+            {{ refugee.registration_date.strftime('%d/%m/%Y') if refugee.registration_date else '-' }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if refugee.remark %}
+  <div class="mt-6">
+    <h3 class="text-lg font-semibold text-gray-700 mb-4">หมายเหตุ</h3>
+    <div class="bg-gray-50 rounded-lg p-4">
+      <p class="text-base text-gray-700 whitespace-pre-wrap">{{ refugee.remark }}</p>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

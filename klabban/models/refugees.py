@@ -1,6 +1,6 @@
 import datetime
-import mongoengine as me
 
+import mongoengine as me
 
 REFUGEE_STATUS_CHOICES = [
     ("active", "กำลังพักพิง"),
@@ -33,3 +33,8 @@ class Refugee(me.Document):
     updated_by = me.ReferenceField("User")
     created_date = me.DateTimeField(default=datetime.datetime.now)
     updated_date = me.DateTimeField(default=datetime.datetime.now)
+
+    def get_status_display(self):
+        """Return Thai status text for the refugee status."""
+        status_dict = dict(REFUGEE_STATUS_CHOICES)
+        return status_dict.get(self.status, self.status)

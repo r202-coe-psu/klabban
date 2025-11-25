@@ -22,21 +22,27 @@
                 </div>
             </form>
             {% if 'admin' in current_user.roles or 'refugee_camp_staff' in current_user.roles %}
-                <a class="btn btn-primary text-white" href="{{ url_for('refugees.create_or_edit', **request.args) }}">
-                    <span class="material-symbols-outlined text-sm">add</span>
-                    เพิ่มผู้อพยพ
-                </a>
+            <a class="btn btn-primary text-white" href="{{ url_for('refugees.create_or_edit', **request.args) }}">
+                <span class="material-symbols-outlined text-sm">add</span>
+                เพิ่มผู้อพยพ
+            </a>
             {% endif %}
         </div>
+        {% if refugees_pagination.total > 0 %}
+        <div class="mb-4 text-sm text-gray-600">
+            พบทั้งหมด <span class="font-semibold text-primary">{{ refugees_pagination.total }}</span> รายการ
+        </div>
+        {% endif %}
+        {% if refugees_pagination.items %}
         <table class="table  w-full text-sm border-x border-t border-gray-200 ">
             <thead class=" text-gray-700">
                 <tr>
-                <th>ลำดับ</th>
-                <th>ชื่อเล่น</th>
-                <th>ชื่อ-นามสกุล</th>
-                <th>สถานะ</th>
-                <th>ศูนย์พักพิง</th>
-                <th></th>
+                    <th>ลำดับ</th>
+                    <th>ชื่อเล่น</th>
+                    <th>ชื่อ-นามสกุล</th>
+                    <th>สถานะ</th>
+                    <th>ศูนย์พักพิง</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -44,46 +50,66 @@
                 <tr class="border-b border-x border-gray-200">
                     <td>{{ loop.index }}</td>
                     <td>{{ refugee.nick_name }}</td>
-                    <td>{{ refugee.name }}</td>
+                    <td>
+                        <a href="{{ url_for('refugees.detail', refugee_id=refugee.id) }}"
+                            class="text-blue-600 hover:underline">
+                            {{ refugee.name }}
+                        </a>
+                    </td>
                     <td>
                         <div class="border rounded-lg py-1 px-2 size-fit
                             {{ 'text-blue-500 border-blue-500' if refugee.status == 'active' else '' }}
                             {{ 'text-red-500 border-red-500' if refugee.status == 'deactive' else '' }}
                             {{ 'text-green-500 border-green-500' if refugee.status == 'back_home' else '' }}
                              ">
-                             {{ refugee.get_status_display() }}
+                            {{ refugee.get_status_display() }}
                         </div>
                     </td>
                     <td>{{ refugee.refugee_camp.name }}</td>
                     <td class="flex gap-2 justify-end">
-                        <a href="{{ url_for('refugees.create_or_edit', refugee_id=refugee.id) }}" class="btn btn-outline btn-sm text-gray-600 border-gray-300">
+                        {% if current_user.is_authenticated and ('admin' in current_user.roles or 'refugee_camp_staff'
+                        in current_user.roles) %}
+                        <a href="{{ url_for('refugees.create_or_edit', refugee_id=refugee.id) }}"
+                            class="btn btn-outline btn-sm text-gray-600 border-gray-300">
                             <span class="material-symbols-outlined">
                                 edit_square
                             </span>
                         </a>
                         <button class="btn btn-outline btn-sm border-gray-300 text-error"
-                           onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
+                            onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
                             <span class="material-symbols-outlined">
-                            delete
+                                delete
                             </span>
                         </button>
                         {{ dialog.DisactiveDialog(
-                            id="%s-disactive-dialog" | format(refugee.id),
-                            title="ยืนยันการลบรายการผู้อพยพ",
-                            body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                            url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
+                        id="%s-disactive-dialog" | format(refugee.id),
+                        title="ยืนยันการลบรายการผู้อพยพ",
+                        body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+                        url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
                         )}}
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="text-center py-16">
+            <div class="text-6xl mb-4 text-gray-300">
+                <span class="material-symbols-outlined">search_off</span>
+            </div>
+            <p class="text-xl text-gray-500 mb-2">ไม่พบข้อมูล</p>
+            <p class="text-sm text-gray-400">ลองปรับเปลี่ยนเงื่อนไขการค้นหา</p>
+        </div>
+        {% endif %}
+        {% if refugees_pagination.total > 0 %}
         {{ paginations.render_pagination(
-            pagination=refugees_pagination,
-            endpoint='refugees.index',
-            key_page='page',
-            kwargs=request.args.to_dict()
+        pagination=refugees_pagination,
+        endpoint='refugees.index',
+        key_page='page',
+        kwargs=request.args.to_dict()
         ) }}
+        {% endif %}
     </div>
 </div>
 {% endblock %}

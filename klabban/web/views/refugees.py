@@ -1,14 +1,24 @@
-from flask import abort, Blueprint, render_template, redirect, url_for, request
-from flask_login import login_required, current_user
-from ..utils.acl import roles_required
+from uuid import uuid4
+
+from flask import Blueprint, abort, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
+from flask_mongoengine import Pagination
+from mongoengine.queryset.visitor import Q
+
 from klabban import models
 from klabban.web import forms
-from mongoengine.queryset.visitor import Q
-from uuid import uuid4
-from flask_mongoengine import Pagination
 
+from ..utils.acl import roles_required
 
 module = Blueprint("refugees", __name__, url_prefix="/refugees")
+
+
+@module.route("/<refugee_id>")
+def detail(refugee_id):
+    refugee = models.Refugee.objects(id=refugee_id).first()
+    if not refugee or refugee.status == "deactive":
+        abort(404)
+    return render_template("/refugees/detail.html", refugee=refugee)
 
 
 @module.route("/")

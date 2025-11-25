@@ -1,0 +1,79 @@
+{% extends "/base/default_page.html" %}
+
+{% set title_page="รายละเอียดศูนย์พักพิง" %}
+
+{% block back_button %}
+<a href="{{ url_for('index.index') }}" class="btn btn-outline btn-sm mb-2">
+  <span class="material-symbols-outlined">arrow_back</span>
+  กลับ
+</a>
+{% endblock back_button %}
+
+{% block content %}
+<div class="bg-white rounded-3xl border border-gray-300 p-6 mb-6">
+  <h2 class="text-2xl font-bold mb-4">{{ refugee_camp.name }}</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div>
+      <h3 class="text-lg font-semibold text-gray-700 mb-4">ข้อมูลติดต่อ</h3>
+      <div class="space-y-3">
+        {% if refugee_camp.line_id %}
+        <div>
+          <label class="text-sm text-gray-500">LINE ID</label>
+          <p class="text-base font-medium">{{ refugee_camp.line_id }}</p>
+        </div>
+        {% endif %}
+        {% if refugee_camp.contact_info %}
+        <div>
+          <label class="text-sm text-gray-500">ช่องทางติดต่อ</label>
+          <p class="text-base font-medium">{{ refugee_camp.contact_info }}</p>
+        </div>
+        {% endif %}
+        {% if refugee_camp.location_url %}
+        <div>
+          <label class="text-sm text-gray-500">ตำแหน่ง</label>
+          <p class="text-base font-medium">
+            <a href="{{ refugee_camp.location_url }}" target="_blank" class="text-blue-600 hover:underline">
+              เปิดใน Google Maps
+              <span class="material-symbols-outlined text-sm">open_in_new</span>
+            </a>
+          </p>
+        </div>
+        {% endif %}
+        {% if refugee_camp.other_link %}
+        <div>
+          <label class="text-sm text-gray-500">ลิงก์อื่น ๆ</label>
+          <p class="text-base font-medium">
+            <a href="{{ refugee_camp.other_link }}" target="_blank" class="text-blue-600 hover:underline">
+              เปิดลิงก์
+              <span class="material-symbols-outlined text-sm">open_in_new</span>
+            </a>
+          </p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if refugee_camp.description %}
+    <div>
+      <h3 class="text-lg font-semibold text-gray-700 mb-4">รายละเอียด</h3>
+      <div class="bg-gray-50 rounded-lg p-4">
+        <p class="text-base text-gray-700 whitespace-pre-wrap">{{ refugee_camp.description }}</p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="bg-white rounded-3xl border border-gray-300 p-6">
+  <div class="flex justify-between items-center">
+    <h3 class="text-lg font-semibold text-gray-700">การดำเนินการ</h3>
+  </div>
+  <div class="mt-4 flex gap-4">
+    <a href="{{ url_for('refugees.index', refugee_camp=refugee_camp.id) }}" class="btn btn-primary">
+      <span class="material-symbols-outlined">people</span>
+      ดูรายชื่อผู้อพยพ
+    </a>
+  </div>
+</div>
+{% endblock %}
