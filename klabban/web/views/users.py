@@ -5,12 +5,13 @@ import uuid
 
 from klabban.web import forms
 from klabban import models
+from klabban.web.utils.acl import roles_required
 
 module = Blueprint("users", __name__, url_prefix="/users")
 
 
 @module.route("", methods=["GET"])
-@login_required
+@roles_required(["admin"])
 def index():
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "", type=str)
@@ -40,7 +41,7 @@ def index():
 
 @module.route("/create", methods=["GET", "POST"], defaults={"user_id": None})
 @module.route("/<user_id>/edit", methods=["GET", "POST"])
-@login_required
+@roles_required(["admin"])
 def create_or_edit_user(user_id):
     form = forms.users.CreateUserForm()
     user = models.User()
@@ -74,7 +75,7 @@ def create_or_edit_user(user_id):
 
 
 @module.route("/<user_id>/delete", methods=["POST"])
-@login_required
+@roles_required(["admin"])
 def delete_user(user_id):
     user = models.User.objects(id=user_id).first()
     if user:

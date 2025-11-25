@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import abort, Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
-
+from ..utils.acl import roles_required
 from klabban import models
 from klabban.web import forms
 from mongoengine.queryset.visitor import Q
@@ -37,14 +37,25 @@ def index():
 
 @module.route("/create", methods=["GET", "POST"], defaults={"refugee_id": None})
 @module.route("/<refugee_id>/edit", methods=["GET", "POST"])
-@login_required
+@roles_required(["admin", "refugee_camp_staff"])
 def create_or_edit(refugee_id):
     form = forms.refugees.RefugeeForm()
-    form.refugee_camp.choices = [
-        (str(camp.id), camp.name)
-        for camp in models.RefugeeCamp.objects(status__ne="deactive").order_by("name")
-    ]
     refugee = models.Refugee()
+
+    if "admin" in current_user.roles:
+        form.refugee_camp.choices = [
+            (str(camp.id), camp.name)
+            for camp in models.RefugeeCamp.objects(status__ne="deactive").order_by(
+                "name"
+            )
+        ]
+    elif "refugee_camp_staff" in current_user.roles:
+        form.refugee_camp.choices = [
+            (str(current_user.refugee_camp.id), current_user.refugee_camp.name)
+        ]
+        form.refugee_camp.data = str(current_user.refugee_camp.id)
+    else:
+        form.refugee_camp.choices = []
 
     if refugee_id:
         refugee = models.Refugee.objects.get(id=refugee_id)
@@ -75,10 +86,14 @@ def create_or_edit(refugee_id):
 
 
 @module.route("/delete/<refugee_id>", methods=["POST"])
-@login_required
+@roles_required(["admin", "refugee_camp_staff"])
 def delete_refugee(refugee_id):
-    print("Deleting refugee:", refugee_id)
     refugee = models.Refugee.objects(id=refugee_id).first()
+    if (
+        "admin" not in current_user.roles
+        and refugee.refugee_camp.id != current_user.refugee_camp.id
+    ):
+        return abort(403)
     if refugee:
         refugee.status = "deactive"
         refugee.save()

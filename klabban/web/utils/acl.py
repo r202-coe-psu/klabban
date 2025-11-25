@@ -16,8 +16,9 @@ def roles_required(required_roles: list[str]):
         def wrapper(*args, **kwargs):
             if not current_user or not current_user.is_authenticated:
                 abort(401)  # Unauthorized
-            if current_user.role in required_roles:
-                return func(*args, **kwargs)
+            for role in required_roles:
+                if role in current_user.roles:
+                    return func(*args, **kwargs)
             else:
                 abort(403)  # Forbidden
 

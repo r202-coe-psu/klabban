@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 
 from klabban import models
 from klabban.web import forms
+from klabban.web.utils.acl import roles_required
 from mongoengine.queryset.visitor import Q
 from uuid import uuid4
 
@@ -14,14 +15,13 @@ module = Blueprint("refugee_camps", __name__, url_prefix="/refugee_camps")
 
 @module.route("/")
 def index():
-    refugee_camps = models.RefugeeCamp.objects(status="active").order_by("name" )
+    refugee_camps = models.RefugeeCamp.objects(status="active").order_by("name")
     return render_template("/refugee_camps/index.html", refugee_camps=refugee_camps)
 
-@module.route(
-    "/create", methods=["GET", "POST"], defaults={"refugee_camp_id": None}
-)
+
+@module.route("/create", methods=["GET", "POST"], defaults={"refugee_camp_id": None})
 @module.route("/<refugee_camp_id>/edit", methods=["GET", "POST"])
-# @login_required
+@roles_required(["admin"])
 def create_or_edit_refugee_camp(refugee_camp_id):
     form = forms.refugee_camps.RefugeeCampForm()
     refugee_camp = models.RefugeeCamp()
@@ -57,14 +57,11 @@ def create_or_edit_refugee_camp(refugee_camp_id):
     return redirect(url_for("refugee_camps.index"))
 
 
-
 @module.route("/delete/<refugee_camp_id>", methods=["POST"])
-# @login_required
+@roles_required(["admin"])
 def delete_refugee_camp(refugee_camp_id):
     refugee_camp = models.RefugeeCamp.objects(id=refugee_camp_id).first()
     if refugee_camp:
         refugee_camp.status = "deactive"
         refugee_camp.save()
-    return redirect(
-        url_for("refugee_camps.index")
-    )
+    return redirect(url_for("refugee_camps.index"))
