@@ -18,7 +18,7 @@ BaseCreateUserForm = model_form(
     FlaskForm,
     field_args={
         "username": {"label": "ชื่อบัญชี (Username)"},
-        "refugee_camp": {"label": "ศูนย์พักพิง", "label_attr": "name"},
+        # "refugee_camp": {"label": "ศูนย์พักพิง", "label_attr": "name"},
         "first_name": {"label": "ชื่อจริง"},
         "last_name": {"label": "นามสกุล"},
     },
@@ -45,6 +45,10 @@ class CreateUserForm(BaseCreateUserForm):
         coerce=str,
         validators=[validators.DataRequired()],
     )
+    refugee_camp = SelectField(
+        "ศูนย์พักพิง",
+        validators=[validators.InputRequired()],
+    )
 
 
 class EditUserForm(BaseCreateUserForm):
@@ -58,6 +62,10 @@ class EditUserForm(BaseCreateUserForm):
         "รีเซ็ตรหัสผ่าน",
         [validators.Optional(), validators.Length(min=6)],
         description="ระบุรหัสผ่านใหม่หากต้องการรีเซ็ตรหัสผ่าน (อย่างน้อย 6 ตัวอักษร)",
+    )
+    refugee_camp = SelectField(
+        "ศูนย์พักพิง",
+        validators=[validators.InputRequired()],
     )
 
 
