@@ -28,6 +28,7 @@ BaseCreateUserForm = model_form(
         "created_date",
         "updated_date",
         "last_login_date",
+        "password",
     ],
 )
 
@@ -43,6 +44,20 @@ class CreateUserForm(BaseCreateUserForm):
         choices=USER_ROLES,
         coerce=str,
         validators=[validators.DataRequired()],
+    )
+
+
+class EditUserForm(BaseCreateUserForm):
+    role = SelectField(
+        "บทบาทผู้ใช้งาน",
+        choices=USER_ROLES,
+        coerce=str,
+        validators=[validators.DataRequired()],
+    )
+    reset_password = PasswordField(
+        "รีเซ็ตรหัสผ่าน",
+        [validators.Optional(), validators.Length(min=6)],
+        description="ระบุรหัสผ่านใหม่หากต้องการรีเซ็ตรหัสผ่าน (อย่างน้อย 6 ตัวอักษร)",
     )
 
 

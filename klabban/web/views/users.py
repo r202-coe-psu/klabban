@@ -48,7 +48,7 @@ def create_or_edit_user(user_id):
 
     if user_id:
         user = models.User.objects.get(id=user_id)
-        form = forms.users.CreateUserForm(obj=user)
+        form = forms.users.EditUserForm(obj=user)
 
     if not form.validate_on_submit():
         print("Form errors:", form.errors)
