@@ -6,6 +6,7 @@ from klabban.web import forms
 from mongoengine.queryset.visitor import Q
 from uuid import uuid4
 from flask_mongoengine import Pagination
+from datetime import datetime
 
 module = Blueprint("refugees", __name__, url_prefix="/refugees")
 
@@ -122,6 +123,10 @@ def create_or_edit(refugee_id):
             refugee_id=refugee_id,
         )
 
+    # ถ้าไม่ระบุวันที่กลับบ้าน แต่สถานะเปลี่ยนเป็นกลับบ้าน ให้ตั้งค่าวันที่กลับบ้านเป็นวันที่ปัจจุบัน
+    if form.status.data == "back_home" and not form.back_home_date.data:
+        form.back_home_date.data = datetime.now()
+
     form.populate_obj(refugee)
     refugee.refugee_camp = models.RefugeeCamp.objects.get(id=form.refugee_camp.data)
     if current_user.is_authenticated:
@@ -132,6 +137,18 @@ def create_or_edit(refugee_id):
     refugee.save()
 
     return redirect(url_for("refugees.index"))
+
+
+@module.route("/<refugee_id>", methods=["GET"])
+@roles_required(["admin", "refugee_camp_staff"])
+def view_refugee(refugee_id):
+    refugee = models.Refugee.objects(id=refugee_id).first()
+    if (
+        "admin" not in current_user.roles
+        and refugee.refugee_camp.id != current_user.refugee_camp.id
+    ):
+        return abort(403)
+    return render_template("refugees/view.html", refugee=refugee)
 
 
 @module.route("/delete/<refugee_id>", methods=["POST"])

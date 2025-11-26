@@ -20,18 +20,23 @@ is_hidden=False
 {% set field_id = id_prefix + field.id %}
 
 {% if field.errors | count > 0 %}
-{% set style = style + " input-error" %}
+  {% set style = style + " input-error" %}
 {% endif %}
 
 {% if readonly or disabled %}
+  {% set style = style + " input-readonly" %}
+{% endif %}
+
+{% if field.type == "SelectField" %}
+  {% set style = style.replace("input", "select") + ' appearance-none' %}
 {% endif %}
 
 {% if class_ != "" %}
-{% set style = style + " " + class_ %}
+  {% set style = style + " " + class_ %}
 {% endif %}
 
 {% if is_hidden %}
-{% set style = style + " hidden" %}
+  {% set style = style + " hidden" %}
 {% endif %}
 
 {% if field.type == "HiddenField" %}
@@ -47,11 +52,11 @@ is_hidden=False
     <p class="fieldset-label">(ไม่บังคับ)</p>
     {% endif %}
   </legend>
-  <label class="w-full input validator {{style}} {% if readonly %}input-readonly{% endif %} {% if is_hidden %}hidden{% endif %}">
+  <label class="w-full validator {{style}} {% if is_hidden %}hidden{% endif %}">
     {% if prefix %}
     {{ prefix_icon }}
     {% endif %}
-    {{ field(placeholder=placeholder, readonly=readonly, **kwargs) }}
+    {{ field(placeholder=placeholder, readonly=readonly, class="appearance-none", **kwargs) }}
     {% if suffix %}
     {{ suffix_icon }}
     {% endif %}

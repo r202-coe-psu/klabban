@@ -1,0 +1,118 @@
+{% extends "/base/default_page.html" %}
+{% import "base/html_renderer.html" as renderer %}
+{% import "/components/dialogs.html" as dialog %}
+{% import "/components/paginations.html" as paginations %}
+
+{% set title_page="รายละเอียดผู้อพยพ / Migrant Details" %}
+{% block content %}
+
+<div class="mb-4">
+    <a href="{{ url_for('refugees.index', **request.args) }}">
+        <i class="ph ph-arrow-left text-lg"></i>
+        กลับไปรายการผู้อพยพ / Back to Refugees List
+    </a>
+</div>
+
+<div class="bg-white rounded-3xl border border-gray-300">
+    <h1 class="text-2xl font-semibold px-6 pt-6 pb-4 border-b border-gray-300">
+        รายละเอียดผู้อพยพ / Migrant Details
+    </h1>
+    <div class="p-4">
+        <h2 class="text-lg font-medium mb-4">ข้อมูลส่วนตัว</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+                <p class="text-gray-400 text-sm font-light">ชื่อผู้อพยพ / Migrant Name:</p>
+                <p>{{ refugee.name or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">ชื่อเล่น / Nickname:</p>
+                <p>{{ refugee.nick_name or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">เพศ / Gender:</p>
+                <p>{{ refugee.get_gender_display() if refugee.gender else "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">โทรศัพท์ / Phone:</p>
+                <p>{{ refugee.phone or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">โรคประจำตัว / Congenital Disease:</p>
+                <p>{{ refugee.congenital_disease or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">สัญชาติ / Nationality:</p>
+                <p>{{ refugee.nationality or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">เชื้อชาติ / Ethnicity:</p>
+                <p>{{ refugee.ethnicity or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">ประเทศ / Country:</p>
+                <p>{{ refugee.country or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">อายุ / Age:</p>
+                <p>{{ refugee.age or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">ที่อยู่ / Address:</p>
+                <p>{{ refugee.address or "-" }}</p>
+            </div>
+        </div>
+        <h2 class="text-lg font-medium mb-4 mt-6">ข้อมูลการอพยพ</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+                <p class="text-gray-400 text-sm font-light">ศูนย์พักพิงที่อาศัย / Refugee Camp:</p>
+                <p><a>{{ refugee.refugee_camp.name }}</a></p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">สัตว์เลี้ยง / Pets:</p>
+                <p>{{ refugee.pets or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">จำนวนคน / People Count:</p>
+                <p>{{ refugee.people_count or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">ผู้ติดต่อฉุกเฉิน / Emergency Contact:</p>
+                <p>{{ refugee.emergency_contact or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">จำนวนวันที่คาดว่าจะพักอยู่ / Expected Days:</p>
+                <p>{{ refugee.expected_days or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">หมายเหตุ / Remark:</p>
+                <p>{{ refugee.remark or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">วันที่ลงทะเบียน / Registration Date:</p>
+                <p>{{ refugee.registration_date.strftime("%d %B %Y") or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">วันที่กลับบ้าน / Return Home Date:</p>
+                <p>{{ refugee.back_home_date or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">สถานะผู้อพยพ / Migrant Status:</p>
+                {{ render_refugee_status(refugee.status) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% macro render_refugee_status(status) %}
+<div class="border rounded-lg py-0.5 px-1.5 size-fit
+    {{ 'text-blue-500 border-blue-500' if status == 'active' else '' }}
+    {{ 'text-red-500 border-red-500' if status == 'deactive' else '' }}
+    {{ 'text-green-500 border-green-500' if status == 'back_home' else '' }}
+        ">
+    {{ 'อยู่ในศูนย์พักพิง / In Migrants Camp' if status == 'active' else '' }}
+    {{ 'ถูกลบออก / Deleted' if status == 'deactive' else '' }}
+    {{ 'กลับบ้านแล้ว / Returned Home' if status == 'back_home' else '' }}
+</div>
+{% endmacro %}

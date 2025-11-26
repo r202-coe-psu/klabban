@@ -24,7 +24,7 @@
                     รายชื่อผู้อพยพ / Migrants List
                 </div>
                 <div class="grid grid-cols-5 max-md:grid-cols-2 max-sm:grid-cols-1 gap-x-4 items-center">
-                    {{ renderer.base_render(search_form.refugee_camp, class="w-full h-full px-3", class_="!p-0") }}
+                    {{ renderer.base_render(search_form.refugee_camp) }}
                     {{ renderer.base_render(search_form.search) }}
                     <input name="view_mode" type="hidden" value="{{ view_mode }}">
                     {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles)%}
@@ -84,20 +84,9 @@
                                 {{ loop.index}}. {{ refugee.name }} {{ ("(" + refugee.nick_name + ")") if
                                 refugee.nick_name else "" }}
                             </div>
-                            {% if "admin" in current_user.roles %}
+                            {% if "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles %}
                             <div class="card-actions flex-nowrap items-start justify-end">
-                                <a href="{{ url_for('refugees.create_or_edit', refugee_id=refugee.id) }}"
-                                    class="w-7 h-7 btn btn-outline btn-sm text-gray-600 border-gray-300">
-                                    <span class="material-symbols-outlined">
-                                        edit_square
-                                    </span>
-                                </a>
-                                <button class="w-7 h-7 btn btn-outline btn-sm border-gray-300 text-error"
-                                    onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
-                                    <span class="material-symbols-outlined">
-                                        delete
-                                    </span>
-                                </button>
+                                {{ render_refugee_toolbar(refugee) }}
                                 {{ dialog.DisactiveDialog(
                                     id="%s-disactive-dialog" | format(refugee.id),
                                     title="ยืนยันการลบรายการผู้อพยพ",
@@ -172,7 +161,7 @@
                             {{ refugee.registration_date.strftime("%d %B %Y") }}
                         </td>
 
-                        {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles)%}
+                        {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp_id) %}
                              <td class="px-4 py-3">
                             {{ refugee.country if refugee.country else '-' }}
                         </td>
@@ -205,20 +194,10 @@
                         </td>
 
                         <!-- ปุ่มจัดการ -->
-                         {% if "admin" in current_user.roles %}
+                        {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp_id) %}
                         <td class="px-4 py-3">
                             <div class="flex gap-2 justify-end">
-
-                                <a href="{{ url_for('refugees.create_or_edit', refugee_id=refugee.id) }}"
-                                    class="btn btn-outline btn-sm text-gray-600 border-gray-300">
-                                    <span class="material-symbols-outlined">edit_square</span>
-                                </a>
-
-                                <button class="btn btn-outline btn-sm border-gray-300 text-error"
-                                    onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
-                                    <span class="material-symbols-outlined">delete</span>
-                                </button>
-
+                                {{ render_refugee_toolbar(refugee) }}
                                 {{ dialog.DisactiveDialog(
                                     id="%s-disactive-dialog" | format(refugee.id),
                                     title="ยืนยันการลบรายการผู้อพยพ",
@@ -249,6 +228,21 @@
     </div>
 </div>
 {% endblock %}
+
+{% macro render_refugee_toolbar(refugee) %}
+<a href="{{ url_for('refugees.view_refugee', refugee_id=refugee.id, **request.args) }}"
+    class="size-8 btn btn-outline btn-sm border-gray-300 text-green-600 hover:bg-green-100">
+    <span class="material-symbols-outlined">visibility</span>
+</a>
+<a href="{{ url_for('refugees.create_or_edit', refugee_id=refugee.id) }}"
+    class="size-8 btn btn-outline btn-sm text-gray-600 border-gray-300">
+    <span class="material-symbols-outlined">edit_square</span>
+</a>
+<button class="size-8 btn btn-outline btn-sm border-gray-300 text-error hover:bg-red-100"
+    onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
+    <span class="material-symbols-outlined">delete</span>
+</button>
+{% endmacro %}
 
 {% macro render_refugee_status(status) %}
 <div class="border rounded-lg py-0.5 px-1.5 size-fit

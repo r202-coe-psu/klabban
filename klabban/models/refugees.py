@@ -29,7 +29,7 @@ class Refugee(me.Document):
     country = me.StringField(max_length=128)
     age = me.IntField()
     address = me.StringField(max_length=512)
-    pets = me.StringField()
+    pets = me.StringField(max_length=512)
     expected_days = me.IntField()
     people_count = me.IntField(default=1, min_value=1)
     emergency_contact = me.StringField(max_length=255)
