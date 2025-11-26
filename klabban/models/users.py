@@ -44,7 +44,7 @@ class User(me.Document, UserMixin):
     refugee_camp = me.ReferenceField(
         "RefugeeCamp", required=False
     )  # ศูนย์พักพิง (optional)
-    
+
     is_setup_password = me.BooleanField(default=False)  # ตั้งรหัสผ่านแล้วหรือไม่
 
     created_date = me.DateTimeField(required=True, default=datetime.datetime.now)
@@ -74,7 +74,9 @@ class User(me.Document, UserMixin):
         return False
 
     def get_fullname(self):
-        return f"{self.first_name} {self.last_name}"
+        if self.first_name or self.last_name:
+            return f"{self.first_name or ''} {self.last_name or ''}".strip()
+        return "Username: {}".format(self.username)
 
     def display_status(self):
         status_dict = dict(STATUS_CHOICES)
