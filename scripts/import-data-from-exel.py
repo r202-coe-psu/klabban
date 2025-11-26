@@ -14,11 +14,18 @@ def import_excel(base_path="."):
     pd = pandas.read_excel(f"{base_path}/data/refugees.xlsx")
 
     for index, row in pd.iterrows():
+        if refugee := Refugee.objects(name=row.get("name")).first():
+            print(f"refugee {row.get('name')} already exists, skip")
+            continue
+
         refugee = Refugee(
             name=row.get("name"),
-            nick_name=row.get("nick_name", "")
+            nick_name=row.get("nick_name", ""),
+            phone=row.get("phone", ""),
+            address=row.get("address", "")
         )
         refugee.save()
+        print(f"refugee {row.get('name')} imported successfully")
 
     
 
