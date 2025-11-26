@@ -8,7 +8,10 @@
     </h1>
     <p class="text-xl text-gray-600">เว็บไซต์สำหรับหาญาติในศูนย์พักพิง</p>
   </div>
-  <div class="card w-full max-w-4xl bg-white shadow-lg border border-gray-100 rounded-xl mb-16">
+  <div class="w-full max-w-5xl text-center red-text-sm text-gray-500 mb-3">
+  <p class="text-error">ข้อมูลนี้สำหรับติดตามหาบุคคลสูญหายในสถานการณ์ภัยพิบัติเท่านั้น และจะลบออกเมื่อสถานการณ์คลี่คลาย</p>
+  </div>
+  <div class="card w-full max-w-4xl bg-white shadow-lg border border-gray-100 rounded-xl mb-10">
     <div class="card-body p-8">
       <h2 class="card-title text-xl mb-2">ค้นหาผู้อพยพ / Search for migrants</h2>
       <form action="{{ url_for('refugees.index') }}" method="get" class="flex flex-col md:flex-row gap-4 items-center">
@@ -30,7 +33,7 @@
   </div>
   <div class="w-full max-w-5xl text-center">
     <h2 class="text-4xl font-bold mb-2 text-black">รายการศูนย์พักพิง</h2>
-    {#
+    {# 
     <a href="{{ url_for('refugees.index') }}">
       <p class="text-base text-gray-600">กดเพื่อดูรายชื่อผู้อพยพทั้งหมด</p>
       <p class="text-base text-gray-600">Click to view all migrants</p>
@@ -45,22 +48,22 @@
       {% endif %} gap-2">
       {% for refugee_camp in refugee_camps %}
 
-      <div class="rounded-xl border border-black p-4 justify-start text-start "> {# ใส่ลิงก์ ไปหน้าของศูนย์พักพิง #}
-        <h1 class="text-3xl font-bold">
-          {{ refugee_camp.name }}
-        </h1>
-        <p class="text-lg text-gray-600 mt-1">
-          จำนวนผู้อพยพ: {{ refugee_camp.refugee_count }} คน
-        </p>
-        {% if refugee_camp.line_id %}
-        <p>
-          LINE ID : {{ refugee_camp.line_id }}
-        </p>
-        {% endif %}
-        <p>
-          ช่องทางติดต่อ : {{ refugee_camp.contact_info | safe }}
-        </p>
-        <div class="flex flex-col gap-2 mt-2">
+      <div class="rounded-xl border border-black p-4 text-start flex flex-col h-full"> {# ใส่ลิงก์ ไปหน้าของศูนย์พักพิง #}
+        <div>
+          <h1 class="text-3xl font-bold">
+            {{ refugee_camp.name }}
+          </h1>
+          {% if refugee_camp.line_id %}
+          <p>
+            LINE ID : {{ refugee_camp.line_id }}
+          </p>
+          {% endif %}
+          <p>
+            ช่องทางติดต่อ : {{ refugee_camp.contact_info | safe }}
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-2 mt-auto pt-4">
           <div class="flex max-sm:flex-col gap-2 w-full">
             {% if refugee_camp.other_link %}
             <a href="{{ refugee_camp.other_link }}" target="_blank" class="btn btn-neutral grow">
