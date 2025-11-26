@@ -1,10 +1,14 @@
 {% extends "/base/default_page.html" %}
 {% import "base/html_renderer.html" as renderer %}
 
-{% set title_page="จัดการผู้อพยพ" %}
+{% if 'edit' in request.path %}
+  {% set title_page="แก้ไขผู้อพยพ / Edit Migrant" %}
+{% else %}
+  {% set title_page="เพิ่มผู้อพยพ / Create Migrant" %}
+{% endif %}
 
 {% block content %}
-<form class="bg-white rounded-lg p-4" method="post"
+<form class="bg-white rounded-lg p-4" method="POST"
   action="{{ url_for('refugees.create_or_edit', refugee_id=refugee_id) }}">
   {{ form.csrf_token }}
   {{ renderer.base_render(form.refugee_camp) }}
@@ -28,10 +32,10 @@
   {{ renderer.base_render(form.status) }}
   <div class="modal-action justify-end">
     <a class="btn" href="{{ url_for('refugees.index') }}">
-      ปิด
+      ยกเลิก / Cancel
     </a>
     <button class="btn btn-primary">
-      ยืนยัน
+      ยืนยัน / Save
     </button>
   </div>
 </form>

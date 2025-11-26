@@ -9,8 +9,8 @@ BaseRefugeeForm = model_form(
     models.Refugee,
     FlaskForm,
     field_args={
-        "nick_name": {"label": "ชื่อเล่น / Nickname"},
-        "name": {"label": "ชื่อ-นามสกุล / Full Name"},
+        "nick_name": {"label": "ชื่อเล่น / Migrant Nickname"},
+        "name": {"label": "ชื่อ-นามสกุล / Migrant Full Name"},
         "nationality": {"label": "สัญชาติ / Nationality", "default": "ไทย"},
         "ethnicity": {"label": "เชื้อชาติ / Ethnicity", "default": "ไทย"},
         "country": {"label": "ประเทศ / Country", "default": "ไทย"},
@@ -33,7 +33,7 @@ BaseRefugeeForm = model_form(
 
 
 class RefugeeForm(BaseRefugeeForm):
-    refugee_camp = SelectField("ศูนย์พักพิง / Refugee Camp", choices=[])
+    refugee_camp = SelectField("ศูนย์พักพิง / Migrant Camp", choices=[])
     registration_date = DateTimeLocalField(
         "วันที่ลงทะเบียน / Registration Date",
         default=datetime.now,
