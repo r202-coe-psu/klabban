@@ -112,7 +112,7 @@
                                     id="%s-change_status-dialog" | format(refugee.id),
                                     title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
                                     body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                                    url=url_for("refugees.change_status", refugee_id=refugee.id)
+                                    url=url_for("refugees.change_status", refugee_id=refugee.id, **request.args)
                                 )}}
                             </div>
                     </div>
@@ -178,7 +178,7 @@
                                     id="%s-change_status-dialog" | format(refugee.id),
                                     title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
                                     body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                                    url=url_for("refugees.change_status", refugee_id=refugee.id)
+                                    url=url_for("refugees.change_status", refugee_id=refugee.id,  **request.args)
                                 )}}
                             </div>
                         </td>
