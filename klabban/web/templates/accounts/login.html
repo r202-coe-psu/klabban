@@ -14,15 +14,15 @@
     <div class="card-body w-full lg:w-1/2">
      <a href="{{ url_for('index.index') }}" class="flex gap-2 items-center">
       <span class="ph ph-arrow-left text-base"></span>
-      กลับสู่หน้าแรก
+      กลับสู่หน้าแรก / Back to Home
       </a>
-      <h2 class="card-title justify-center text-2xl">เข้าสู่ระบบ</h2>
+      <h2 class="card-title justify-center text-2xl">เข้าสู่ระบบ / Login</h2>
       <form method="POST" class="space-y-4">
         {{ form.csrf_token }}
         <!-- Username -->
         <div class="form-control">
           <label class="label">
-            <span class="label-text">ชื่อผู้ใช้</span>
+            <span class="label-text">ชื่อผู้ใช้ / Username</span>
           </label>
           {{ form.username(class_="input input-bordered w-full", placeholder="กรอกชื่อบัญชีผู้ใช้") }}
         </div>
@@ -30,7 +30,7 @@
         <!-- Password -->
         <div class="form-control">
           <label class="label">
-            <span class="label-text">รหัสผ่าน</span>
+            <span class="label-text">รหัสผ่าน / Password</span>
           </label>
           <div class="relative">
             <input type="password" id="password_input" name="password" placeholder="กรอกรหัสผ่าน"
@@ -57,7 +57,7 @@
 
         <!-- Button -->
         <div class="form-control mt-6 ">
-          <button class="btn btn-primary w-full text-white">เข้าสู่ระบบ</button>
+          <button class="btn btn-primary w-full text-white">เข้าสู่ระบบ / Login</button>
           <a href="{{ url_for('accounts.login_oauth', name='google') }}" class="btn btn-gray w-full"><i>
               <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="25" height="25" viewBox="0 0 48 48">
                 <path fill="#fbc02d"

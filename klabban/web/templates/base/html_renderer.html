@@ -12,6 +12,9 @@ disabled_optional_text=True,
 is_hidden=False
 ) %}
 
+{# ตั้งค่าเริ่มต้น placeholder จาก wtform #}
+{% set placeholder = placeholder if placeholder != "" else field.render_kw.placeholder %}
+
 {#% set style = "input input-bordered flex items-center gap-2 w-full" %#}
 {% set style = "input flex items-center gap-2 w-full" %}
 {% set field_id = id_prefix + field.id %}
@@ -44,7 +47,7 @@ is_hidden=False
     <p class="fieldset-label">(ไม่บังคับ)</p>
     {% endif %}
   </legend>
-  <label class="w-full input validator {% if readonly %}input-readonly{% endif %} {% if is_hidden %}hidden{% endif %}">
+  <label class="w-full input validator {{style}} {% if readonly %}input-readonly{% endif %} {% if is_hidden %}hidden{% endif %}">
     {% if prefix %}
     {{ prefix_icon }}
     {% endif %}
@@ -53,8 +56,8 @@ is_hidden=False
     {{ suffix_icon }}
     {% endif %}
   </label>
+  {% if field.errors %}
   <span class="validator-hint">
-
     {% for error in field.errors %}
     {% if 'This field is required' in error %}
     กรุณากรอกข้อมูล
@@ -64,6 +67,7 @@ is_hidden=False
     {% if not loop.last %}<br>{% endif %}
     {% endfor %}
   </span>
+  {% endif  %}
 </fieldset>
 {% endif %}
 {% endmacro %}
@@ -123,11 +127,13 @@ is_hidden=False
 
   </div>
 
-  <p class="validator-hint text-error">
-    {% for error in field.errors %}
-    {{ error }}{% if not loop.last %}<br>{% endif %}
-    {% endfor %}
-  </p>
+  {% if field.errors %}
+    <p class="validator-hint text-error">
+      {% for error in field.errors %}
+      {{ error }}{% if not loop.last %}<br>{% endif %}
+      {% endfor %}
+    </p>
+  {% endif %}
 </fieldset>
 
 <script>
@@ -213,11 +219,11 @@ is_hidden=False
   </div>
 
   {% if field.errors %}
-  <p class="validator-hint text-error mt-1 text-sm">
-    {% for error in field.errors %}
-    {{ error }}{% if not loop.last %}<br>{% endif %}
-    {% endfor %}
-  </p>
+    <p class="validator-hint text-error mt-1 text-sm">
+      {% for error in field.errors %}
+      {{ error }}{% if not loop.last %}<br>{% endif %}
+      {% endfor %}
+    </p>
   {% endif %}
 </fieldset>
 
@@ -270,18 +276,20 @@ is_hidden=False
   <textarea {% if readonly %} readonly {% endif %} class="w-full h-24 textarea bg-white rounded-3xl"
     name="{{ field.name }}" id="{{ field.id }}"
     placeholder="กรอก{{ field.label.text }}ที่นี่">{{ field.data if field.data else field.default if field.default else "" }}</textarea>
-  <div class="fieldset-label">
-    <p class="validator-hint">
-      {% for error in field.errors %}
-      {% if 'This field is required' in error %}
-      กรุณากรอกข้อมูล
-      {% else %}
-      {{ error }}
-      {% endif %}
-      {% if not loop.last %}<br>{% endif %}
-      {% endfor %}
-    </p>
-  </div>
+  {% if field.errors %}
+    <div class="fieldset-label">
+      <p class="validator-hint">
+        {% for error in field.errors %}
+        {% if 'This field is required' in error %}
+        กรุณากรอกข้อมูล
+        {% else %}
+        {{ error }}
+        {% endif %}
+        {% if not loop.last %}<br>{% endif %}
+        {% endfor %}
+      </p>
+    </div>
+  {% endif %}
 </fieldset>
 {% endmacro %}
 

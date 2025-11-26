@@ -16,10 +16,21 @@ class Refugee(me.Document):
     }
 
     refugee_camp = me.ReferenceField("RefugeeCamp")
-    nick_name = me.StringField(max_length=255)
     name = me.StringField(required=True, max_length=255)
+
+    # extra fields
+    phone = me.StringField(max_length=32)
+    congenital_disease = me.StringField(max_length=512)
+    nick_name = me.StringField(max_length=255)
     nationality = me.StringField(max_length=128)
     ethnicity = me.StringField(max_length=128)
+    age = me.IntField()
+    address = me.StringField(max_length=512)
+    pets = me.StringField()
+    expected_days = me.IntField()
+    people_count = me.IntField()
+    emergency_contact = me.StringField(max_length=255)
+    
     remark = me.StringField()
     registration_date = me.DateTimeField(default=datetime.datetime.now)
     is_public_searchable = me.BooleanField(default=True)

@@ -3,40 +3,113 @@
 {% import "/components/dialogs.html" as dialog %}
 {% import "/components/paginations.html" as paginations %}
 
-{% set title_page="รายชื่อผู้อพยพ" %}
+{% set title_page="รายชื่อผู้อพยพ / Refugees List" %}
 
 {% block content %}
+
+{% if not current_user.is_authenticated %}
+<div class="mb-4">
+    <a href="{{ url_for('index.index') }}">
+        <i class="ph ph-arrow-left text-lg"></i>
+        กลับไปหน้าหลัก / Back to Home
+    </a>
+</div>
+{% endif %}
+
 <div class="bg-white rounded-3xl border border-gray-300">
     <div class="overflow-x-auto p-6">
-        <div class="flex flex-row items-end justify-between mb-2">
+        <div class="flex flex-row max-sm:flex-col w-full sm:items-end justify-between mb-2 gap-4">
             <form method="GET">
                 <div class="text-xl font-medium text-gray-700">
-                    ค้นหารายชื่อผู้อพยพ
+                    รายชื่อผู้อพยพ / Refugees
                 </div>
-                <div class="flex gap-4 items-center">
-                    {{ renderer.base_render(search_form.refugee_camp) }}
+                <div class="grid grid-cols-3 max-sm:grid-cols-1 gap-x-4 items-center">
+                    {{ renderer.base_render(search_form.refugee_camp, class="w-full h-full px-3", class_="!p-0") }}
                     {{ renderer.base_render(search_form.search) }}
-                    <button type="submit" class="btn btn-primary text-white mt-4">
-                        ค้นหา
+                    <button type="submit" class="btn btn-primary text-white sm:mt-8 max-sm:mt-3">
+                        <span class="ph ph-magnifying-glass text-lg"></span>
+                        ค้นหา / Search
                     </button>
                 </div>
             </form>
             {% if 'admin' in current_user.roles or 'refugee_camp_staff' in current_user.roles %}
-                <a class="btn btn-primary text-white" href="{{ url_for('refugees.create_or_edit', **request.args) }}">
-                    <span class="material-symbols-outlined text-sm">add</span>
-                    เพิ่มผู้อพยพ
-                </a>
+            <a class="btn btn-primary text-white" href="{{ url_for('refugees.create_or_edit', **request.args) }}">
+                <span class="material-symbols-outlined text-sm">add</span>
+                เพิ่มผู้อพยพ / Add Refugee
+            </a>
             {% endif %}
         </div>
-        <table class="table  w-full text-sm border-x border-t border-gray-200 ">
+        {% set args = request.args.to_dict() %}
+        {% set _ = args.pop('view_mode', None) %}
+        <div class="w-full flex justify-end mb-4">
+            <div class="max-sm:w-full max-sm:grid grid-cols-2 border border-gray-300 rounded p-1 w-fit">
+                <a href="{{ url_for('refugees.index', view_mode='grid', **args) }}"
+                    class="btn {{ 'bg-black text-white' if view_mode == 'grid' else ''}}">
+                    ดูแบบการ์ด
+                    <span class="text-lg ph ph-squares-four"></span>
+                </a>
+                <a href="{{ url_for('refugees.index', view_mode='list', **args) }}"
+                    class="btn {{ 'bg-black text-white' if view_mode == 'list' else ''}}">
+                    ดูแบบตาราง
+                    <span class="text-lg ph ph-list-dashes"></span>
+                </a>
+            </div>
+        </div>
+        {% if view_mode == 'grid' %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for refugee in refugees_pagination.items %}
+            <div>
+                <div class="card bg-base-100 shadow-md">
+                    <div class="card-body p-4">
+                        <h2 class="card-title flex items-start justify-between gap-2">
+                            <div>
+                                {{ loop.index}}. {{ refugee.name }} {{ ("(" + refugee.nick_name + ")") if
+                                refugee.nick_name else "" }}
+                            </div>
+                            {% if "admin" in current_user.roles %}
+                            <div class="card-actions flex-nowrap items-start justify-end">
+                                <a href="{{ url_for('refugees.create_or_edit', refugee_id=refugee.id) }}"
+                                    class="w-7 h-7 btn btn-outline btn-sm text-gray-600 border-gray-300">
+                                    <span class="material-symbols-outlined">
+                                        edit_square
+                                    </span>
+                                </a>
+                                <button class="w-7 h-7 btn btn-outline btn-sm border-gray-300 text-error"
+                                    onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
+                                    <span class="material-symbols-outlined">
+                                        delete
+                                    </span>
+                                </button>
+                                {{ dialog.DisactiveDialog(
+                                id="%s-disactive-dialog" | format(refugee.id),
+                                title="ยืนยันการลบรายการผู้อพยพ",
+                                body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+                                url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
+                                )}}
+                            </div>
+                            {% endif %}
+                        </h2>
+                        <div>
+                            <p class="text-gray-500 font-light">ศูนย์พักพิง / Refugee Camp</p>
+                            <p>{{ refugee.refugee_camp.name }}</p>
+                        </div>
+                        {{ render_refugee_status(refugee.status) }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <table class="table  w-full text-sm border border-gray-200 ">
             <thead class=" text-gray-700">
                 <tr>
-                <th>ลำดับ</th>
-                <th>ชื่อเล่น</th>
-                <th>ชื่อ-นามสกุล</th>
-                <th>สถานะ</th>
-                <th>ศูนย์พักพิง</th>
-                <th></th>
+                    <th>ลำดับ</th>
+                    <th>ชื่อเล่น</th>
+                    <th>ชื่อ-นามสกุล</th>
+                    <th>ลงทะเบียนเมื่อ</th>
+                    <th>สถานะ</th>
+                    <th>ศูนย์พักพิง</th>
+                    <th>ข้อมูลล่าสุด</th>
                 </tr>
             </thead>
             <tbody>
@@ -46,44 +119,58 @@
                     <td>{{ refugee.nick_name }}</td>
                     <td>{{ refugee.name }}</td>
                     <td>
-                        <div class="border rounded-lg py-1 px-2 size-fit
-                            {{ 'text-blue-500 border-blue-500' if refugee.status == 'active' else '' }}
-                            {{ 'text-red-500 border-red-500' if refugee.status == 'deactive' else '' }}
-                            {{ 'text-green-500 border-green-500' if refugee.status == 'back_home' else '' }}
-                             ">
-                             {{ refugee.get_status_display() }}
-                        </div>
+                        {{ refugee.registration_date.strftime("%d %B %Y") }}
+                    </td>
+                    <td>
+                        {{ render_refugee_status(refugee.status) }}
                     </td>
                     <td>{{ refugee.refugee_camp.name }}</td>
+                    <td>
+                        {{ refugee.updated_date.strftime("%d %B %Y") }}
+                    </td>
                     <td class="flex gap-2 justify-end">
-                        <a href="{{ url_for('refugees.create_or_edit', refugee_id=refugee.id) }}" class="btn btn-outline btn-sm text-gray-600 border-gray-300">
+                        <a href="{{ url_for('refugees.create_or_edit', refugee_id=refugee.id) }}"
+                            class="btn btn-outline btn-sm text-gray-600 border-gray-300">
                             <span class="material-symbols-outlined">
                                 edit_square
                             </span>
                         </a>
                         <button class="btn btn-outline btn-sm border-gray-300 text-error"
-                           onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
+                            onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
                             <span class="material-symbols-outlined">
-                            delete
+                                delete
                             </span>
                         </button>
                         {{ dialog.DisactiveDialog(
-                            id="%s-disactive-dialog" | format(refugee.id),
-                            title="ยืนยันการลบรายการผู้อพยพ",
-                            body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                            url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
+                        id="%s-disactive-dialog" | format(refugee.id),
+                        title="ยืนยันการลบรายการผู้อพยพ",
+                        body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+                        url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
                         )}}
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% endif %}
         {{ paginations.render_pagination(
-            pagination=refugees_pagination,
-            endpoint='refugees.index',
-            key_page='page',
-            kwargs=request.args.to_dict()
+        pagination=refugees_pagination,
+        endpoint='refugees.index',
+        key_page='page',
+        kwargs=request.args.to_dict()
         ) }}
     </div>
 </div>
 {% endblock %}
+
+{% macro render_refugee_status(status) %}
+<div class="border rounded-lg py-0.5 px-1.5 size-fit
+    {{ 'text-blue-500 border-blue-500' if status == 'active' else '' }}
+    {{ 'text-red-500 border-red-500' if status == 'deactive' else '' }}
+    {{ 'text-green-500 border-green-500' if status == 'back_home' else '' }}
+        ">
+    {{ 'อยู่ในศูนย์พักพิง / In Refugee Camp' if status == 'active' else '' }}
+    {{ 'ถูกลบออก / Deleted' if status == 'deactive' else '' }}
+    {{ 'กลับบ้านแล้ว / Returned Home' if status == 'back_home' else '' }}
+</div>
+{% endmacro %}
