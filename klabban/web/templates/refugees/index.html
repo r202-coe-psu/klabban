@@ -133,7 +133,9 @@
                         <th class="text-left">สถานะ</th>
                         <th class="text-left">ศูนย์พักพิง</th>
                         <th class="text-left">ข้อมูลล่าสุด</th>
+                        {% if "admin" in current_user.roles %}
                         <th class="text-right">จัดการ</th>
+                        {% endif %}
                     </tr>
                 </thead>
 
@@ -179,6 +181,7 @@
                         </td>
 
                         <!-- ปุ่มจัดการ -->
+                         {% if "admin" in current_user.roles %}
                         <td class="px-4 py-3">
                             <div class="flex gap-2 justify-end">
 
@@ -200,6 +203,7 @@
                                 )}}
                             </div>
                         </td>
+                        {% endif %}
 
                     </tr>
                     {% endfor %}
