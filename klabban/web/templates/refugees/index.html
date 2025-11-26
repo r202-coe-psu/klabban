@@ -31,17 +31,19 @@
         </div>
         {% set args = request.args.to_dict() %}
         {% set _ = args.pop('view_mode', None) %}
-        <div class="max-sm:grid grid-cols-2 w-full flex justify-end mb-4 gap-2">
-            <a href="{{ url_for('refugees.index', view_mode='grid', **args) }}"
-                class="btn {{ 'bg-black text-white' if view_mode == 'grid' else ''}}">
-                ดูแบบการ์ด
-                <span class="ph ph-squares-four"></span>
-            </a>
-            <a href="{{ url_for('refugees.index', view_mode='list', **args) }}"
-                class="btn {{ 'bg-black text-white' if view_mode == 'list' else ''}}">
-                ดูแบบตาราง
-                <span class="ph ph-list-dashes"></span>
-            </a>
+        <div class="w-full flex justify-end mb-4">
+            <div class="max-sm:w-full max-sm:grid grid-cols-2 border border-gray-300 rounded p-1 w-fit">
+                <a href="{{ url_for('refugees.index', view_mode='grid', **args) }}"
+                    class="btn {{ 'bg-black text-white' if view_mode == 'grid' else ''}}">
+                    ดูแบบการ์ด
+                    <span class="ph ph-squares-four"></span>
+                </a>
+                <a href="{{ url_for('refugees.index', view_mode='list', **args) }}"
+                    class="btn {{ 'bg-black text-white' if view_mode == 'list' else ''}}">
+                    ดูแบบตาราง
+                    <span class="ph ph-list-dashes"></span>
+                </a>
+            </div>
         </div>
         {% if view_mode == 'grid' %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
