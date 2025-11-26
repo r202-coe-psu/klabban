@@ -1,4 +1,4 @@
-from flask import abort, Blueprint, render_template, redirect, url_for, request
+from flask import abort, Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from ..utils.acl import roles_required
 from klabban import models
@@ -52,6 +52,28 @@ def index():
         view_mode=view_mode,
     )
 
+
+@module.route("/<refugee_id>/change_status/", methods=["POST"])
+def change_status(refugee_id):
+    refugee = models.Refugee.objects.get(id=refugee_id)
+    # name_confirmation = request.form.get("name_confirmation")
+    # refugee_name_confirm = request.form.get("refugee_name_confirm")
+        
+    if refugee.status == 'active':
+        refugee.status = 'back_home' 
+        flash(f"สถานะของ **{refugee.name}** ถูกเปลี่ยนเป็น 'กลับบ้านแล้ว' สำเร็จ.", "success")
+    
+    elif refugee.status == 'back_home':
+        refugee.status = 'active'
+        flash(f"สถานะของ **{refugee.name}** ถูกเปลี่ยนกลับเป็น 'อยู่ในศูนย์พักพิง' สำเร็จ.", "success")
+    
+    else:
+        flash(f"ไม่สามารถเปลี่ยนสถานะของ **{refugee.name}** ได้ เนื่องจากสถานะปัจจุบันคือ {refugee.status}.", "error")
+        return redirect(url_for('refugees.index', **request.args))
+        
+    refugee.save()
+        
+    return redirect(url_for('refugees.index', **request.args))
 
 @module.route("/create", methods=["GET", "POST"], defaults={"refugee_id": None})
 @module.route("/<refugee_id>/edit", methods=["GET", "POST"])

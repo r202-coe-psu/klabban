@@ -113,7 +113,19 @@
                             {% set _ = camp_args.pop('refugee_camp', None) %}
                             <a class="underline text-black cursor-pointer" href="{{ url_for('refugees.index', refugee_camp=refugee.refugee_camp.id, **camp_args) }}">{{ refugee.refugee_camp.name }}</a>
                         </div>
-                        {{ render_refugee_status(refugee.status) }}
+                        <div class="flex items-center gap-2">
+                            {{ render_refugee_status(refugee.status) }}
+                                <button
+                                    onclick="$('#{{refugee.id}}-change_status-dialog')[0].showModal()">
+                                    <i class="ph ph-arrows-clockwise"></i>
+                                </button>
+                                {{ dialog.DisactiveDialog(
+                                    id="%s-change_status-dialog" | format(refugee.id),
+                                    title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
+                                    body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+                                    url=url_for("refugees.change_status", refugee_id=refugee.id)
+                                )}}
+                            </div>
                     </div>
                 </div>
             </div>
@@ -167,7 +179,19 @@
                         {% endif %}
 
                         <td class="px-4 py-3">
+                            <div class="flex items-center gap-2">
                             {{ render_refugee_status(refugee.status) }}
+                                <button
+                                    onclick="$('#{{refugee.id}}-change_status-dialog')[0].showModal()">
+                                    <i class="ph ph-arrows-clockwise"></i>
+                                </button>
+                                {{ dialog.DisactiveDialog(
+                                    id="%s-change_status-dialog" | format(refugee.id),
+                                    title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
+                                    body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+                                    url=url_for("refugees.change_status", refugee_id=refugee.id)
+                                )}}
+                            </div>
                         </td>
 
                         <td class="px-4 py-3">
