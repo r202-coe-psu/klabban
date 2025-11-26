@@ -10,7 +10,7 @@
   </div>
   <div class="card w-full max-w-4xl bg-white shadow-lg border border-gray-100 rounded-xl mb-16">
     <div class="card-body p-8">
-      <h2 class="card-title text-xl mb-2">ค้นหาผู้อพยพ / Search refugees</h2>
+      <h2 class="card-title text-xl mb-2">ค้นหาผู้อพยพ / Search for migrants</h2>
       <form action="{{ url_for('refugees.index') }}" method="get" class="flex flex-col md:flex-row gap-4 items-center">
 
         <input type="text" name="search" id="search" placeholder="ชื่อ - สกุล หรือ ชื่อเล่น / Name or Nickname"
@@ -31,7 +31,7 @@
     {# 
     <a href="{{ url_for('refugees.index') }}">
       <p class="text-base text-gray-600">กดเพื่อดูรายชื่อผู้อพยพทั้งหมด</p>
-      <p class="text-base text-gray-600">Click to view all refugees</p>
+      <p class="text-base text-gray-600">Click to view all migrants</p>
     </a>
     #}
     <div class="mt-4 grid {% if refugee_camps|length > 2 %}
@@ -48,9 +48,9 @@
           {{ refugee_camp.name }}
         </h1>
         {% if refugee_camp.line_id %}
-          <p>
-            LINE ID : {{ refugee_camp.line_id }}
-          </p>
+        <p>
+          LINE ID : {{ refugee_camp.line_id }}
+        </p>
         {% endif %}
         <p>
           ช่องทางติดต่อ : {{ refugee_camp.contact_info | safe }}
@@ -58,12 +58,12 @@
         <div class="flex flex-col gap-2 mt-2">
           <div class="flex max-sm:flex-col gap-2 w-full">
             {% if refugee_camp.other_link %}
-              <a href="{{ refugee_camp.other_link }}" target="_blank" class="btn btn-neutral grow">
-                ดูเพิ่มเติม / More Info
-                <span class="material-symbols-outlined">
-                  open_in_new
-                </span>
-              </a>
+            <a href="{{ refugee_camp.other_link }}" target="_blank" class="btn btn-neutral grow">
+              ดูเพิ่มเติม / More Info
+              <span class="material-symbols-outlined">
+                open_in_new
+              </span>
+            </a>
             {% endif %}
             {% if refugee_camp.location_url %}
             <a href="{{ refugee_camp.location_url }}" target="_blank" class="btn grow">
