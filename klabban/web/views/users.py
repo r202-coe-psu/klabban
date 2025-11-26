@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
+from mongoengine.queryset.visitor import Q
 import datetime
 import uuid
 
@@ -14,10 +15,18 @@ module = Blueprint("users", __name__, url_prefix="/users")
 @roles_required(["admin"])
 def index():
     page = request.args.get("page", 1, type=int)
-    search = request.args.get("search", "", type=str)
+    search = request.args.get("search", "", type=str).strip()
 
     users = models.User.objects()
-    total = 0
+    if search:
+        users = users.filter(
+            (Q(username__icontains=search))
+            | (Q(first_name__icontains=search))
+            | (Q(last_name__icontains=search))
+            | (Q(display_name__icontains=search))
+            | (Q(email__icontains=search))
+        )
+    total = users.count()
 
     class Pagination:
         def __init__(self, items, page, per_page, total):
@@ -83,7 +92,10 @@ def create_or_edit_user(user_id):
 def delete_user(user_id):
     user = models.User.objects(id=user_id).first()
     if user:
-        user.delete()
+        user.status = "inactive"
+        user.updated_date = datetime.datetime.now()
+        user.updated_by = current_user._get_current_object()
+        user.save()
     return redirect(url_for("users.index"))
 
 
