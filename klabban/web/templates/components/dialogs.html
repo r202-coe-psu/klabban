@@ -19,7 +19,10 @@ action_button_onclick="",
 action_button_color="primary",
 summit_button_color="primary",
 summit_button_text="",
-summit_button_type="submit") %}
+summit_button_type="submit",
+refugee_name="",
+bypass=false
+) %}
 
 {#
 ### วิธีใช้ Dialog 101 ###
@@ -68,6 +71,13 @@ action_button_onclick: ฟังก์ชัน javascript สำหรับป
     <h3 class="font-bold text-xl">{{ title | safe }}</h3>
     <p class="py-4 " style="overflow-wrap: break-word;">{{ body | safe }}</p>
 
+    {% if refugee_name %}
+    <p class="mb-2 text-gray-700">โปรดพิมพ์ชื่อผู้อพยพเพื่อยืนยัน: <strong>{{ refugee_name }}</strong></p>
+    {# en #}
+    <p class="mb-2 text-gray-700">Please type the refugee's name to confirm: <strong>{{ refugee_name }}</strong></p>
+      <input class="border p-2 w-full" type="text" id="{{ id }}-refugee-name-input" value="" placeholder='{{ refugee_name }}'  />
+    {% endif %}
+
     <div class="modal-action">
       <!-- Cancel Button -->
       {% if not disable_cancel_button %}
@@ -85,12 +95,13 @@ action_button_onclick: ฟังก์ชัน javascript สำหรับป
       {% endif %}
       {% endif %}
 
+
       <!-- Action Button -->
       {% if action_button_text %}
       <form method="{{ method }}" action="{{ action_button_href }}">
         {% set action_tag = "button" if action_button_type == "submit" else "a" %}
         {% if action_button_href or action_button_onclick %}
-        <{{action_tag}} class="btn  btn-outline btn-{{ action_button_color }}" type="{{ action_button_type }}"
+        <{{action_tag}} class="btn btn-outline btn-{{ action_button_color }}" type="{{ action_button_type }}"
           onclick="{{ action_button_onclick}}">
           {{ action_button_icon | safe }}
           {{ action_button_text | safe }}
@@ -114,11 +125,41 @@ action_button_onclick: ฟังก์ชัน javascript สำหรับป
 <script>
   {% if init_show %}
   document.getElementById("{{ id }}").showModal();
+
+  {% endif %}
+
+  {% if refugee_name %}
+  (function() {
+    const dialog = document.getElementById("{{ id }}");
+    const input = dialog.querySelector('input[id="{{ id }}-refugee-name-input"]');
+    const actionButton = dialog.querySelector('.modal-action .btn-outline');
+    let bypass = {{ 'true' if bypass else 'false' }};
+    if (!input || !actionButton) return;
+    input.value = "";
+    input.addEventListener('input', function() {
+      if (bypass || input.value === "{{ refugee_name }}" ) {
+        actionButton.removeAttribute('disabled');
+        actionButton.classList.remove('btn-disabled');
+        actionButton.classList.add('btn-{{ action_button_color }}');
+      } else {
+        actionButton.setAttribute('disabled', 'disabled');
+        actionButton.classList.remove('btn-{{ action_button_color }}');
+        actionButton.classList.add('btn-disabled');
+      }
+    });
+
+    // Disable the action button initially
+    if (!bypass) {
+      actionButton.setAttribute('disabled', 'disabled');
+      actionButton.classList.remove('btn-{{ action_button_color }}');
+      actionButton.classList.add('btn-disabled');
+    }
+  })();
   {% endif %}
 </script>
 {% endmacro %}
 
-{% macro DisactiveDialog(id, title, body, url) %}
+{% macro DisactiveDialog(id, title, body, url, refugee_name, bypass=false) %}
 {{
 Dialog(
 id=id,
@@ -126,11 +167,13 @@ title=title,
 body=body,
 method="POST",
 close_at_corner=True,
-cancel_button_text="ยกเลิก",
-action_button_text="ยืนยัน",
+cancel_button_text="ยกเลิก / cancels",
+action_button_text="ยืนยัน / submit",
 action_button_type="submit",
-action_button_color="orange",
+action_button_color="primary",
 action_button_href=url,
+refugee_name=refugee_name,
+bypass=bypass
 )
 }}
 {% endmacro %}

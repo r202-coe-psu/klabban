@@ -71,7 +71,13 @@ def change_status(refugee_id):
     else:
         flash(f"ไม่สามารถเปลี่ยนสถานะของ **{refugee.name}** ได้ เนื่องจากสถานะปัจจุบันคือ {refugee.status}.", "error")
         return redirect(url_for('refugees.index', **request.args))
-        
+  
+    log = models.RefugeeStatusLog(
+        status=refugee.status,
+        changed_by=current_user._get_current_object() if current_user.is_authenticated else None,
+        ip_address=request.headers.get("X-Forwarded-For", request.remote_addr),
+    )
+    refugee.status_log.append(log)
     refugee.save()
         
     return redirect(url_for('refugees.index', **request.args))

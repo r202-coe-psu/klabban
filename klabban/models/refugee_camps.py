@@ -1,7 +1,6 @@
 import datetime
 import mongoengine as me
 
-
 class RefugeeCamp(me.Document):
     meta = {"collection": "refugee_camps", "indexes": ["name", "status", "created_by"]}
 
@@ -13,7 +12,7 @@ class RefugeeCamp(me.Document):
     other_link = me.StringField(max_length=2048)
 
     status = me.StringField(choices=("deactive", "active"), default="active")
-
+   
     created_by = me.ReferenceField(
         "User",
     )
