@@ -20,6 +20,7 @@ BaseRefugeeForm = model_form(
         "phone": {"label": "เบอร์โทรศัพท์ / Phone"},
         "age": {"label": "อายุ / Age"},
         "gender": {"label": "เพศ / Gender"},
+        "congenital_disease": {"label": "โรคประจำตัว / Congenital Disease"},
         "people_count": {"label": "จำนวนคน / People Count"},
         "pets": {"label": "สัตว์เลี้ยง / Pets"},
         "expected_days": {"label": "จำนวนวันที่คาดว่าจะพัก / Expected Days"},
