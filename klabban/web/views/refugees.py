@@ -38,6 +38,8 @@ def index():
         query = query.filter(refugee_camp=refugee_camp_id)
     if country:
         query = query.filter(country__icontains=country)
+    if request.args.get("exclude_thai"):
+        query = query.filter(country__ne="ไทย")
     try:
         refugees_pagination = Pagination(query, page=page, per_page=per_page)
     except ValueError:
@@ -99,6 +101,7 @@ def create_or_edit(refugee_id):
         )
 
     form.populate_obj(refugee)
+    refugee.refugee_camp = models.RefugeeCamp.objects.get(id=form.refugee_camp.data)
     if current_user.is_authenticated:
         if not refugee_id:
             refugee.created_by = current_user._get_current_object()
