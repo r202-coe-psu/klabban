@@ -7,9 +7,9 @@ import mongoengine as me
 from collections import Counter, defaultdict
 from dotenv import dotenv_values
 
-def to_py_datetime(x):
+def to_py_datetime(x, sheet_name=None):
     if pd.isna(x):
-        return None
+        return format_sheet_date(sheet_name)
     if isinstance(x, pd.Timestamp):
         return x.to_pydatetime()
     if isinstance(x, datetime.datetime):
@@ -19,7 +19,7 @@ def to_py_datetime(x):
     except Exception:
         return None
 
-def map_row_to_doc(row, created_by_id=None, camp_id=None):
+def map_row_to_doc(row, created_by_id=None, camp_id=None,sheet_name=None):
     """
     Map a pandas Series row (Thai column names) to a dict ready for insertion.
     Adjust keys according to your Refugee schema.
@@ -27,7 +27,8 @@ def map_row_to_doc(row, created_by_id=None, camp_id=None):
     # column names seen in the sheet
     name = row.get("ชื่อ-สกุล")
 
-    registration_date = to_py_datetime(row.get("วัน/เวลาที่เข้าพัก"))
+    registration_date = to_py_datetime(row.get("วัน/เวลาที่เข้าพัก"), sheet_name=sheet_name)
+        
     expected_leave = to_py_datetime(row.get("วันที่คาดว่าจะออกจากศูนย์พักพิง"))
     age = row.get("อายุ")
     try:
@@ -97,6 +98,15 @@ def map_row_to_doc(row, created_by_id=None, camp_id=None):
     }
     # remove None entries for cleaner insert
     return {k: v for k, v in doc.items() if v is not None}
+
+def format_sheet_date(name):
+    if name in ['241168（1）', '241168（2）', '241168 (3)']:
+        return datetime.datetime(2025, 11 ,24)
+    elif name in ['251168-1', ' 251168-2', '251168-3', '251168-4']:
+        return datetime.datetime(2025, 11, 25)
+    else:
+        return None
+
 
 def duplicate_drop(data_to_save):
     counter = Counter()
@@ -204,7 +214,7 @@ def main():
                 continue
             if isinstance(name_val, str) and not name_val.strip():
                 continue
-            doc = map_row_to_doc(row, created_by_id=admin_id, camp_id=camp_id)
+            doc = map_row_to_doc(row, created_by_id=admin_id, camp_id=camp_id, sheet_name=sheet_name)
             # print(f"Row {i}: name={doc.get('name')}, registration_date={doc.get('registration_date')}, age={doc.get('age')}")
             data_to_save.append(doc)
     print("All sheet lens:", len(data_to_save))
