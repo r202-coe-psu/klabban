@@ -84,7 +84,8 @@
                                 {{ loop.index}}. {{ refugee.name }} {{ ("(" + refugee.nick_name + ")") if
                                 refugee.nick_name else "" }}
                             </div>
-                            {% if "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles %}
+                            {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
+                            
                             <div class="card-actions flex-nowrap items-start justify-end">
                                 {{ render_refugee_toolbar(refugee) }}
                                 {{ dialog.DisactiveDialog(
@@ -104,19 +105,19 @@
                         </div>
                         <div class="flex items-center gap-2">
                             {{ render_refugee_status(refugee.status) }}
-                                <button
-                                    onclick="$('#{{refugee.id}}-change_status-dialog')[0].showModal()">
-                                    <i class="ph ph-arrows-clockwise"></i>
-                                </button>
-                                {{ dialog.DisactiveDialog(
-                                    id="%s-change_status-dialog" | format(refugee.id),
-                                    title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
-                                    body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                                    url=url_for("refugees.change_status", refugee_id=refugee.id, **request.args),
-                                    refugee_name=refugee.name,
-                                    bypass=current_user.roles[0] in ["refugee_camp_staff", "admin"] if current_user.is_authenticated else false
-                                )}}
-                            </div>
+                            <button
+                                onclick="$('#{{refugee.id}}-change_status-dialog')[0].showModal()">
+                                <i class="ph ph-arrows-clockwise"></i>
+                            </button>
+                            {{ dialog.DisactiveDialog(
+                                id="%s-change_status-dialog" | format(refugee.id),
+                                title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
+                                body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+                                url=url_for("refugees.change_status", refugee_id=refugee.id, **request.args),
+                                refugee_name=refugee.name,
+                                bypass=current_user.roles[0] in ["refugee_camp_staff", "admin"] if current_user.is_authenticated else false
+                            )}}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -136,7 +137,7 @@
                         <th class="text-left">สถานะ</th>
                         <th class="text-left">ศูนย์พักพิง</th>
                         <th class="text-left">ข้อมูลล่าสุด</th>
-                        {% if "admin" in current_user.roles %}
+                        {% if "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles %}
                         <th class="text-right">จัดการ</th>
                         {% endif %}
                     </tr>
@@ -163,7 +164,7 @@
                             {{ refugee.registration_date.strftime("%d %B %Y") }}
                         </td>
 
-                        {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp_id) %}
+                        {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
                              <td class="px-4 py-3">
                             {{ refugee.country if refugee.country else '-' }}
                         </td>
@@ -198,7 +199,7 @@
                         </td>
 
                         <!-- ปุ่มจัดการ -->
-                        {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp_id) %}
+                        {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
                         <td class="px-4 py-3">
                             <div class="flex gap-2 justify-end">
                                 {{ render_refugee_toolbar(refugee) }}
