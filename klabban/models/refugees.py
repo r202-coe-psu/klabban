@@ -18,6 +18,10 @@ class Refugee(me.Document):
     refugee_camp = me.ReferenceField("RefugeeCamp")
     nick_name = me.StringField(max_length=255)
     name = me.StringField(required=True, max_length=255)
+
+    phone = me.StringField(max_length=32)
+    address = me.StringField(max_length=512)
+
     nationality = me.StringField(max_length=128)
     ethnicity = me.StringField(max_length=128)
     remark = me.StringField()
