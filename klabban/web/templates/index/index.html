@@ -1,5 +1,23 @@
 {% extends "/base/default_page.html" %}
 
+{% block title %}
+เว็บไซต์สำหรับหาญาติในศูนย์พักพิง
+{% endblock title %}
+
+{% block head %}
+{{ super() }}
+<meta name="description" content="เว็บไซต์สำหรับหาญาติในศูนย์พักพิง">
+<link rel="canonical" href="{{ request.url }}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="เว็บไซต์สำหรับหาญาติในศูนย์พักพิง">
+<meta property="og:description" content="เว็บไซต์สำหรับหาญาติในศูนย์พักพิง">
+<meta property="og:url" content="{{ request.url }}">
+<meta property="og:image" content="https://example.com/preview.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="เว็บไซต์สำหรับหาญาติในศูนย์พักพิง">
+<meta name="twitter:description" content="เว็บไซต์สำหรับหาญาติในศูนย์พักพิง">
+{% endblock head %}
+
 {% block content %}
 <main class="container mx-auto px-4 flex flex-col items-center mt-8 mb-16">
   <div class="text-center mb-10">
@@ -9,7 +27,8 @@
     <p class="text-xl text-gray-600">เว็บไซต์สำหรับหาญาติในศูนย์พักพิง</p>
   </div>
   <div class="w-full max-w-5xl text-center red-text-sm text-gray-500 mb-3">
-  <p class="text-error">ข้อมูลนี้สำหรับติดตามหาบุคคลสูญหายในสถานการณ์ภัยพิบัติเท่านั้น และจะลบออกเมื่อสถานการณ์คลี่คลาย</p>
+    <p class="text-error">ข้อมูลนี้สำหรับติดตามหาบุคคลสูญหายในสถานการณ์ภัยพิบัติเท่านั้น
+      และจะลบออกเมื่อสถานการณ์คลี่คลาย</p>
   </div>
   <div class="card w-full max-w-4xl bg-white shadow-lg border border-gray-100 rounded-xl mb-10">
     <div class="card-body p-8">
@@ -33,7 +52,7 @@
   </div>
   <div class="w-full max-w-5xl text-center">
     <h2 class="text-4xl font-bold mb-2 text-black">รายการศูนย์พักพิง</h2>
-    {# 
+    {#
     <a href="{{ url_for('refugees.index') }}">
       <p class="text-base text-gray-600">กดเพื่อดูรายชื่อผู้อพยพทั้งหมด</p>
       <p class="text-base text-gray-600">Click to view all migrants</p>
@@ -48,7 +67,8 @@
       {% endif %} gap-2">
       {% for refugee_camp in refugee_camps %}
 
-      <div class="rounded-xl border border-black p-4 text-start flex flex-col h-full"> {# ใส่ลิงก์ ไปหน้าของศูนย์พักพิง #}
+      <div class="rounded-xl border border-black p-4 text-start flex flex-col h-full"> {# ใส่ลิงก์ ไปหน้าของศูนย์พักพิง
+        #}
         <div>
           <h1 class="text-3xl font-bold">
             {{ refugee_camp.name }}
