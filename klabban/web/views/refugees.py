@@ -9,6 +9,7 @@ from flask_mongoengine import Pagination
 
 module = Blueprint("refugees", __name__, url_prefix="/refugees")
 
+
 @module.route("/")
 def index():
     view_mode = request.args.get("view_mode", "list")
@@ -32,8 +33,8 @@ def index():
     if search:
         query = models.Refugee.objects(status__ne="deactive").order_by("name")
         query = query.filter(Q(name__icontains=search) | Q(nick_name__icontains=search))
-        if refugee_camp_id:
-            query = query.filter(refugee_camp=refugee_camp_id)
+    if refugee_camp_id:
+        query = query.filter(refugee_camp=refugee_camp_id)
     try:
         refugees_pagination = Pagination(query, page=page, per_page=per_page)
     except ValueError:
@@ -70,9 +71,7 @@ def create_or_edit(refugee_id):
             refugee_camp = models.RefugeeCamp.objects.get(
                 id=request.args.get("refugee_camp_id")
             )
-            form.refugee_camp.choices = [
-                (str(refugee_camp.id), refugee_camp.name)
-            ]
+            form.refugee_camp.choices = [(str(refugee_camp.id), refugee_camp.name)]
             form.refugee_camp.data = str(refugee_camp.id)
         form.refugee_camp.choices = []
 
