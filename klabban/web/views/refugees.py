@@ -6,6 +6,7 @@ from klabban.web import forms
 from mongoengine.queryset.visitor import Q
 from uuid import uuid4
 from flask_mongoengine import Pagination
+from datetime import datetime
 
 module = Blueprint("refugees", __name__, url_prefix="/refugees")
 
@@ -99,6 +100,10 @@ def create_or_edit(refugee_id):
             form=form,
             refugee_id=refugee_id,
         )
+
+    # ถ้าไม่ระบุวันที่กลับบ้าน แต่สถานะเปลี่ยนเป็นกลับบ้าน ให้ตั้งค่าวันที่กลับบ้านเป็นวันที่ปัจจุบัน
+    if form.status.data == "back_home" and not form.back_home_date.data:
+        form.back_home_date.data = datetime.now()
 
     form.populate_obj(refugee)
     refugee.refugee_camp = models.RefugeeCamp.objects.get(id=form.refugee_camp.data)
