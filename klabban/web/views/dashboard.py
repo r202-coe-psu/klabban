@@ -61,7 +61,7 @@ def get_refugee_country_stats(refugee_queryset):
     for country in countries:
         count = refugee_queryset.filter(country=country).sum("people_count")
         country_stats.append({"label": country if country else "ไม่ระบุ", "count": count})
-    return country_stats
+    return sorted(country_stats, key=lambda x: x["count"], reverse=True)
 
 
 @module.route("/admin")
