@@ -62,46 +62,40 @@
       grid-cols-1
       {% endif %} gap-2">
       {% for refugee_camp in refugee_camps %}
+      <div class="card w-full bg-white shadow-lg border border-gray-100 rounded-xl flex flex-col h-full">
+        <div class="card-body p-4 text-start flex flex-col h-full">
+            <div>
+                <h2 class="card-title text-xl mb-2">{{ refugee_camp.name }}</h2>
+                {% if refugee_camp.line_id %}
+                <p class="text-l text-gray-600">LINE ID : {{ refugee_camp.line_id }}</p>
+                {% endif %}
+                <p class="text-l text-gray-600">ช่องทางติดต่อ : {{ refugee_camp.contact_info | safe }}</p>
+            </div>
 
-      <div class="rounded-xl border border-black p-4 text-start flex flex-col h-full"> {# ใส่ลิงก์ ไปหน้าของศูนย์พักพิง
-        #}
-        <div>
-          <h1 class="text-2xl font-bold">
-            {{ refugee_camp.name }}
-          </h1>
-          {% if refugee_camp.line_id %}
-          <p>
-            LINE ID : {{ refugee_camp.line_id }}
-          </p>
-          {% endif %}
-          <p>
-            ช่องทางติดต่อ : {{ refugee_camp.contact_info | safe }}
-          </p>
-        </div>
-
-        <div class="flex flex-col gap-2 mt-auto pt-4">
-          <div class="flex flex-col gap-2 w-full">
-            {% if refugee_camp.other_link %}
-            <a href="{{ refugee_camp.other_link }}" target="_blank" class="btn btn-neutral grow">
-              ดูเพิ่มเติม / More Info
-              <span class="material-symbols-outlined">
-                open_in_new
-              </span>
-            </a>
-            {% endif %}
-            {% if refugee_camp.location_url %}
-            <a href="{{ refugee_camp.location_url }}" target="_blank" class="btn grow">
-              <span class="material-symbols-outlined">location_on</span>
-              ดูตำแหน่ง / View Location
-            </a>
-            {% endif %}
-          </div>
-          <div class="flex flex-row gap-2 w-full">
-            <a href="{{ url_for('refugees.index', refugee_camp=refugee_camp.id) }}" class="btn btn-primary w-full">
-              <i class="ph ph-person text-lg"></i>
-              รายการผู้อพยพ / Migrants List
-            </a>
-          </div>
+            <div class="flex flex-col gap-2 mt-auto pt-4">
+                <div class="flex flex-col gap-2 w-full">
+                    {% if refugee_camp.other_link %}
+                    <a href="{{ refugee_camp.other_link }}" target="_blank" class="btn btn-neutral grow">
+                        ดูเพิ่มเติม / More Info
+                        <span class="material-symbols-outlined">
+                            open_in_new
+                        </span>
+                    </a>
+                    {% endif %}
+                    {% if refugee_camp.location_url %}
+                    <a href="{{ refugee_camp.location_url }}" target="_blank" class="btn grow">
+                        <span class="material-symbols-outlined">location_on</span>
+                        ดูตำแหน่ง / View Location
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="flex flex-row gap-2 w-full">
+                    <a href="{{ url_for('refugees.index', refugee_camp=refugee_camp.id) }}" class="btn btn-primary w-full">
+                        <i class="ph ph-person text-lg"></i>
+                        รายการผู้อพยพ / Migrants List
+                    </a>
+                </div>
+            </div>
         </div>
       </div>
       {% endfor %}
