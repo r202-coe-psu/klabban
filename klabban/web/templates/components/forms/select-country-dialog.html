@@ -22,7 +22,7 @@
 </div>
 
 {# หน้าต่างเลือกประเทศ #}
-<dialog id="{{ dialog_id }}" class="modal modal-bottom sm:modal-middle">
+<dialog id="{{ dialog_id }}" class="modal max-sm:max-w-screen modal-bottom sm:modal-middle">
     <div class="modal-box">
         {% if close_at_corner %}
             <button
@@ -34,7 +34,7 @@
         {% endif %}
         
         <h3 class="font-bold text-lg">เลือกประเทศ / Select Country</h3>
-        <p class="text-sm">คุณสามารถเลือกประเทศจากรายการด้านล่าง หรือกรอกชื่อประเทศใหม่ได้</p>
+        <p class="text-sm">คุณสามารถเลือกประเทศจากรายการด้านล่าง หรือกรอกชื่อประเทศใหม่ได้ / You can select a country from the list below or enter a new country name</p>
 
         <div id="country-options" class="py-4 gap-1 flex flex-col max-h-[50vh] overflow-y-auto" style="overflow-wrap: break-word;">
             กำลังโหลดข้อมูลประเทศ...
