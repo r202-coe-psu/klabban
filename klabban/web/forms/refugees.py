@@ -16,8 +16,16 @@ BaseRefugeeForm = model_form(
         "status": {"label": "สถานะ / Status"},
         "address": {"label": "ที่อยู่ / Address"},
         "phone": {"label": "เบอร์โทรศัพท์ / Phone"},
+        "age": {"label": "อายุ / Age"},
+        "gender": {"label": "เพศ / Gender"},
     },
-    exclude=["refugee_camp"],
+    exclude=[
+        "refugee_camp",
+        "created_by",
+        "updated_by",
+        "created_date",
+        "updated_date",
+    ],
 )
 
 
