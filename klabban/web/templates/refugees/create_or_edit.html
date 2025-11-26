@@ -13,8 +13,8 @@
   {{ dialog.Dialog(
     init_show=True,
     id="%s-disactive-dialog" | format(duplicated_refugee.id),
-    title="ยืนยันการลบรายการศูนย์พักพิง",
-    body="มีผู้อพยพชื่อ <b>%s</b> อยู่แล้วในระบบ คุณต้องการที่จะบันทึกข้อมูลนี้ใช่หรือไม่?" | format(form.name.data),
+    title="มีผู้อพยพซ้ำ / Duplicate Migrant",
+    body="มีผู้อพยพชื่อ <b>%s</b> อยู่แล้วในระบบ คุณต้องการที่จะบันทึกข้อมูลนี้เข้าไปในระบบใช่หรือไม่?" | format(form.name.data),
     action_button_text="ยืนยันการบันทึก / Confirm Save",
     action_button_onclick="{ 
       document.getElementById('is-confirm-duplicate').value = 'yes';
