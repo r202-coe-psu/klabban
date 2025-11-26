@@ -1,4 +1,5 @@
 {% extends "/base/default_page.html" %}
+{% import "/components/dialogs.html" as dialog %}
 {% import "base/html_renderer.html" as renderer %}
 
 {% if 'edit' in request.path %}
@@ -8,6 +9,19 @@
 {% endif %}
 
 {% block content %}
+{% if duplicated_refugee %}
+  {{ dialog.Dialog(
+    init_show=True,
+    id="%s-disactive-dialog" | format(duplicated_refugee.id),
+    title="ยืนยันการลบรายการศูนย์พักพิง",
+    body="มีผู้อพยพชื่อ <b>%s</b> อยู่แล้วในระบบ คุณต้องการที่จะบันทึกข้อมูลนี้ใช่หรือไม่?" | format(form.name.data),
+    action_button_text="ยืนยันการบันทึก / Confirm Save",
+    action_button_onclick="{ 
+      document.getElementById('is-confirm-duplicate').value = 'yes';
+      document.getElementById('submit-refugee-button').click();
+    }"
+  )}}
+{% endif %}
 <form class="bg-white rounded-lg p-4" method="POST"
   action="{{ url_for('refugees.create_or_edit', refugee_id=refugee_id) }}">
   {{ form.csrf_token }}
@@ -34,11 +48,14 @@
     {{ renderer.base_render(form.back_home_date) }}
   </div>
   {{ renderer.base_render(form.status) }}
+  {% if duplicated_refugee %}
+    <input type="hidden" id="is-confirm-duplicate" name="is_confirm" value="no" />
+  {% endif %}
   <div class="modal-action justify-end">
     <a class="btn" href="{{ url_for('refugees.index') }}">
       ยกเลิก / Cancel
     </a>
-    <button class="btn btn-primary">
+    <button class="btn btn-primary" type="submit" id="submit-refugee-button">
       ยืนยัน / Save
     </button>
   </div>

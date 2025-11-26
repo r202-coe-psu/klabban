@@ -159,7 +159,7 @@ action_button_onclick: ฟังก์ชัน javascript สำหรับป
 </script>
 {% endmacro %}
 
-{% macro DisactiveDialog(id, title, body, url, refugee_name, bypass=false) %}
+{% macro DisactiveDialog(id, title, body, url, refugee_name, bypass=false, init_show=false) %}
 {{
 Dialog(
 id=id,
@@ -173,7 +173,8 @@ action_button_type="submit",
 action_button_color="primary",
 action_button_href=url,
 refugee_name=refugee_name,
-bypass=bypass
+bypass=bypass,
+init_show=init_show
 )
 }}
 {% endmacro %}

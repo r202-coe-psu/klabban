@@ -34,7 +34,11 @@ def index():
         query = models.Refugee.objects(id=None)
     if search:
         query = models.Refugee.objects(status__ne="deactive").order_by("name")
-        query = query.filter(Q(name__icontains=search) | Q(nick_name__icontains=search))
+        query = query.filter(
+            Q(name__icontains=search)
+            | Q(nick_name__icontains=search)
+            | Q(phone__icontains=search)
+        )
     if refugee_camp_id:
         query = query.filter(refugee_camp=refugee_camp_id)
     if country:
@@ -59,28 +63,38 @@ def change_status(refugee_id):
     refugee = models.Refugee.objects.get(id=refugee_id)
     # name_confirmation = request.form.get("name_confirmation")
     # refugee_name_confirm = request.form.get("refugee_name_confirm")
-        
-    if refugee.status == 'active':
-        refugee.status = 'back_home' 
+
+    if refugee.status == "active":
+        refugee.status = "back_home"
         flash(f"สถานะของ **{refugee.name}** ถูกเปลี่ยนเป็น 'กลับบ้านแล้ว' สำเร็จ.", "success")
-    
-    elif refugee.status == 'back_home':
-        refugee.status = 'active'
-        flash(f"สถานะของ **{refugee.name}** ถูกเปลี่ยนกลับเป็น 'อยู่ในศูนย์พักพิง' สำเร็จ.", "success")
-    
+
+    elif refugee.status == "back_home":
+        refugee.status = "active"
+        flash(
+            f"สถานะของ **{refugee.name}** ถูกเปลี่ยนกลับเป็น 'อยู่ในศูนย์พักพิง' สำเร็จ.", "success"
+        )
+
     else:
-        flash(f"ไม่สามารถเปลี่ยนสถานะของ **{refugee.name}** ได้ เนื่องจากสถานะปัจจุบันคือ {refugee.status}.", "error")
-        return redirect(url_for('refugees.index', **request.args))
-  
+        flash(
+            f"ไม่สามารถเปลี่ยนสถานะของ **{refugee.name}** ได้ เนื่องจากสถานะปัจจุบันคือ {refugee.status}.",
+            "error",
+        )
+        return redirect(url_for("refugees.index", **request.args))
+
     log = models.RefugeeStatusLog(
         status=refugee.status,
-        changed_by=current_user._get_current_object() if current_user.is_authenticated else None,
+        changed_by=(
+            current_user._get_current_object()
+            if current_user.is_authenticated
+            else None
+        ),
         ip_address=request.headers.get("X-Forwarded-For", request.remote_addr),
     )
     refugee.status_log.append(log)
     refugee.save()
-        
-    return redirect(url_for('refugees.index', **request.args))
+
+    return redirect(url_for("refugees.index", **request.args))
+
 
 @module.route("/create", methods=["GET", "POST"], defaults={"refugee_id": None})
 @module.route("/<refugee_id>/edit", methods=["GET", "POST"])
@@ -127,6 +141,18 @@ def create_or_edit(refugee_id):
             "refugees/create_or_edit.html",
             form=form,
             refugee_id=refugee_id,
+        )
+
+    is_confirm = request.form.get("is_confirm", "no")
+    duplicated_refugee = models.Refugee.objects(
+        name=form.name.data,
+    )
+    if duplicated_refugee and is_confirm != "yes" and not refugee_id:
+        return render_template(
+            "refugees/create_or_edit.html",
+            form=form,
+            refugee_id=refugee_id,
+            duplicated_refugee=duplicated_refugee,
         )
 
     # ถ้าไม่ระบุวันที่กลับบ้าน แต่สถานะเปลี่ยนเป็นกลับบ้าน ให้ตั้งค่าวันที่กลับบ้านเป็นวันที่ปัจจุบัน
