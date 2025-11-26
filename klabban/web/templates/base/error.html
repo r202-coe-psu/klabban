@@ -2,14 +2,12 @@
 
 {% block body %}
 <div class="flex w-full h-screen justify-center items-center">
-    <p class="text-error text-center text-3xl">
-      {{ error_msg }}<br>
-      {{ error_msg_eng }}
+    <p class="text-error text-3xl">
+      {{ error_msg }}
     </p>
 </div>
 
 <script>
-  // รีเฟรชหน้าทุก 10 วินาที
   setTimeout(function() {
     window.location.reload();
   }, 10000);
