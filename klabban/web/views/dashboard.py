@@ -10,6 +10,22 @@ from ..utils.acl import roles_required
 module = Blueprint("dashboard", __name__, url_prefix="/dashboard")
 
 
+def get_refugee_age_stats(refugee_queryset):
+    age_stats = []
+    age_ranges = [(0, 5), (6, 12), (13, 17), (18, 59), (60, 200)]
+    age_labels = ["0-5 ปี", "6-12 ปี", "13-17 ปี", "18-59 ปี", "60+ ปี"]
+    for index, age_range in enumerate(age_ranges):
+        count = refugee_queryset.filter(
+            age__gte=age_range[0], age__lte=age_range[1]
+        ).sum("people_count")
+        age_stats.append({"label": age_labels[index], "count": count})
+
+    # ไม่ทราบอายุ
+    unknown_age_count = refugee_queryset.filter(age=None).sum("people_count")
+    age_stats.append({"label": "ไม่ทราบอายุ", "count": unknown_age_count})
+    return age_stats
+
+
 @module.route("/admin")
 @login_required
 @roles_required(["admin"])
@@ -105,18 +121,7 @@ def refugee_camp_dashboard():
         registration_date__gte=seven_days_ago
     ).sum("people_count")
 
-    age_stats = []
-    age_ranges = [(0, 5), (6, 12), (13, 17), (18, 59), (60, 200)]
-    age_labels = ["0-5 ปี", "6-12 ปี", "13-17 ปี", "18-59 ปี", "60+ ปี"]
-    for index, age_range in enumerate(age_ranges):
-        count = refugees.filter(age__gte=age_range[0], age__lte=age_range[1]).sum(
-            "people_count"
-        )
-        age_stats.append({"label": age_labels[index], "count": count})
-
-    # ไม่ทราบอายุ
-    unknown_age_count = refugees.filter(age=None).sum("people_count")
-    age_stats.append({"label": "ไม่ทราบอายุ", "count": unknown_age_count})
+    age_stats = get_refugee_age_stats(refugees)
 
     return render_template(
         "dashboard/refugee_camp.html",
