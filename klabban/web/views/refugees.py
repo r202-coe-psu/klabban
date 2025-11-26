@@ -58,7 +58,7 @@ def index():
     )
 
 
-@module.route("/<refugee_id>/change_status/", methods=["POST"])
+@module.route("/<refugee_id>/change_status/", methods=["POST", "GET"])
 def change_status(refugee_id):
     refugee = models.Refugee.objects.get(id=refugee_id)
     # name_confirmation = request.form.get("name_confirmation")
