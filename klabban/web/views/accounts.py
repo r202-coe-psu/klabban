@@ -44,6 +44,10 @@ def login():
     login_user(user)
     user.last_login_date = datetime.datetime.now()
     user.save()
+
+    if not user.is_setup_password:
+        return redirect(url_for("accounts.setup_password"))
+
     next = request.args.get("next")
     if next:
         return redirect(next)
@@ -106,3 +110,17 @@ def authorized_oauth(name):
 def logout():
     logout_user()
     return redirect("/")
+
+
+@module.route("/setup-password", methods=["GET", "POST"])
+@login_required
+def setup_password():
+    form = forms.accounts.SetupPasswordForm()
+    if not form.validate_on_submit():
+        return render_template("/accounts/setup-password.html", form=form)
+
+    current_user.set_password(form.password.data)
+    current_user.is_setup_password = True
+    current_user.save()
+    flash("ตั้งค่ารหัสผ่านเรียบร้อยแล้ว", "success")
+    return redirect(url_for("index.index"))

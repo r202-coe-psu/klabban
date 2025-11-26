@@ -44,6 +44,8 @@ class User(me.Document, UserMixin):
     refugee_camp = me.ReferenceField(
         "RefugeeCamp", required=False
     )  # ศูนย์พักพิง (optional)
+    
+    is_setup_password = me.BooleanField(default=False)  # ตั้งรหัสผ่านแล้วหรือไม่
 
     created_date = me.DateTimeField(required=True, default=datetime.datetime.now)
     creator = me.ReferenceField("User", dbref=True, required=False)  # ผู้สร้าง

@@ -53,7 +53,7 @@ def create_user_google(user_info, user=None):
         user.first_name = user_info.get("given_name", "").title()
         user.last_name = user_info.get("family_name", "").title()
         user.email = user_info.get("email")
-
+    user.is_setup_password = True
     user.save()
     return user
 
@@ -82,6 +82,7 @@ def create_user_engpsu(user_info, user=None):
     else:
         user.roles.append("staff")
 
+    user.is_setup_password = True
     user.save()
     return user
 
@@ -100,6 +101,7 @@ def create_user_psu(user_info, user=None):
         user.last_name = user_info.get("last_name", "").title()
         user.email = user_info.get("email")
 
+    user.is_setup_password = True
     user.save()
 
     if user_info["username"].isdigit():
@@ -130,6 +132,7 @@ def create_user_psu(user_info, user=None):
     user.title = user_info.get("title")
     # user.other_ids.append(user_info.get("username"))
 
+    user.is_setup_password = True
     user.save()
     return user
 
@@ -156,6 +159,7 @@ def create_user_line(user_info, user=None):
         user.first_name = names[0]
         user.last_name = names[1]
 
+    user.is_setup_password = True
     user.save()
     return user
 
@@ -178,6 +182,7 @@ def create_user_facebook(user_info, user=None):
         user.first_name = user_info.get("first_name")
         user.last_name = user_info.get("last_name")
 
+    user.is_setup_password = True
     user.save()
     return user
 
