@@ -66,15 +66,16 @@ def create_or_edit(refugee_id):
         ]
         form.refugee_camp.data = str(current_user.refugee_camp.id)
     else:
-        if request.args.get("refugee_camp_id"):
-            refugee_camp = models.RefugeeCamp.objects.get(
-                id=request.args.get("refugee_camp_id")
-            )
-            form.refugee_camp.choices = [
-                (str(refugee_camp.id), refugee_camp.name)
-            ]
-            form.refugee_camp.data = str(refugee_camp.id)
         form.refugee_camp.choices = []
+
+    refugee_camp_id = request.args.get("refugee_camp_id", None)
+    if refugee_camp_id:
+        refugee_camp = models.RefugeeCamp.objects.get(id=refugee_camp_id)
+        form.refugee_camp.choices = [
+            (str(refugee_camp.id), refugee_camp.name)
+        ]
+
+        form.refugee_camp.data = str(refugee_camp.id)
 
     if refugee_id:
         refugee = models.Refugee.objects.get(id=refugee_id)

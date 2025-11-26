@@ -76,6 +76,7 @@ def map_row_to_doc(row, created_by_id=None, camp_id=None,sheet_name=None):
         "name": _clean(name, to_str=True),
         "nationality": None,
         "ethnicity": None,
+        "country": None,
         "remark": None,
         "registration_date": registration_date,
         "is_public_searchable": True,

@@ -43,6 +43,10 @@
                     </td>
 
                     <td class="flex gap-2 justify-end">
+                         <a class="btn btn-primary text-white" href="{{ url_for('refugees.create_or_edit', refugee_camp_id=refugee_camp.id, **request.args) }}">
+                            <span class="material-symbols-outlined text-sm">add</span>
+                            เพิ่มผู้อพยพ / Add Refugee
+                        </a>
                         <button
                         hx-target="#create_or_edit_refugee_camp-modal" 
                         hx-get="{{ url_for('refugee_camps.create_or_edit_refugee_camp',refugee_camp_id=refugee_camp.id, **request.args) }}"
