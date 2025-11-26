@@ -25,7 +25,7 @@
                 <th>ลำดับ</th>
                 <th>ชื่อศูนย์พักพิง</th>
                 <th>ตำแหน่ง</th>
-                <th class="text-center">จัดการ</th>
+                <th class="text-right">จัดการ</th>
                 </tr>
             </thead>
             <tbody>
@@ -41,7 +41,8 @@
                         -
                         {% endif %}
                     </td>
-                    <td class="flex gap-2 justify-center">
+
+                    <td class="flex gap-2 justify-end">
                         <button
                         hx-target="#create_or_edit_refugee_camp-modal" 
                         hx-get="{{ url_for('refugee_camps.create_or_edit_refugee_camp',refugee_camp_id=refugee_camp.id, **request.args) }}"
