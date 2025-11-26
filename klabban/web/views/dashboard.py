@@ -3,10 +3,11 @@ import datetime
 from flask import Blueprint, render_template, request
 from flask_login import current_user, login_required
 from mongoengine.queryset.queryset import QuerySet
-
+from mongoengine.queryset.visitor import Q
 from .. import models
 from .. import forms
 from ..utils.acl import roles_required
+from ..utils.template_filters import format_thai_date
 
 module = Blueprint("dashboard", __name__, url_prefix="/dashboard")
 
@@ -34,23 +35,22 @@ def get_refugee_daily_stats(refugee_queryset: QuerySet):
     if len(sorted_registration_dates) == 0:
         return []
 
-    min_date = sorted_registration_dates[0]
-    max_date = sorted_registration_dates[-1]
-    if not min_date or not max_date:
-        return []
+    min_date = sorted_registration_dates[0].registration_date.date()
+    max_date = sorted_registration_dates[-1].registration_date.date()
 
     stats = []
     oneday = datetime.timedelta(days=1)
-    current_date = min_date.registration_date.date()
-    end_date = max_date.registration_date.date()
-    while current_date <= end_date:
-        count = refugee_queryset.filter(
-            registration_date__gte=current_date,
-            registration_date__lt=current_date + oneday,
-        ).sum("people_count")
-        stats.append(
-            {"label": f"วันที่ {current_date.strftime("%d/%m/%Y")}", "count": count}
+    current_date = min_date
+
+    while current_date <= max_date:
+        current_date_min = datetime.datetime.combine(current_date, datetime.time.min)
+        current_date_max = datetime.datetime.combine(current_date, datetime.time.max)
+        qs = refugee_queryset.filter(
+            Q(registration_date__gte=current_date_min)
+            & Q(registration_date__lt=current_date_max)
         )
+        count = qs.sum("people_count") if qs else 0
+        stats.append({"label": f"วันที่ {format_thai_date(current_date)}", "count": count})
         current_date += oneday
     return stats
 
@@ -65,7 +65,7 @@ def get_refugee_country_stats(refugee_queryset):
             unknown_count = count
             continue
         country_stats.append({"label": country, "value": country, "count": count})
-    null_country_entry = refugee_queryset.filter(country=None).count()
+    null_country_entry = refugee_queryset.filter(country=None).sum("people_count")
     if null_country_entry > 0:
         unknown_count += null_country_entry
     if unknown_count > 0:

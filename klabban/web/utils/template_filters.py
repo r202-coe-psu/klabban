@@ -41,7 +41,7 @@ def format_month_th(month_num: str | int):
 
 
 def format_thai_date(dt):
-    if not isinstance(dt, datetime.datetime):
+    if not isinstance(dt, datetime.datetime) and not isinstance(dt, datetime.date):
         return ""
 
     thai_year = dt.year + 543
