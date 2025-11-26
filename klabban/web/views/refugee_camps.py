@@ -30,8 +30,8 @@ def create_or_edit_refugee_camp(refugee_camp_id):
     if refugee_camp_id:
         refugee_camp = models.RefugeeCamp.objects.get(id=refugee_camp_id)
         form = forms.refugee_camps.RefugeeCampForm(obj=refugee_camp)
-    # else:
-    #   refugee_camp.created_by = current_user._get_current_object()
+    else:
+        refugee_camp.created_by = current_user._get_current_object()
 
     if request.method == "GET":
 
@@ -51,7 +51,8 @@ def create_or_edit_refugee_camp(refugee_camp_id):
         )
 
     form.populate_obj(refugee_camp)
-    # refugee_camp.updated_by = current_user._get_current_object()
+    refugee_camp.updated_by = current_user._get_current_object()
+    refugee_camp.updated_at = datetime.datetime.now()
     refugee_camp.save()
 
     return redirect(url_for("refugee_camps.index"))
@@ -63,5 +64,7 @@ def delete_refugee_camp(refugee_camp_id):
     refugee_camp = models.RefugeeCamp.objects(id=refugee_camp_id).first()
     if refugee_camp:
         refugee_camp.status = "deactive"
+        refugee_camp.updated_by = current_user._get_current_object()
+        refugee_camp.updated_at = datetime.datetime.now()
         refugee_camp.save()
     return redirect(url_for("refugee_camps.index"))
