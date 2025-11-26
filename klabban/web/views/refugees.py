@@ -59,6 +59,10 @@ def index():
 def create_or_edit(refugee_id):
     form = forms.refugees.RefugeeForm()
     refugee = models.Refugee()
+    if refugee_id:
+        refugee = models.Refugee.objects.get(id=refugee_id)
+        form = forms.refugees.RefugeeForm(obj=refugee)
+
     if current_user.is_authenticated and "admin" in current_user.roles:
         # 1. ถ้าเป็น admin ให้แสดงตัวเลือก refugee_camp ทั้งหมด
         form.refugee_camp.choices = [
@@ -82,10 +86,6 @@ def create_or_edit(refugee_id):
             ).first()
             form.refugee_camp.choices = [(str(refugee_camp.id), refugee_camp.name)]
             form.refugee_camp.data = str(refugee_camp.id)
-
-    if refugee_id:
-        refugee = models.Refugee.objects.get(id=refugee_id)
-        form = forms.refugees.RefugeeForm(obj=refugee)
 
     # ถ้ามีค่าจาก request args ให้ตั้งค่า refugee_camp
     refugee_camp_id = request.args.get("refugee_camp_id", None)
