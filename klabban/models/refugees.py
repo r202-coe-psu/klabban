@@ -36,6 +36,7 @@ class Refugee(me.Document):
 
     remark = me.StringField()
     registration_date = me.DateTimeField(default=datetime.datetime.now)
+    back_home_date = me.DateTimeField()
     is_public_searchable = me.BooleanField(default=True)
 
     # universal field

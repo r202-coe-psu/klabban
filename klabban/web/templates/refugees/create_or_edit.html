@@ -19,9 +19,12 @@
     {{ renderer.base_render(form.age) }}
     {{ renderer.base_render(form.gender) }}
     {{ renderer.base_render(form.people_count) }}
+    <div class="col-span-2">
+      {{ renderer.render_text_area_field(form.remark) }}
+    </div>
     {{ renderer.base_render(form.registration_date) }}
+    {{ renderer.base_render(form.back_home_date) }}
   </div>
-  {{ renderer.render_text_area_field(form.remark) }}
   {{ renderer.base_render(form.status) }}
   <div class="modal-action justify-end">
     <a class="btn" href="{{ url_for('refugees.index') }}">
