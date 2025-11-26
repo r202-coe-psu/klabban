@@ -100,58 +100,81 @@
             {% endfor %}
         </div>
         {% else %}
-        <table class="table  w-full text-sm border border-gray-200 ">
-            <thead class=" text-gray-700">
-                <tr>
-                    <th>ลำดับ</th>
-                    <th>ชื่อเล่น</th>
-                    <th>ชื่อ-นามสกุล</th>
-                    <th>ลงทะเบียนเมื่อ</th>
-                    <th>สถานะ</th>
-                    <th>ศูนย์พักพิง</th>
-                    <th>ข้อมูลล่าสุด</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for refugee in refugees_pagination.items %}
-                <tr class="border-b border-x border-gray-200">
-                    <td>{{ loop.index }}</td>
-                    <td>{{ refugee.nick_name if refugee.nick_name else '-'}}</td>
-                    <td>{{ refugee.name }}</td>
-                    <td>
-                        {{ refugee.registration_date.strftime("%d %B %Y") }}
-                    </td>
-                    <td>
-                        {{ render_refugee_status(refugee.status) }}
-                    </td>
-                    <td>{{ refugee.refugee_camp.name }}</td>
-                    <td>
-                        {{ refugee.updated_date.strftime("%d %B %Y") }}
-                    </td>
-                    <td class="flex gap-2 justify-end">
-                        <a href="{{ url_for('refugees.create_or_edit', refugee_id=refugee.id) }}"
-                            class="btn btn-outline btn-sm text-gray-600 border-gray-300">
-                            <span class="material-symbols-outlined">
-                                edit_square
-                            </span>
-                        </a>
-                        <button class="btn btn-outline btn-sm border-gray-300 text-error"
-                            onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
-                            <span class="material-symbols-outlined">
-                                delete
-                            </span>
-                        </button>
-                        {{ dialog.DisactiveDialog(
-                        id="%s-disactive-dialog" | format(refugee.id),
-                        title="ยืนยันการลบรายการผู้อพยพ",
-                        body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                        url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
-                        )}}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            <table class="table w-full text-sm border border-gray-200">
+                <thead class="text-gray-700 bg-gray-50">
+                    <tr>
+                        <th class="text-center">ลำดับ</th>
+                        <th class="text-left">ชื่อเล่น</th>
+                        <th class="text-left">ชื่อ-นามสกุล</th>
+                        <th class="text-left">ลงทะเบียนเมื่อ</th>
+                        <th class="text-left">สถานะ</th>
+                        <th class="text-left">ศูนย์พักพิง</th>
+                        <th class="text-left">ข้อมูลล่าสุด</th>
+                        <th class="text-right">จัดการ</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for refugee in refugees_pagination.items %}
+                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                        
+                        <!-- ลำดับ -->
+                        <td class="text-center px-4 py-3">
+                            {{ loop.index }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            {{ refugee.nick_name if refugee.nick_name else '-' }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            {{ refugee.name }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            {{ refugee.registration_date.strftime("%d %B %Y") }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            {{ render_refugee_status(refugee.status) }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            {{ refugee.refugee_camp.name }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            {{ refugee.updated_date.strftime("%d %B %Y") }}
+                        </td>
+
+                        <!-- ปุ่มจัดการ -->
+                        <td class="px-4 py-3">
+                            <div class="flex gap-2 justify-end">
+
+                                <a href="{{ url_for('refugees.create_or_edit', refugee_id=refugee.id) }}"
+                                    class="btn btn-outline btn-sm text-gray-600 border-gray-300">
+                                    <span class="material-symbols-outlined">edit_square</span>
+                                </a>
+
+                                <button class="btn btn-outline btn-sm border-gray-300 text-error"
+                                    onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </button>
+
+                                {{ dialog.DisactiveDialog(
+                                    id="%s-disactive-dialog" | format(refugee.id),
+                                    title="ยืนยันการลบรายการผู้อพยพ",
+                                    body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+                                    url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
+                                )}}
+                            </div>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
         {% endif %}
         {{ paginations.render_pagination(
         pagination=refugees_pagination,
