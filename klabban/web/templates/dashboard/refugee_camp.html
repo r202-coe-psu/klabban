@@ -1,0 +1,172 @@
+{% import "base/html_renderer.html" as renderer %}
+
+{% extends "/base/default_page.html" %}
+
+{% set title_page = "แดชบอร์ดศูนย์พักพิง " + refugee_camp.name if refugee_camp else "" %}
+{% set description_page = "ภาพรวมผู้อพยพสำหรับศูนย์พักพิง" %}
+
+{% block content %}
+
+<div class="max-sm:p-2">
+  {% if "admin" in current_user.roles %}
+    <form method="GET" class="pb-4 flex gap-2">
+      <div>
+        {{ renderer.base_render(form.refugee_camp) }}
+        <p class="text-xs font-light">*เลือกศูนย์พักพิงเพื่อดูข้อมูลเฉพาะศูนย์นั้น (สำหรับผู้ดูแลระบบเท่านั้น)</p>
+      </div>
+      <button type="submit" class="btn btn-primary mt-8">
+        <i class="ph ph-magnifying-glass text-lg"></i> แสดงข้อมูล
+      </button>
+    </form>
+  {% endif %}
+
+
+  <div class="space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-3 gap-4">
+      <div class="card bg-white shadow border border-gray-100">
+        <div class="card-body">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-sm font-medium text-blue-600 flex items-center gap-2">
+                <i class="ph ph-users text-base"></i>
+                ผู้อพยพทั้งหมด
+              </p>
+              <p class="text-4xl font-bold mt-1 text-blue-600">{{ total_refugees }}</p>
+            </div>
+            <div class="bg-blue-100 text-blue-600 p-3 rounded-xl">
+              <i class="ph ph-users text-2xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card bg-white shadow border border-gray-100">
+        <div class="card-body">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-sm font-medium text-blue-500 flex items-center gap-2">
+                <i class="ph ph-house text-base"></i>
+                กำลังพักพิง
+              </p>
+              <p class="text-4xl font-bold mt-1 text-blue-500">{{ active_refugees }}</p>
+            </div>
+            <div class="text-green-600 p-3 rounded-xl">
+              <i class="ph ph-house text-2xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card bg-white shadow border border-gray-100">
+        <div class="card-body">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-sm font-medium text-green-600 flex items-center gap-2">
+                <i class="ph ph-check-circle text-base"></i>
+                กลับบ้านแล้ว
+              </p>
+              <p class="text-4xl font-bold mt-1  ">{{ returned_refugees }}</p>
+            </div>
+            <div class="bg-emerald-100 text-emerald-600 p-3 rounded-xl">
+              <i class="ph ph-check-circle text-2xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div class="xl:col-span-2 card bg-white shadow border border-gray-100">
+      <div class="card-body">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-xl font-semibold">ผู้อพยพตามกลุ่มช่วงอายุ</h2>
+            <p class="text-sm text-gray-500">จำนวนทั้งหมด {{ total_refugees }} คน</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-2">
+          {% for age_stat in age_stats %}
+          <div class="flex items-center justify-between border border-gray-100 rounded-xl p-4">
+            <div>
+              <p class="font-semibold text-lg">{{ age_stat.label }}</p>
+              <p class="text-sm text-gray-500">ผู้อพยพทั้งหมด</p>
+            </div>
+            <div class="text-2xl font-bold">{{ age_stat.count }} 
+              <span class="text-base font-medium">คน</span>
+              </div>
+          </div>
+          {% endfor %}
+    
+        </div>
+      </div>
+    </div>
+      <div class="card bg-white shadow border border-gray-100">
+        <div class="card-body space-y-5">
+          <div>
+            <p class="text-sm text-gray-500">ลงทะเบียนล่าสุด (7 วัน)</p>
+            <p class="text-4xl font-bold">{{ registrations_last_week }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">อัตราผู้กลับบ้าน</p>
+            <p class="text-4xl font-bold">{{ (return_rate * 100) | round(1) }}%</p>
+          </div>
+          <div class="divider"></div>
+          <div>
+            <p class="text-sm text-gray-500 mb-3">การดำเนินการด่วน</p>
+            <div class="flex flex-col gap-2">
+              <a href="{{ url_for('refugees.index', refugee_camp=refugee_camp.id) }}" class="btn btn-outline justify-start">
+                <i class="ph ph-magnifying-glass text-lg"></i>
+                ค้นหาผู้อพยพ
+              </a>
+              <a href="{{ url_for('refugee_camps.index') }}" class="btn btn-outline justify-start">
+                <i class="ph ph-buildings text-lg"></i>
+                จัดการศูนย์พักพิง
+              </a>
+              <a href="{{ url_for('refugees.create_or_edit', refugee_camp_id=refugee_camp.id) }}" class="btn btn-primary justify-start">
+                <i class="ph ph-plus text-lg"></i>
+                เพิ่มผู้อพยพ
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-white shadow border border-gray-100">
+      <div class="card-body">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-xl font-semibold">ผู้ลงทะเบียนล่าสุด</h2>
+            <p class="text-sm text-gray-500">ข้อมูลอัปเดตล่าสุด {{ now | format_thai_datetime_short_month }}</p>
+          </div>
+        </div>
+
+        {% if recent_refugees %}
+        <div class="overflow-x-auto">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ชื่อ - สกุล</th>
+                <th>ศูนย์พักพิง</th>
+                <th>วันที่ลงทะเบียน</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for refugee in recent_refugees %}
+              <tr>
+                <td class="font-medium">{{ refugee.name }}</td>
+                <td>{{ refugee.refugee_camp.name if refugee.refugee_camp else "ไม่ระบุ" }}</td>
+                <td>{{ refugee.registration_date | format_thai_datetime_short_month }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center text-gray-500 py-10">
+          ยังไม่มีการลงทะเบียนล่าสุด
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
