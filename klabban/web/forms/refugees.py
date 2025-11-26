@@ -3,6 +3,7 @@ from flask_mongoengine.wtf import model_form
 from klabban.web import models
 from wtforms import StringField, SelectField, DateTimeLocalField
 from datetime import datetime
+from wtforms.validators import DataRequired, Optional
 
 BaseRefugeeForm = model_form(
     models.Refugee,
@@ -38,6 +39,13 @@ class RefugeeForm(BaseRefugeeForm):
         default=datetime.now,
         format="%Y-%m-%dT%H:%M",
         render_kw={"placeholder": "เลือกวันที่และเวลา / Select Date and Time"},
+        validators=[DataRequired()],
+    )
+    back_home_date = DateTimeLocalField(
+        "วันที่กลับบ้าน / Back Home Date",
+        format="%Y-%m-%dT%H:%M",
+        render_kw={"placeholder": "เลือกวันที่และเวลา / Select Date and Time"},
+        validators=[Optional()],
     )
 
 
