@@ -7,7 +7,7 @@ BaseRefugeeForm = model_form(
     models.Refugee,
     FlaskForm,
     field_args={
-        "refugee_camp": {"label": "ศูนย์พักพิง / Refugee Camp", "label_attr": "name"},
+        "refugee_camp": {"label": "ศูนย์พักพิง / Migrant Camp", "label_attr": "name"},
         "nick_name": {"label": "ชื่อเล่น / Nickname"},
         "name": {"label": "ชื่อ-นามสกุล / Full Name"},
         "nationality": {"label": "สัญชาติ / Nationality", "default": "ไทย"},
@@ -27,6 +27,6 @@ class RefugeeForm(BaseRefugeeForm):
 
 class RefugeeSearchForm(FlaskForm):
     search = StringField(
-        "ค้นหา / Search", render_kw={"placeholder": "ค้นหาชื่อผู้อพยพ / Search Refugee Name"}
+        "ค้นหา / Search", render_kw={"placeholder": "ค้นหาชื่อผู้อพยพ / Search Migrant Name"}
     )
     refugee_camp = SelectField("ศูนย์พักพิง / Refugee Camp", choices=[])
