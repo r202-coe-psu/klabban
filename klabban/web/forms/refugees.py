@@ -54,4 +54,4 @@ class RefugeeSearchForm(FlaskForm):
         "ค้นหา / Search", render_kw={"placeholder": "ค้นหาชื่อผู้อพยพ / Search Migrant Name"}
     )
     country = StringField("ประเทศ / Country")
-    refugee_camp = SelectField("ศูนย์พักพิง / Refugee Camp", choices=[])
+    refugee_camp = SelectField("ศูนย์พักพิง / Migrant Camp", choices=[])
