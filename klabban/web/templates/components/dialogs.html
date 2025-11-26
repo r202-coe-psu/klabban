@@ -20,7 +20,9 @@ action_button_color="primary",
 summit_button_color="primary",
 summit_button_text="",
 summit_button_type="submit",
-refugee_name="") %}
+refugee_name="",
+bypass=false
+) %}
 
 {#
 ### วิธีใช้ Dialog 101 ###
@@ -131,11 +133,11 @@ action_button_onclick: ฟังก์ชัน javascript สำหรับป
     const dialog = document.getElementById("{{ id }}");
     const input = dialog.querySelector('input[id="{{ id }}-refugee-name-input"]');
     const actionButton = dialog.querySelector('.modal-action .btn-outline');
-
+    let bypass = {{ 'true' if bypass else 'false' }};
     if (!input || !actionButton) return;
     input.value = "";
     input.addEventListener('input', function() {
-      if (input.value === "{{ refugee_name }}") {
+      if (bypass || input.value === "{{ refugee_name }}" ) {
         actionButton.removeAttribute('disabled');
         actionButton.classList.remove('btn-disabled');
         actionButton.classList.add('btn-{{ action_button_color }}');
@@ -147,15 +149,17 @@ action_button_onclick: ฟังก์ชัน javascript สำหรับป
     });
 
     // Disable the action button initially
-    actionButton.setAttribute('disabled', 'disabled');
-    actionButton.classList.remove('btn-{{ action_button_color }}');
-    actionButton.classList.add('btn-disabled');
+    if (!bypass) {
+      actionButton.setAttribute('disabled', 'disabled');
+      actionButton.classList.remove('btn-{{ action_button_color }}');
+      actionButton.classList.add('btn-disabled');
+    }
   })();
   {% endif %}
 </script>
 {% endmacro %}
 
-{% macro DisactiveDialog(id, title, body, url, refugee_name) %}
+{% macro DisactiveDialog(id, title, body, url, refugee_name, bypass=false) %}
 {{
 Dialog(
 id=id,
@@ -169,8 +173,7 @@ action_button_type="submit",
 action_button_color="primary",
 action_button_href=url,
 refugee_name=refugee_name,
+bypass=bypass
 )
 }}
-
-
 {% endmacro %}

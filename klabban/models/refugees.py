@@ -12,7 +12,7 @@ GENDER = [("male", "ชาย"), ("female", "หญิง"), ("other", "ไม�
 
 class RefugeeStatusLog(me.EmbeddedDocument):
     status = me.StringField(choices=REFUGEE_STATUS_CHOICES, required=True)
-    changed_by = me.ReferenceField("User", required=True)
+    changed_by = me.ReferenceField("User")
     changed_date = me.DateTimeField(default=datetime.datetime.now)
     ip_address = me.StringField()  # To accommodate IPv6 addresses
 

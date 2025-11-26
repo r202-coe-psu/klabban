@@ -27,6 +27,7 @@ BaseRefugeeForm = model_form(
         "emergency_contact": {"label": "กรณีติดต่อฉุกเฉิน / Emergency Contact"},
     },
     exclude=[
+        "status_log",
         "refugee_camp",
         "created_by",
         "updated_by",
