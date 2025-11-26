@@ -117,6 +117,18 @@ def create_or_edit(refugee_id):
     return redirect(url_for("refugees.index"))
 
 
+@module.route("/<refugee_id>", methods=["GET"])
+@roles_required(["admin", "refugee_camp_staff"])
+def view_refugee(refugee_id):
+    refugee = models.Refugee.objects(id=refugee_id).first()
+    if (
+        "admin" not in current_user.roles
+        and refugee.refugee_camp.id != current_user.refugee_camp.id
+    ):
+        return abort(403)
+    return render_template("refugees/view.html", refugee=refugee)
+
+
 @module.route("/delete/<refugee_id>", methods=["POST"])
 @roles_required(["admin", "refugee_camp_staff"])
 def delete_refugee(refugee_id):
