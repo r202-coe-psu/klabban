@@ -85,3 +85,13 @@ def delete_user(user_id):
     if user:
         user.delete()
     return redirect(url_for("users.index"))
+
+
+@module.route("/<user_id>/reset_password", methods=["POST"])
+@roles_required(["admin"])
+def reset_password_user(user_id):
+    user = models.User.objects(id=user_id).first()
+    if user:
+        user.set_password(user.username)
+        user.save()
+    return redirect(url_for("users.index"))
