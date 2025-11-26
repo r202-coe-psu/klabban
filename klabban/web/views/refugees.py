@@ -7,9 +7,7 @@ from mongoengine.queryset.visitor import Q
 from uuid import uuid4
 from flask_mongoengine import Pagination
 
-
 module = Blueprint("refugees", __name__, url_prefix="/refugees")
-
 
 @module.route("/")
 def index():
@@ -51,31 +49,36 @@ def index():
 
 @module.route("/create", methods=["GET", "POST"], defaults={"refugee_id": None})
 @module.route("/<refugee_id>/edit", methods=["GET", "POST"])
-@roles_required(["admin", "refugee_camp_staff"])
+# @roles_required(["admin", "refugee_camp_staff"])
 def create_or_edit(refugee_id):
     form = forms.refugees.RefugeeForm()
     refugee = models.Refugee()
-
-    if "admin" in current_user.roles:
+    if current_user.is_authenticated and "admin" in current_user.roles:
         form.refugee_camp.choices = [
             (str(camp.id), camp.name)
             for camp in models.RefugeeCamp.objects(status__ne="deactive").order_by(
                 "name"
             )
         ]
-    elif "refugee_camp_staff" in current_user.roles:
+    elif current_user.is_authenticated and "refugee_camp_staff" in current_user.roles:
         form.refugee_camp.choices = [
             (str(current_user.refugee_camp.id), current_user.refugee_camp.name)
         ]
         form.refugee_camp.data = str(current_user.refugee_camp.id)
     else:
+        if request.args.get("refugee_camp_id"):
+            refugee_camp = models.RefugeeCamp.objects.get(
+                id=request.args.get("refugee_camp_id")
+            )
+            form.refugee_camp.choices = [
+                (str(refugee_camp.id), refugee_camp.name)
+            ]
+            form.refugee_camp.data = str(refugee_camp.id)
         form.refugee_camp.choices = []
 
     if refugee_id:
         refugee = models.Refugee.objects.get(id=refugee_id)
         form = forms.refugees.RefugeeForm(obj=refugee)
-    # else:
-    #   refugee.created_by = current_user._get_current_object()
 
     if request.method == "GET":
         return render_template(
@@ -93,7 +96,11 @@ def create_or_edit(refugee_id):
         )
 
     form.populate_obj(refugee)
-    # refugee.updated_by = current_user._get_current_object()
+    if current_user.is_authenticated:
+        if not refugee_id:
+            refugee.created_by = current_user._get_current_object()
+        refugee.updated_by = current_user._get_current_object()
+
     refugee.save()
 
     return redirect(url_for("refugees.index"))
