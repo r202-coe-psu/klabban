@@ -21,6 +21,9 @@ BaseRefugeeForm = model_form(
         "age": {"label": "อายุ / Age"},
         "gender": {"label": "เพศ / Gender"},
         "people_count": {"label": "จำนวนคน / People Count"},
+        "pets": {"label": "สัตว์เลี้ยง / Pets"},
+        "expected_days": {"label": "จำนวนวันที่คาดว่าจะพัก / Expected Days"},
+        "emergency_contact": {"label": "กรณีติดต่อฉุกเฉิน / Emergency Contact"},
     },
     exclude=[
         "refugee_camp",
