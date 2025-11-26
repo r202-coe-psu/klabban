@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from mongoengine.queryset.visitor import Q
 import datetime
 import uuid
-
+from flask_mongoengine import Pagination 
 from klabban.web import forms
 from klabban import models
 from klabban.web.utils.acl import roles_required
@@ -12,12 +12,14 @@ module = Blueprint("users", __name__, url_prefix="/users")
 
 
 @module.route("", methods=["GET"])
-@roles_required(["admin"])
+@roles_required(["admin", "refugee_camp_staff"])
 def index():
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "", type=str).strip()
 
     users = models.User.objects()
+    if "refugee_camp_staff" in current_user.roles:
+        users = users.filter(refugee_camp=current_user.refugee_camp)
     if search:
         users = users.filter(
             (Q(username__icontains=search))
@@ -26,39 +28,43 @@ def index():
             | (Q(display_name__icontains=search))
             | (Q(email__icontains=search))
         )
-    total = users.count()
+    try:
+        pagination = Pagination(users, page, per_page=20)
+    except Exception as e:
+        pagination = Pagination(users, 1, per_page=20)
 
-    class Pagination:
-        def __init__(self, items, page, per_page, total):
-            self.items = items
-            self.page = page
-            self.per_page = per_page
-            self.total = total
-            self.pages = max(1, (total + per_page - 1) // per_page)
-            self.has_prev = page > 1
-            self.has_next = page < self.pages
-            self.prev_num = page - 1 if self.has_prev else None
-            self.next_num = page + 1 if self.has_next else None
-
-    pagination = Pagination(users, page, 20, total)
 
     form = forms.users.SearchCreateUserForm()
     form.search.data = search
 
-    return render_template("/users/index.html", users_pagination=pagination, form=form)
+    return render_template("/users/index.html", users_pagination=pagination, form=form, total=users.count())
 
 
 @module.route("/create", methods=["GET", "POST"], defaults={"user_id": None})
 @module.route("/<user_id>/edit", methods=["GET", "POST"])
-@roles_required(["admin"])
+@roles_required(["admin", "refugee_camp_staff"])
 def create_or_edit_user(user_id):
     form = forms.users.CreateUserForm()
+
     user = models.User()
 
     if user_id:
         user = models.User.objects.get(id=user_id)
         form = forms.users.EditUserForm(obj=user)
-
+    if "refugee_camp_staff" in current_user.roles:
+        form.refugee_camp.choices = [
+            (str(current_user.refugee_camp.id), current_user.refugee_camp.name)
+        ]
+        print("Refugee camp staff, limited choices:", form.refugee_camp.choices)
+    else:
+        refugee_camps = models.RefugeeCamp.objects().order_by("name")
+        form.refugee_camp.choices = [
+            (str(camp.id), camp.name) for camp in refugee_camps
+        ]
+        print("All refugee camps:", form.refugee_camp.choices)
+    form.role.choices = [
+        ("refugee_camp_staff", "เจ้าหน้าที่ศูนย์พักพิง"),
+    ]
     if not form.validate_on_submit():
         print("Form errors:", form.errors)
         form.role.data = user.roles[0] if user.roles else "user"
@@ -81,6 +87,7 @@ def create_or_edit_user(user_id):
     form.populate_obj(user)
     if not user_id and form.password.data:
         user.set_password(form.password.data)
+    user.refugee_camp = models.RefugeeCamp.objects.get(id=form.refugee_camp.data)
     user.roles = [form.role.data]
     user.save()
 
@@ -88,7 +95,7 @@ def create_or_edit_user(user_id):
 
 
 @module.route("/<user_id>/delete", methods=["POST"])
-@roles_required(["admin"])
+@roles_required(["admin", "refugee_camp_staff"])
 def delete_user(user_id):
     user = models.User.objects(id=user_id).first()
     if user:
@@ -100,7 +107,7 @@ def delete_user(user_id):
 
 
 @module.route("/<user_id>/reset_password", methods=["POST"])
-@roles_required(["admin"])
+@roles_required(["admin", "refugee_camp_staff"])
 def reset_password_user(user_id):
     user = models.User.objects(id=user_id).first()
     if user:

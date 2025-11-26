@@ -24,7 +24,7 @@
     <h4 class="max-w-sm min-w-32">
       รายการผู้ใช้งาน
     </h4>
-    {% if "admin" in current_user.roles %}
+    {% if "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles %}
     <form action="{{ url_for('users.index') }}" method="get"
       class="flex md:flex-row flex-col gap-2 w-full items-end justify-end flex-wrap">
       <div class="flex md:flex-row flex-col gap-2 flex-wrap justify-end max-md:w-full">
@@ -138,26 +138,26 @@
                 body="คุณต้องการที่จะรีเซ็ตรหัสผ่านผู้ใช้งานชื่อ <b>%s</b> ใช่หรือไม่? (บัญชีนี้จะถูกรีเซ็ตรหัสผ่านให้เป็น <b>%s</b>)" | format(user.get_fullname(), user.username),
                 url=url_for("users.reset_password_user", user_id=user.id, **request.args)
               )}}
-            </div>
-              {{ dialog.DisactiveDialog(
+              </div>
+            {{ dialog.DisactiveDialog(
                 id="%s-delete-dialog" | format(user.id),
                 title="ยืนยันการลบผู้ใช้งาน",
                 body="คุณต้องการที่จะลบผู้ใช้งานชื่อ <b>%s</b> ใช่หรือไม่?" | format(user.get_fullname()),
                 url=url_for("users.delete_user", user_id=user.id, **request.args)
               )}}
-            </div>
-          </td>
-        </tr>
+              </div>
+            </td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
 
     {{ paginations.render_pagination(
-      pagination=users_pagination,
-      endpoint='users.index',
-      key_page='page',
-      kwargs=request.args.to_dict()
-    ) }}
+        pagination=users_pagination,
+        endpoint='users.index',
+        key_page='page',
+        kwargs=request.args.to_dict()
+      ) }}
   </div>
 </div>
 

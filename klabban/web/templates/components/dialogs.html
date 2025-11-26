@@ -75,11 +75,10 @@ action_button_onclick: ฟังก์ชัน javascript สำหรับป
     <p class="mb-2 text-gray-700">โปรดพิมพ์ชื่อผู้อพยพเพื่อยืนยัน: <strong>{{ refugee_name }}</strong></p>
     {# en #}
     <p class="mb-2 text-gray-700">Please type the refugee's name to confirm: <strong>{{ refugee_name }}</strong></p>
-      <input class="border p-2 w-full" type="text" id="{{ id }}-refugee-name-input" value="" placeholder='{{ refugee_name }}'  />
+      <input class="border p-2 w-full" type="text" id="{{ id }}-refugee-name-input" value="" placeholder='{{ refugee_name }}' autocomplete="off" />
     {% endif %}
 
     <div class="modal-action">
-      <!-- Cancel Button -->
       {% if not disable_cancel_button %}
       {% if cancel_button_href or cancel_button_onclick %}
       <a class="btn btn-{{ cancel_button_color }} outline-none" {% if cancel_button_href %}
@@ -96,7 +95,6 @@ action_button_onclick: ฟังก์ชัน javascript สำหรับป
       {% endif %}
 
 
-      <!-- Action Button -->
       {% if action_button_text %}
       <form method="{{ method }}" action="{{ action_button_href }}">
         {% set action_tag = "button" if action_button_type == "submit" else "a" %}
@@ -122,44 +120,76 @@ action_button_onclick: ฟังก์ชัน javascript สำหรับป
   <form method="dialog" class="modal-backdrop"><button>กดเพื่อปิด</button></form>
   {% endif %}
 </dialog>
+
 <script>
   {% if init_show %}
   document.getElementById("{{ id }}").showModal();
-
   {% endif %}
 
   {% if refugee_name %}
   (function() {
     const dialog = document.getElementById("{{ id }}");
     const input = dialog.querySelector('input[id="{{ id }}-refugee-name-input"]');
-    const actionButton = dialog.querySelector('.modal-action .btn-outline');
-    let bypass = {{ 'true' if bypass else 'false' }};
+    const actionForm = dialog.querySelector('form[action="{{ action_button_href }}"]');
+    const actionButton = actionForm ? actionForm.querySelector('.btn-outline') : dialog.querySelector('.modal-action .btn-outline');
+    
+    // --- จุดที่แก้ไข: เพิ่มเงื่อนไขตรวจสอบ Role ของ current_user ---
+    // รวมเงื่อนไข: bypass เดิม OR เป็น admin OR เป็น refugee_camp_staff
+    let bypass = {{ bypass }}
+    // --------------------------------------------------------
+
+    const targetName = "{{ refugee_name }}";
+
     if (!input || !actionButton) return;
+    
     input.value = "";
-    input.addEventListener('input', function() {
-      if (bypass || input.value === "{{ refugee_name }}" ) {
+
+    function validateInput() {
+      // ถ้าเป็น bypass ให้ผ่านตลอด (ตรวจสอบแค่ trim หรือไม่ก็ได้ แล้วแต่ความต้องการ แต่ในที่นี้คือไม่ต้องตรงเป๊ะ)
+      // หรือถ้าอยากให้ bypass คือไม่ต้องพิมพ์เลย ให้แก้เงื่อนไขเป็น if (bypass || input.value.trim() === targetName)
+      if (bypass || input.value.trim() === targetName) {
         actionButton.removeAttribute('disabled');
         actionButton.classList.remove('btn-disabled');
         actionButton.classList.add('btn-{{ action_button_color }}');
+        return true;
       } else {
         actionButton.setAttribute('disabled', 'disabled');
         actionButton.classList.remove('btn-{{ action_button_color }}');
         actionButton.classList.add('btn-disabled');
+        return false;
+      }
+    }
+
+    input.addEventListener('input', validateInput);
+
+    actionButton.addEventListener('click', function(e) {
+      if (!validateInput()) {
+        e.preventDefault();
+        e.stopPropagation();
+        alert("ชื่อไม่ถูกต้อง! กรุณากรอกชื่อให้ตรงกับ '" + targetName + "' เพื่อยืนยัน\n\nIncorrect name! Please type '" + targetName + "' to confirm.");
+        return false;
       }
     });
 
-    // Disable the action button initially
-    if (!bypass) {
-      actionButton.setAttribute('disabled', 'disabled');
-      actionButton.classList.remove('btn-{{ action_button_color }}');
-      actionButton.classList.add('btn-disabled');
-    }
+    input.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        if (!validateInput()) {
+           e.preventDefault();
+           alert("ชื่อไม่ถูกต้อง! กรุณากรอกชื่อให้ตรงกับ '" + targetName + "' เพื่อยืนยัน");
+        }
+      }
+    });
+
+    // เริ่มต้น: เรียก validateInput
+    // ถ้าเป็น Admin/Staff (bypass=true) ปุ่มจะ Active ทันทีตั้งแต่เริ่ม
+    validateInput();
+    
   })();
   {% endif %}
 </script>
 {% endmacro %}
 
-{% macro DisactiveDialog(id, title, body, url, refugee_name, bypass=false, init_show=false) %}
+{% macro DisactiveDialog(id, title, body, url, refugee_name, action_button_type="submit", bypass=false, init_show=false) %}
 {{
 Dialog(
 id=id,
@@ -169,7 +199,7 @@ method="POST",
 close_at_corner=True,
 cancel_button_text="ยกเลิก / cancels",
 action_button_text="ยืนยัน / submit",
-action_button_type="submit",
+action_button_type=action_button_type,
 action_button_color="primary",
 action_button_href=url,
 refugee_name=refugee_name,
@@ -177,4 +207,122 @@ bypass=bypass,
 init_show=init_show
 )
 }}
+{% endmacro %}
+
+
+
+
+
+{% macro ChangeStatusDialog(
+id,
+title,
+body,
+class_="",
+init_show=False,
+click_outside_to_close=True,
+close_at_corner=False,
+method="GET",
+disable_cancel_button=False,
+cancel_button_text="ปิด",
+cancel_button_href="",
+cancel_button_onclick="",
+cancel_button_color="",
+action_button_text="",
+action_button_type="action",
+action_button_href="",
+action_button_onclick="",
+action_button_color="primary",
+summit_button_color="primary",
+summit_button_text="",
+summit_button_type="submit",
+refugee_name="",
+bypass=false,
+refugee_id=""
+) %}
+
+{# --- 1. คำนวณสิทธิ์ Bypass ในฝั่ง Server (Jinja) --- #}
+{% set is_privileged = bypass %}
+{# ถ้า bypass=True หรือ เป็น admin/staff ให้ถือว่าผ่านได้เลย #}
+{% set should_bypass = bypass or is_privileged %}
+
+<dialog id="{{ id }}" class="modal modal-bottom sm:modal-middle">
+  <div class="modal-box {{ class_ }}">
+
+    <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 outline-none"
+      onclick="document.getElementById('{{ id }}').close();">✕</button>
+
+    <h3 class="font-bold text-xl">{{ title | safe }}</h3>
+    <p class="py-4 " style="overflow-wrap: break-word;">{{ body | safe }}</p>
+
+    {% if refugee_name %}
+      {# แสดงข้อความเฉพาะเมื่อต้องกรอกชื่อ (ถ้าไม่ Bypass) หรือจะแสดงตลอดก็ได้ตามดีไซน์ #}
+      {% if not should_bypass %}
+        <p class="mb-2 text-gray-700">โปรดพิมพ์ชื่อผู้อพยพเพื่อยืนยัน: <strong>{{ refugee_name }}</strong></p>
+        <p class="mb-2 text-gray-700">Please type the refugee's name to confirm: <strong>{{ refugee_name }}</strong></p>
+      {% else %}
+         <p class="mb-2 text-green-600 text-sm">
+            <i class="fa-solid fa-shield-halved"></i> Staff Override: ไม่จำเป็นต้องพิมพ์ชื่อยืนยัน
+         </p>
+      {% endif %}
+      
+      <input class="border p-2 w-full" type="text" id="{{ id }}-refugee-name-input" value="" placeholder='{{ refugee_name }}' autocomplete="off" />
+    {% endif %}
+
+    <div class="modal-action">
+      <form method="{{ method }}" action="{{ action_button_href }}" id="{{ id }}-action-form">
+        {# ปุ่มยกเลิก (เปลี่ยน type เป็น button เพื่อกัน submit โดยไม่ตั้งใจ) #}
+        <button class="btn" type="button" onclick="document.getElementById('{{ id }}').close();">
+          ยกเลิก / Cancel
+        </button>
+        
+        {# ปุ่มยืนยัน เรียก function checkAndSubmit... #}
+        <button class="btn btn-outline btn-{{ action_button_color }}" type="button"
+          onclick="checkAndSubmit_{{ refugee_id }}()">
+          ยืนยัน / Submit
+        </button>
+      </form>
+
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>กดเพื่อปิด</button></form>
+</dialog>
+
+<script>
+  {% if init_show %}
+  document.getElementById("{{ id }}").showModal();
+  {% endif %}
+
+  // สร้าง Global Function ให้ปุ่มเรียกใช้ได้
+  // ใช้ const เพื่อป้องกันการประกาศซ้ำ แต่ต้องระวังถ้า macro ถูกใช้หลายครั้งในหน้าเดียว id ต้องไม่ซ้ำ
+  var checkAndSubmit_{{ refugee_id }} = function() {
+    
+    // ดึงค่าจาก Jinja มาเป็น JS Boolean
+    var isBypass = {{ 'true' if should_bypass else 'false' }};
+    var targetName = "{{ refugee_name }}";
+    
+    var form = document.getElementById("{{ id }}-action-form");
+    var input = document.getElementById("{{ id }}-refugee-name-input");
+    
+    // กรณีไม่มีช่อง Input (refugee_name ว่าง) ก็ให้ผ่านเลย
+    if (!input) {
+      form.submit();
+      return;
+    }
+
+    // --- Logic ตรวจสอบ ---
+    if (isBypass) {
+      // ถ้าเป็น Admin/Staff หรือมีค่า bypass=true ให้ส่งฟอร์มได้เลย
+      form.submit();
+    } else {
+      // ถ้าเป็น User ธรรมดา ต้องตรวจชื่อ
+      if (input.value.trim() === targetName) {
+        form.submit();
+      } else {
+        alert("ชื่อไม่ถูกต้อง! กรุณากรอกชื่อให้ตรงกับ '" + targetName + "' เพื่อยืนยัน\n\nIncorrect name! Please type '" + targetName + "' to confirm.");
+        // focus กลับไปที่ input
+        input.focus(); 
+      }
+    }
+  };
+</script>
 {% endmacro %}
