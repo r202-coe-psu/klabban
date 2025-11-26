@@ -28,8 +28,8 @@
         <li>
           <a class="{{ 'drawer-menu-active' if request.path == url_for('index.index') else '' }}"
             href="{{ url_for('index.index') }}">
-            <i class="ph ph-layout-grid text-lg"></i>
-            แดชบอร์ด
+            <i class="ph ph-magnifying-glass text-lg"></i>
+            หน้าแรก
           </a>
         </li>
         {% if "admin" in current_user.roles %}
