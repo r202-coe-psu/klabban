@@ -7,7 +7,6 @@ BaseRefugeeForm = model_form(
     models.Refugee,
     FlaskForm,
     field_args={
-        "refugee_camp": {"label": "ศูนย์พักพิง / Migrant Camp", "label_attr": "name"},
         "nick_name": {"label": "ชื่อเล่น / Nickname"},
         "name": {"label": "ชื่อ-นามสกุล / Full Name"},
         "nationality": {"label": "สัญชาติ / Nationality", "default": "ไทย"},
@@ -18,11 +17,12 @@ BaseRefugeeForm = model_form(
         "address": {"label": "ที่อยู่ / Address"},
         "phone": {"label": "เบอร์โทรศัพท์ / Phone"},
     },
+    exclude=["refugee_camp"],
 )
 
 
 class RefugeeForm(BaseRefugeeForm):
-    pass
+    refugee_camp = SelectField("ศูนย์พักพิง / Refugee Camp", choices=[])
 
 
 class RefugeeSearchForm(FlaskForm):
