@@ -96,16 +96,15 @@
           </td>
           <td class="py-3 px-4">
             {% if user.refugee_camp %}
-              <span class="badge bg-white border border-blue-500 text-blue-500">
-                {{ user.refugee_camp.name }}
-              </span>
+            <span class="badge bg-white border border-blue-500 text-blue-500">
+              {{ user.refugee_camp.name }}
+            </span>
             {% else %}
-              <span class="text-gray-400">-</span>
+            <span class="text-gray-400">-</span>
             {% endif %}
           </td>
           <td class="py-3 px-4">
-            <span
-              class="badge text-white w-32 {{ 'bg-green-500' if user.status == 'active' else 'bg-red-500' }}">
+            <span class="badge text-white w-32 {{ 'bg-green-500' if user.status == 'active' else 'bg-red-500' }}">
               {{ user.display_status() }}</span>
           </td>
           <td class="py-3 px-4 text-gray-400 min-w-[160px]">
@@ -127,11 +126,11 @@
                 </span>
               </button>
               {{ dialog.DisactiveDialog(
-                id="%s-delete-dialog" | format(user.id),
-                title="ยืนยันการลบผู้ใช้งาน",
-                body="คุณต้องการที่จะลบผู้ใช้งานชื่อ <b>%s</b> ใช่หรือไม่?" | format(user.get_fullname()),
-                url=url_for("users.delete_user",
-                user_id=user.id, **request.args)
+              id="%s-delete-dialog" | format(user.id),
+              title="ยืนยันการลบผู้ใช้งาน",
+              body="คุณต้องการที่จะลบผู้ใช้งานชื่อ <b>%s</b> ใช่หรือไม่?" | format(user.get_fullname()),
+              url=url_for("users.delete_user",
+              user_id=user.id, **request.args)
               )}}
             </div>
 
@@ -142,10 +141,10 @@
     </table>
 
     {{ paginations.render_pagination(
-      pagination=users_pagination,
-      endpoint='users.index',
-      key_page='page',
-      kwargs=request.args.to_dict()
+    pagination=users_pagination,
+    endpoint='users.index',
+    key_page='page',
+    kwargs=request.args.to_dict()
     ) }}
   </div>
 </div>
@@ -170,21 +169,21 @@
   <div class="px-6 grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
     <div class="space-y-4">
       {{ role_description(
-        name="ผู้ดูแลระบบ (Admin)",
-        description="จัดการศูนย์พักพิง (RefugeeCamp) ทั้งหมดในระบบ รวมถึงการตั้งค่าผู้ใช้งานและสิทธิ์การเข้าถึงระบบ",
+      name="ผู้ดูแลระบบ (Admin)",
+      description="จัดการศูนย์พักพิง (Migrant Camp) ทั้งหมดในระบบ รวมถึงการตั้งค่าผู้ใช้งานและสิทธิ์การเข้าถึงระบบ",
       ) }}
     </div>
     <div class="space-y-4">
       {{ role_description(
-        name="เจ้าหน้าที่ศูนย์พักพิง (Staff)",
-        description="เพิ่มและจัดการข้อมูลผู้อพยพ (Refugee) ภายในศูนย์พักพิงที่รับผิดชอบ",
+      name="เจ้าหน้าที่ศูนย์พักพิง (Staff)",
+      description="เพิ่มและจัดการข้อมูลผู้อพยพ (Migrant) ภายในศูนย์พักพิงที่รับผิดชอบ",
       ) }}
     </div>
     <div class="space-y-4">
       {{ role_description(
-        name="ผู้ใช้ทั่วไป (User)",
-        description="ค้นหาและดูข้อมูลทั่วไป สามารถเข้าถึงข้อมูล Sensitive เช่น รูปภาพของผู้อพยพได้",
-        watch_only=false,
+      name="ผู้ใช้ทั่วไป (User)",
+      description="ค้นหาและดูข้อมูลทั่วไป สามารถเข้าถึงข้อมูล Sensitive เช่น รูปภาพของผู้อพยพได้",
+      watch_only=false,
       ) }}
     </div>
   </div>
