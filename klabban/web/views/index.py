@@ -11,3 +11,7 @@ def index():
     refugee_camps = models.RefugeeCamp.objects(status="active").order_by("created_at")
     return render_template("index/index.html", refugee_camps=refugee_camps)
 
+
+@module.route("/robots.txt")
+def robots_txt():
+    return redirect(url_for("static", filename="robots.txt"))
