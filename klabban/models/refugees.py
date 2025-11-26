@@ -8,6 +8,12 @@ REFUGEE_STATUS_CHOICES = [
     ("deactive", "ปิดการใช้งาน"),
 ]
 
+GENDER = [
+    ("male", "ชาย"),
+    ("female", "หญิง"),
+    ("other", "ไม่ระบุ")
+]
+
 
 class Refugee(me.Document):
     meta = {
@@ -17,8 +23,8 @@ class Refugee(me.Document):
 
     refugee_camp = me.ReferenceField("RefugeeCamp")
     name = me.StringField(required=True, max_length=255)
-
     # extra fields
+    gender = me.StringField(choice=GENDER)
     phone = me.StringField(max_length=32)
     congenital_disease = me.StringField(max_length=512)
     nick_name = me.StringField(max_length=255)
@@ -35,6 +41,9 @@ class Refugee(me.Document):
     remark = me.StringField()
     registration_date = me.DateTimeField(default=datetime.datetime.now)
     is_public_searchable = me.BooleanField(default=True)
+
+    # universal field 
+    metadata = me.DictField()
 
     status = me.StringField(
         choices=REFUGEE_STATUS_CHOICES,
