@@ -24,6 +24,7 @@ def index():
     ]
     search = search_form.search.data
     refugee_camp_id = search_form.refugee_camp.data
+    country = search_form.country.data
     query = models.Refugee.objects(id=None)
     try:
         if "refugee_camp_staff" in current_user.roles or "admin" in current_user.roles:
@@ -35,6 +36,8 @@ def index():
         query = query.filter(Q(name__icontains=search) | Q(nick_name__icontains=search))
     if refugee_camp_id:
         query = query.filter(refugee_camp=refugee_camp_id)
+    if country:
+        query = query.filter(country__icontains=country)
     try:
         refugees_pagination = Pagination(query, page=page, per_page=per_page)
     except ValueError:
