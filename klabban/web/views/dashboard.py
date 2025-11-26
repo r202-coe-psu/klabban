@@ -55,6 +55,15 @@ def get_refugee_daily_stats(refugee_queryset: QuerySet):
     return stats
 
 
+def get_refugee_country_stats(refugee_queryset):
+    country_stats = []
+    countries = refugee_queryset.distinct("country")
+    for country in countries:
+        count = refugee_queryset.filter(country=country).sum("people_count")
+        country_stats.append({"label": country if country else "ไม่ระบุ", "count": count})
+    return country_stats
+
+
 @module.route("/admin")
 @login_required
 @roles_required(["admin"])
@@ -135,6 +144,7 @@ def refugee_camp_dashboard():
             refugee_camp=None,
             age_stats=[],
             daily_stats=[],
+            country_stats=[],
         )
 
     now = datetime.datetime.utcnow()
@@ -153,6 +163,7 @@ def refugee_camp_dashboard():
 
     age_stats = get_refugee_age_stats(refugees)
     daily_stats = get_refugee_daily_stats(refugees)
+    country_stats = get_refugee_country_stats(refugees)
 
     return render_template(
         "dashboard/refugee_camp.html",
@@ -167,4 +178,5 @@ def refugee_camp_dashboard():
         refugee_camp=refugee_camp,
         age_stats=age_stats,
         daily_stats=daily_stats,
+        country_stats=country_stats,
     )
