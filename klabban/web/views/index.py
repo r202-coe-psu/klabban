@@ -9,12 +9,9 @@ module = Blueprint("index", __name__)
 @module.route("/")
 def index():
     refugee_camps = models.RefugeeCamp.objects(status="active").order_by("created_at")
-    
-    # Get refugee count for each camp
-    camp_counts = {}
-    for camp in refugee_camps:
-        count = models.Refugee.objects(refugee_camp=camp.id, status="active").count()
-        camp_counts[str(camp.id)] = count
-    
-    return render_template("index/index.html", refugee_camps=refugee_camps, camp_counts=camp_counts)
+    return render_template("index/index.html", refugee_camps=refugee_camps)
 
+
+@module.route("/robots.txt")
+def robots_txt():
+    return redirect(url_for("static", filename="robots.txt"))
