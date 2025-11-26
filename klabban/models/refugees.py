@@ -24,6 +24,7 @@ class Refugee(me.Document):
     nick_name = me.StringField(max_length=255)
     nationality = me.StringField(max_length=128)
     ethnicity = me.StringField(max_length=128)
+    country = me.StringField(max_length=128)
     age = me.IntField()
     address = me.StringField(max_length=512)
     pets = me.StringField()

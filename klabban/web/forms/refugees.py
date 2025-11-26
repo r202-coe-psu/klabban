@@ -12,6 +12,7 @@ BaseRefugeeForm = model_form(
         "name": {"label": "ชื่อ-นามสกุล / Full Name"},
         "nationality": {"label": "สัญชาติ / Nationality", "default": "ไทย"},
         "ethnicity": {"label": "เชื้อชาติ / Ethnicity", "default": "ไทย"},
+        "country": {"label": "ประเทศ / Country", "default": "ไทย"},
         "remark": {"label": "หมายเหตุ / Remark"},
         "status": {"label": "สถานะ / Status"},
         "address": {"label": "ที่อยู่ / Address"},
