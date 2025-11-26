@@ -1,0 +1,48 @@
+{% import "base/html_renderer.html" as renderer %}
+
+<dialog id="{{ modal_id }}" class="modal modal-open">
+  <div class="modal-box">
+    <h3 class="text-lg">ส่งออกข้อมูลผู้อพยพ</h3>
+    <span class="text-sm text-gray-600">กรุณาเลือกศูนย์พักพิงที่ต้องการส่งออกข้อมูล</span>
+    <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 outline-none"
+      onclick="document.getElementById('{{ modal_id }}').classList.remove('modal-open')">✕</button>
+    <div class="flex flex-col mt-4">
+      {# เพิ่ม id ให้ชัดเจนสำหรับการอ้างอิง #}
+      {{ renderer.render_select_field(form.refugee_camp_export, id="refugee_camp_select") }}
+
+      {# พื้นที่สำหรับแสดง Error ข้อความแจ้งเตือน #}
+      <span id="export-error-msg" class="text-error text-sm mt-2 hidden">
+        * กรุณาเลือกศูนย์พักพิงก่อนกดยืนยัน
+      </span>
+      <span class="text-sm text-gray-500">หมายเหตุ: หลังจากกดยืนยัน ระบบจะเริ่มดำเนินการส่งออกข้อมูล
+        ซึ่งอาจใช้เวลาสักครู่ ขึ้นอยู่กับจำนวนข้อมูลผู้อพยพในศูนย์พักพิงที่เลือก</span>
+    </div>
+
+    <div class="modal-action justify-end">
+      <button type="button" class="btn"
+        onclick="document.getElementById('{{ modal_id }}').classList.remove('modal-open')">
+        ปิด
+      </button>
+
+      <button type="button" class="btn btn-primary" onclick="submitExportRefugee('{{ modal_id }}')">
+        ยืนยัน
+      </button>
+    </div>
+    <div class="divider"></div>
+    <div class="flex flex-col mt-6">
+      <h1 class="text-bold pb-4 ">ไฟล์ที่มีในระบบ</h1>
+      {% if not all_exported_files %}
+      <span class="text-sm text-gray-500 ml-2">ไม่มีไฟล์ที่สามารถส่งออกได้ในขณะนี้</span>
+      {% else %}
+      {% for exported_file in all_exported_files %}
+      <div class="flex flex-col bg-white p-4 mb-4 rounded-lg shadow-md">
+        <span class="text-sm text-gray-500 py-2">{{ exported_file.refugee_camp.name }} (อัปเดตเมื่อ
+          {{ exported_file.updated_date.strftime('%d %B %Y, %H:%M') }})</span>
+        <a href="{{ url_for('refugee_camps.download_exported_file', refugee_camp_id=exported_file.refugee_camp.id) }}"
+          class="btn" download> <i class="ph ph-download"></i> {{ exported_file.refugee_camp.name }}</a>
+      </div>
+      {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</dialog>

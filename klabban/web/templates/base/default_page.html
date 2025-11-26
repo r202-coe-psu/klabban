@@ -1,4 +1,5 @@
 {% extends "base/base.html" %}
+{% from "components/toasts.html" import render_toast %}
 
 {% block body %}
 <div class="drawer 2xl:drawer-open">
@@ -68,6 +69,10 @@
       {% include "base/footer.html" %}
     </div>
   </div>
+  {% include "base/sidebar.html" %}
+  {% for category, message in get_flashed_messages(with_categories=true) %}
+  {{ render_toast(message, category) }}
+  {% endfor %}
   {% include "base/sidebar.html" %}
 </div>
 {% endblock body %}

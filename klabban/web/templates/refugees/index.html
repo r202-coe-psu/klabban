@@ -9,107 +9,114 @@
 
 {% if not current_user.is_authenticated %}
 <div class="mb-4">
-    <a href="{{ url_for('index.index') }}">
-        <i class="ph ph-arrow-left text-lg"></i>
-        กลับไปหน้าแรก / Back to Home
-    </a>
+  <a href="{{ url_for('index.index') }}">
+    <i class="ph ph-arrow-left text-lg"></i>
+    กลับไปหน้าหลัก / Back to Home
+  </a>
 </div>
 {% endif %}
-
+<div id="export-refugee-modal-container"></div>
 <div class="bg-white rounded-3xl border border-gray-300">
-    <div class="overflow-x-auto p-6">
-        <div class="flex flex-row max-sm:flex-col w-full sm:items-end justify-between mb-2 gap-4">
-            <form method="GET">
-                <div class="text-xl font-medium text-gray-700">
-                    รายชื่อผู้อพยพ / Migrants List
-                </div>
-                <div class="grid grid-cols-5 max-md:grid-cols-2 max-sm:grid-cols-1 gap-x-4 items-center">
-                    {{ renderer.base_render(search_form.refugee_camp) }}
-                    {{ renderer.base_render(search_form.search) }}
-                    <input name="view_mode" type="hidden" value="{{ view_mode }}">
-                    {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles)%}
-                        {{ renderer.base_render(search_form.country) }}
-                        <div class="space-y-2">
-                            <p class="text-xs fieldset-legend">ไม่แสดงประเทศไทย</p>
-                            <input
-                                type="checkbox"
-                                name="exclude_thai"
-                                class="toggle toggle-primary"
-                                {% if request.args.get('exclude_thai') %}checked{% endif %}
-                            />
-                        </div>
-                    {% endif %}
-                    <button type="submit" class="btn btn-primary text-white sm:mt-8 max-sm:mt-3">
-                        <span class="ph ph-magnifying-glass text-lg"></span>
-                        ค้นหา / Search
-                    </button>
-                </div>
-            </form>
-            {% if 'admin' in current_user.roles or 'refugee_camp_staff' in current_user.roles %}
-            <a class="btn btn-primary text-white mb-1" href="{{ url_for('refugees.create_or_edit', **request.args) }}">
-                <span class="material-symbols-outlined text-sm">add</span>
-                เพิ่มผู้อพยพ / Add Migrant
-            </a>
-            {% endif %}
+  <div class="overflow-x-auto p-6">
+    <div class="flex flex-row max-sm:flex-col w-full sm:items-end justify-between mb-2 gap-4">
+      <form method="GET">
+        <div class="text-xl font-medium text-gray-700 flex justify-between items-center w-full">
+          <p>รายชื่อผู้อพยพ / Migrants List</p>
+
         </div>
-        {% if not search_form.search.data and ("refugee_camp_staff" not in current_user.roles and "admin" not in current_user.roles) %}
-            <div class="mb-4 text-sm text-gray-600 italic">
-                * รายชื่อผู้อพยพจะไม่แสดง จนกว่าจะระบุคำค้นหาในช่อง <span class="font-medium">"ค้นหา / Search"</span> ด้านบน
-            </div>
-        {% endif %}
-        {% set args = request.args.to_dict() %}
-        {% set _ = args.pop('view_mode', None) %}
-        <div class="w-full flex justify-end mb-4">
-            <div class="max-sm:w-full max-sm:grid grid-cols-2 border border-gray-300 rounded p-1 w-fit">
-                <a href="{{ url_for('refugees.index', view_mode='grid', **args) }}"
-                    class="btn {{ 'bg-black text-white' if view_mode == 'grid' else ''}}">
-                    ดูแบบการ์ด
-                    <span class="text-lg ph ph-squares-four"></span>
-                </a>
-                <a href="{{ url_for('refugees.index', view_mode='list', **args) }}"
-                    class="btn {{ 'bg-black text-white' if view_mode == 'list' else ''}}">
-                    ดูแบบตาราง
-                    <span class="text-lg ph ph-list-dashes"></span>
-                </a>
-            </div>
+        <div class="grid grid-cols-5 max-md:grid-cols-2 max-sm:grid-cols-1 gap-x-4 items-center">
+          {{ renderer.base_render(search_form.refugee_camp) }}
+          {{ renderer.base_render(search_form.search) }}
+          <input name="view_mode" type="hidden" value="{{ view_mode }}">
+          {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in
+          current_user.roles)%}
+          {{ renderer.base_render(search_form.country) }}
+          <div class="space-y-2">
+            <p class="text-xs fieldset-legend">ไม่แสดงประเทศไทย</p>
+            <input type="checkbox" name="exclude_thai" class="toggle toggle-primary" {% if
+              request.args.get('exclude_thai') %}checked{% endif %} />
+          </div>
+          {% endif %}
+          <button type="submit" class="btn btn-primary text-white sm:mt-8 max-sm:mt-3">
+            <span class="ph ph-magnifying-glass text-lg"></span>
+            ค้นหา / Search
+          </button>
         </div>
-        {% if view_mode == 'grid' %}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {% for refugee in refugees_pagination.items %}
-            <div>
-                <div class="card bg-base-100 shadow-md">
-                    <div class="card-body p-4">
-                        <h2 class="card-title flex items-start justify-between gap-2">
-                            <div>
-                                {{ loop.index + (refugees_pagination.page - 1) * refugees_pagination.per_page }}. {{ refugee.name }} {{ ("(" + refugee.nick_name + ")") if
+      </form>
+      {% if 'admin' in current_user.roles or 'refugee_camp_staff' in current_user.roles %}
+      <div class="justify-end flex flex-col gap-2 w-fit">
+        <button hx-get="{{ url_for('refugee_camps.export_refugee_modal') }}" hx-target="#export-refugee-modal-container"
+          hx-trigger="click" hx-swap="innerHTML" class="btn btn-secondary text-white">
+          <span class="ph ph-file-xls text-lg"></span>
+          ส่งออกข้อมูลผู้อพยพ / Export Migrants Data
+        </button>
+        <a class="btn btn-primary text-white mb-1" href="{{ url_for('refugees.create_or_edit', **request.args) }}">
+          <span class="material-symbols-outlined text-sm">add</span>
+          เพิ่มผู้อพยพ / Add Migrant
+        </a>
+      </div>
+      {% endif %}
+    </div>
+    {% if not search_form.search.data and ("refugee_camp_staff" not in current_user.roles and "admin" not in
+    current_user.roles) %}
+    <div class="mb-4 text-sm text-gray-600 italic">
+      * รายชื่อผู้อพยพจะไม่แสดง จนกว่าจะระบุคำค้นหาในช่อง <span class="font-medium">"ค้นหา / Search"</span> ด้านบน
+    </div>
+    {% endif %}
+    {% set args = request.args.to_dict() %}
+    {% set _ = args.pop('view_mode', None) %}
+    <div class="w-full flex justify-end mb-4">
+      <div class="max-sm:w-full max-sm:grid grid-cols-2 border border-gray-300 rounded p-1 w-fit">
+        <a href="{{ url_for('refugees.index', view_mode='grid', **args) }}"
+          class="btn {{ 'bg-black text-white' if view_mode == 'grid' else ''}}">
+          ดูแบบการ์ด
+          <span class="text-lg ph ph-squares-four"></span>
+        </a>
+        <a href="{{ url_for('refugees.index', view_mode='list', **args) }}"
+          class="btn {{ 'bg-black text-white' if view_mode == 'list' else ''}}">
+          ดูแบบตาราง
+          <span class="text-lg ph ph-list-dashes"></span>
+        </a>
+      </div>
+    </div>
+    {% if view_mode == 'grid' %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for refugee in refugees_pagination.items %}
+      <div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body p-4">
+            <h2 class="card-title flex items-start justify-between gap-2">
+              <div>
+                {{ loop.index + (refugees_pagination.page - 1) * refugees_pagination.per_page }}. {{ refugee.name }} {{ ("(" + refugee.nick_name + ")") if
                                 refugee.nick_name else "" }}
-                            </div>
-                            {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
-                            
-                            <div class="card-actions flex-nowrap items-start justify-end">
-                                {{ render_refugee_toolbar(refugee) }}
-                                {{ dialog.DisactiveDialog(
+              </div>
+              {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and
+              refugee.refugee_camp.id == current_user.refugee_camp.id) %}
+
+              <div class="card-actions flex-nowrap items-start justify-end">
+                {{ render_refugee_toolbar(refugee) }}
+                {{ dialog.DisactiveDialog(
                                     id="%s-disactive-dialog" | format(refugee.id),
                                     title="ยืนยันการลบรายการผู้อพยพ",
                                     body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
                                     url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
                                 )}}
-                            </div>
-                            {% endif %}
-                        </h2>
-                        <div>
-                            <p class="text-gray-500 font-light">ศูนย์พักพิง / Migrant Camp</p>
-                            {% set camp_args = request.args.to_dict() %}
-                            {% set _ = camp_args.pop('refugee_camp', None) %}
-                            <a class="underline text-black cursor-pointer" href="{{ url_for('refugees.index', refugee_camp=refugee.refugee_camp.id, **camp_args) }}">{{ refugee.refugee_camp.name }}</a>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            {{ render_refugee_status(refugee.status) }}
-                            <button
-                                onclick="$('#{{refugee.id}}-change_status-dialog')[0].showModal()">
-                                <i class="ph ph-arrows-clockwise"></i>
-                            </button>
-                            {{ dialog.DisactiveDialog(
+              </div>
+              {% endif %}
+            </h2>
+            <div>
+              <p class="text-gray-500 font-light">ศูนย์พักพิง / Migrant Camp</p>
+              {% set camp_args = request.args.to_dict() %}
+              {% set _ = camp_args.pop('refugee_camp', None) %}
+              <a class="underline text-black cursor-pointer"
+                href="{{ url_for('refugees.index', refugee_camp=refugee.refugee_camp.id, **camp_args) }}">{{ refugee.refugee_camp.name }}</a>
+            </div>
+            <div class="flex items-center gap-2">
+              {{ render_refugee_status(refugee.status) }}
+              <button onclick="$('#{{refugee.id}}-change_status-dialog')[0].showModal()">
+                <i class="ph ph-arrows-clockwise"></i>
+              </button>
+              {{ dialog.DisactiveDialog(
                                 id="%s-change_status-dialog" | format(refugee.id),
                                 title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
                                 body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
@@ -117,67 +124,68 @@
                                 refugee_name=refugee.name,
                                 bypass=current_user.roles[0] in ["refugee_camp_staff", "admin"] if current_user.is_authenticated else false
                             )}}
-                        </div>
-                    </div>
-                </div>
             </div>
-            {% endfor %}
+          </div>
         </div>
-        {% else %}
-            <table class="table w-full text-sm border border-gray-200">
-                <thead class="text-gray-700 bg-gray-50">
-                    <tr>
-                        <th class="text-center">ลำดับ</th>
-                        <th class="text-left">ชื่อเล่น</th>
-                        <th class="text-left">ชื่อ-นามสกุล</th>
-                        <th class="text-left">ลงทะเบียนเมื่อ</th>
-                        {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles)%}
-                            <th class="text-left">ประเทศ</th>
-                        {% endif %}
-                        <th class="text-left">สถานะ</th>
-                        <th class="text-left">ศูนย์พักพิง</th>
-                        <th class="text-left">ข้อมูลล่าสุด</th>
-                        {% if "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles %}
-                        <th class="text-right">จัดการ</th>
-                        {% endif %}
-                    </tr>
-                </thead>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <table class="table w-full text-sm border border-gray-200">
+      <thead class="text-gray-700 bg-gray-50">
+        <tr>
+          <th class="text-center">ลำดับ</th>
+          <th class="text-left">ชื่อเล่น</th>
+          <th class="text-left">ชื่อ-นามสกุล</th>
+          <th class="text-left">ลงทะเบียนเมื่อ</th>
+          {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in
+          current_user.roles)%}
+          <th class="text-left">ประเทศ</th>
+          {% endif %}
+          <th class="text-left">สถานะ</th>
+          <th class="text-left">ศูนย์พักพิง</th>
+          <th class="text-left">ข้อมูลล่าสุด</th>
+          {% if "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles %}
+          <th class="text-right">จัดการ</th>
+          {% endif %}
+        </tr>
+      </thead>
 
-                <tbody>
-                    {% for refugee in refugees_pagination.items %}
-                    <tr class="border-b border-gray-200 hover:bg-gray-50">
-                        
-                        <!-- ลำดับ -->
-                        <td class="text-center px-4 py-3">
-                            {{ loop.index + (refugees_pagination.page - 1) * refugees_pagination.per_page }}
-                        </td>
+      <tbody>
+        {% for refugee in refugees_pagination.items %}
+        <tr class="border-b border-gray-200 hover:bg-gray-50">
 
-                        <td class="px-4 py-3">
-                            {{ refugee.nick_name if refugee.nick_name else '-' }}
-                        </td>
+          <!-- ลำดับ -->
+          <td class="text-center px-4 py-3">
+            {{ loop.index + (refugees_pagination.page - 1) * refugees_pagination.per_page }}
+          </td>
 
-                        <td class="px-4 py-3">
-                            {{ refugee.name }}
-                        </td>
+          <td class="px-4 py-3">
+            {{ refugee.nick_name if refugee.nick_name else '-' }}
+          </td>
 
-                        <td class="px-4 py-3">
-                            {{ refugee.registration_date.strftime("%d %B %Y") }}
-                        </td>
+          <td class="px-4 py-3">
+            {{ refugee.name }}
+          </td>
 
-                        {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
-                             <td class="px-4 py-3">
-                            {{ refugee.country if refugee.country else '-' }}
-                        </td>
-                        {% endif %}
+          <td class="px-4 py-3">
+            {{ refugee.registration_date.strftime("%d %B %Y") }}
+          </td>
 
-                        <td class="px-4 py-3">
-                            <div class="flex items-center gap-2">
-                            {{ render_refugee_status(refugee.status) }}
-                                <button
-                                    onclick="$('#{{refugee.id}}-change_status-dialog')[0].showModal()">
-                                    <i class="ph ph-arrows-clockwise"></i>
-                                </button>
-                                {{ dialog.ChangeStatusDialog(
+          {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id
+          == current_user.refugee_camp.id) %}
+          <td class="px-4 py-3">
+            {{ refugee.country if refugee.country else '-' }}
+          </td>
+          {% endif %}
+
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2">
+              {{ render_refugee_status(refugee.status) }}
+              <button onclick="$('#{{refugee.id}}-change_status-dialog')[0].showModal()">
+                <i class="ph ph-arrows-clockwise"></i>
+              </button>
+              {{ dialog.ChangeStatusDialog(
                                     id="%s-change_status-dialog" | format(refugee.id),
                                     title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
                                     body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
@@ -186,89 +194,137 @@
                                     bypass=(current_user.roles[0] in ["refugee_camp_staff", "admin"]) if current_user.is_authenticated else false,
                                     refugee_id=refugee.id
                                 )}}
-                            </div>
-                        </td>
+            </div>
+          </td>
 
-                        <td class="px-4 py-3">
-                            {% set camp_args = request.args.to_dict() %}
-                            {% set _ = camp_args.pop('refugee_camp', None) %}
-                            <a class="underline text-black cursor-pointer" href="{{ url_for('refugees.index', refugee_camp=refugee.refugee_camp.id, **camp_args) }}">{{ refugee.refugee_camp.name }}</a>
-                        </td>
+          <td class="px-4 py-3">
+            {% set camp_args = request.args.to_dict() %}
+            {% set _ = camp_args.pop('refugee_camp', None) %}
+            <a class="underline text-black cursor-pointer"
+              href="{{ url_for('refugees.index', refugee_camp=refugee.refugee_camp.id, **camp_args) }}">{{ refugee.refugee_camp.name }}</a>
+          </td>
 
-                        <td>
-                            {% if "admin" in current_user.roles %}
-                                <div class="cursor-pointer tooltip tooltip-left bg-white text-black px-4 py-1">
-                                     <div class="tooltip-content text-start grid">
-                                        <div class="space-y-1">
-                                            <div class="flex gap-1">
-                                                <div class="font-medium">ผู้สร้าง:</div>
-                                                <div>{{ refugee.created_by.get_fullname() if refugee.created_by else "ไม่พบคนสร้าง" }}</div>
-                                            </div>
-                                            <div class="flex gap-1">
-                                                <div class="font-medium">ผู้แก้ไข:</div>
-                                                <div>{{ refugee.updated_by.get_fullname() if refugee.updated_by else "ไม่พบคนแก้ไข" }}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tooltip tooltip-left" >
-                                        {{ refugee.updated_date.strftime("%d %B %Y") }}
-                                    </div>
-                                </div>
-                            {% else %}
-                                <div class="px-4 py-1">
-                                    {{ refugee.updated_date.strftime("%d %B %Y") }}
-                                </div>
-                            {% endif %}
-                        </td>
+          <td>
+            {% if "admin" in current_user.roles %}
+            <div class="cursor-pointer tooltip tooltip-left bg-white text-black px-4 py-1">
+              <div class="tooltip-content text-start grid">
+                <div class="space-y-1">
+                  <div class="flex gap-1">
+                    <div class="font-medium">ผู้สร้าง:</div>
+                    <div>{{ refugee.created_by.get_fullname() if refugee.created_by else "ไม่พบคนสร้าง" }}</div>
+                  </div>
+                  <div class="flex gap-1">
+                    <div class="font-medium">ผู้แก้ไข:</div>
+                    <div>{{ refugee.updated_by.get_fullname() if refugee.updated_by else "ไม่พบคนแก้ไข" }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="tooltip tooltip-left">
+                {{ refugee.updated_date.strftime("%d %B %Y") }}
+              </div>
+            </div>
+            {% else %}
+            <div class="px-4 py-1">
+              {{ refugee.updated_date.strftime("%d %B %Y") }}
+            </div>
+            {% endif %}
+          </td>
 
-                        <!-- ปุ่มจัดการ -->
-                        {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
-                        <td class="px-4 py-3">
-                            <div class="flex gap-2 justify-end">
-                                {{ render_refugee_toolbar(refugee) }}
-                                {{ dialog.DisactiveDialog(
+          <!-- ปุ่มจัดการ -->
+          {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id
+          == current_user.refugee_camp.id) %}
+          <td class="px-4 py-3">
+            <div class="flex gap-2 justify-end">
+              {{ render_refugee_toolbar(refugee) }}
+              {{ dialog.DisactiveDialog(
                                     id="%s-disactive-dialog" | format(refugee.id),
                                     title="ยืนยันการลบรายการผู้อพยพ",
                                     body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
                                     url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
                                 )}}
-                            </div>
-                        </td>
-                        {% endif %}
-
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-        {% endif %}
-        {% if search_form.search.data and not refugees_pagination.items %}
-            <div class="mt-4 py-4 text-center text-gray-500 italic">
-                ไม่พบผู้อพยพที่ตรงกับคำค้นหา
             </div>
-        {% endif %}
-        {{ paginations.render_pagination(
+          </td>
+          {% endif %}
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% endif %}
+    {% if search_form.search.data and not refugees_pagination.items %}
+    <div class="mt-4 py-4 text-center text-gray-500 italic">
+      ไม่พบผู้อพยพที่ตรงกับคำค้นหา
+    </div>
+    {% endif %}
+    {{ paginations.render_pagination(
             pagination=refugees_pagination,
             endpoint='refugees.index',
             key_page='page',
             kwargs=request.args.to_dict()
         ) }}
-    </div>
+  </div>
 </div>
+
+<script>
+  // สร้าง function ไว้ข้างนอกเพื่อให้เรียกใช้ได้ง่าย
+  // ไม่ต้องรอ DOMContentLoaded เพราะ function จะทำงานเมื่อกดปุ่มเท่านั้น
+  function submitExportRefugee(modalId) {
+    // 1. อ้างอิง Element
+    // ใช้ ID ที่เรากำหนดใหม่ใน HTML (refugee_camp_select) เพื่อความชัวร์
+    // หรือถ้าใช้ WTForms เดิม อาจจะเป็น document.getElementById('refugee_camp')
+    const campSelect = document.getElementById('refugee_camp_export') || document.getElementById('refugee_camp_select');
+    const errorMsg = document.getElementById('export-error-msg');
+    const modal = document.getElementById(modalId);
+
+    // ดึงค่า
+    const campId = campSelect ? campSelect.value : null;
+
+    // 2. ดักกรณีไม่เลือก refugee_camp (Validation)
+    if (!campId || campId === "") {
+      // แสดงข้อความแจ้งเตือน
+      if (errorMsg) errorMsg.classList.remove('hidden');
+
+      // หรือใช้ alert แบบง่ายๆ
+      // alert("กรุณาเลือกศูนย์พักพิง");
+
+      // focus ไปที่ select box
+      if (campSelect) campSelect.focus();
+      return; // จบการทำงาน ไม่ส่งค่า
+    }
+
+    // ซ่อนข้อความ error ถ้าผ่านแล้ว
+    if (errorMsg) errorMsg.classList.add('hidden');
+
+    console.log("Exporting Camp ID:", campId);
+
+    // 3. สั่ง Download ไฟล์
+    // *เปลี่ยนจาก fetch เป็น window.location.href เพื่อให้ Browser เด้งหน้าต่าง Save file*
+    const exportUrl = `/refugee_camps/export/${campId}`;
+    window.location.href = exportUrl;
+
+    // 4. สั่งปิด Modal
+    if (modal) {
+      modal.classList.remove('modal-open');
+      // ถ้าต้องการลบ Modal ออกจาก DOM เลย (กรณี HTMX มักจะชอบลบ)
+      // modal.remove(); 
+    }
+  }
+</script>
 {% endblock %}
 
 {% macro render_refugee_toolbar(refugee) %}
 <a href="{{ url_for('refugees.view_refugee', refugee_id=refugee.id, **request.args) }}"
-    class="size-8 btn btn-outline btn-sm border-gray-300 text-green-600 hover:bg-green-100">
-    <span class="material-symbols-outlined">visibility</span>
+  class="size-8 btn btn-outline btn-sm border-gray-300 text-green-600 hover:bg-green-100">
+  <span class="material-symbols-outlined">visibility</span>
 </a>
 <a href="{{ url_for('refugees.create_or_edit', refugee_id=refugee.id) }}"
-    class="size-8 btn btn-outline btn-sm text-gray-600 border-gray-300">
-    <span class="material-symbols-outlined">edit_square</span>
+  class="size-8 btn btn-outline btn-sm text-gray-600 border-gray-300">
+  <span class="material-symbols-outlined">edit_square</span>
 </a>
 <button class="size-8 btn btn-outline btn-sm border-gray-300 text-error hover:bg-red-100"
-    onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
-    <span class="material-symbols-outlined">delete</span>
+  onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
+  <span class="material-symbols-outlined">delete</span>
 </button>
 {% endmacro %}
 
@@ -278,8 +334,8 @@
     {{ 'text-red-500 border-red-500' if status == 'deactive' else '' }}
     {{ 'text-green-500 border-green-500' if status == 'back_home' else '' }}
         ">
-    {{ 'อยู่ในศูนย์พักพิง / In Migrants Camp' if status == 'active' else '' }}
-    {{ 'ถูกลบออก / Deleted' if status == 'deactive' else '' }}
-    {{ 'กลับบ้านแล้ว / Returned Home' if status == 'back_home' else '' }}
+  {{ 'อยู่ในศูนย์พักพิง / In Migrants Camp' if status == 'active' else '' }}
+  {{ 'ถูกลบออก / Deleted' if status == 'deactive' else '' }}
+  {{ 'กลับบ้านแล้ว / Returned Home' if status == 'back_home' else '' }}
 </div>
 {% endmacro %}
