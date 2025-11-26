@@ -116,7 +116,7 @@
                 {% for refugee in refugees_pagination.items %}
                 <tr class="border-b border-x border-gray-200">
                     <td>{{ loop.index }}</td>
-                    <td>{{ refugee.nick_name }}</td>
+                    <td>{{ refugee.nick_name if refugee.nick_name else '-'}}</td>
                     <td>{{ refugee.name }}</td>
                     <td>
                         {{ refugee.registration_date.strftime("%d %B %Y") }}
