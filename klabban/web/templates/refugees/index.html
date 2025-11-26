@@ -81,7 +81,7 @@
                     <div class="card-body p-4">
                         <h2 class="card-title flex items-start justify-between gap-2">
                             <div>
-                                {{ loop.index}}. {{ refugee.name }} {{ ("(" + refugee.nick_name + ")") if
+                                {{ loop.index + (refugees_pagination.page - 1) * refugees_pagination.per_page }}. {{ refugee.name }} {{ ("(" + refugee.nick_name + ")") if
                                 refugee.nick_name else "" }}
                             </div>
                             {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
@@ -149,7 +149,7 @@
                         
                         <!-- ลำดับ -->
                         <td class="text-center px-4 py-3">
-                            {{ loop.index }}
+                            {{ loop.index + (refugees_pagination.page - 1) * refugees_pagination.per_page }}
                         </td>
 
                         <td class="px-4 py-3">
