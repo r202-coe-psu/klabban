@@ -2,6 +2,7 @@ import datetime
 
 from flask import Blueprint, render_template, request
 from flask_login import current_user, login_required
+from mongoengine.queryset.queryset import QuerySet
 
 from .. import models
 from .. import forms
@@ -24,6 +25,34 @@ def get_refugee_age_stats(refugee_queryset):
     unknown_age_count = refugee_queryset.filter(age=None).sum("people_count")
     age_stats.append({"label": "ไม่ทราบอายุ", "count": unknown_age_count})
     return age_stats
+
+
+def get_refugee_daily_stats(refugee_queryset: QuerySet):
+    sorted_registration_dates = list(
+        refugee_queryset.only("registration_date").order_by("registration_date")
+    )
+    if len(sorted_registration_dates) == 0:
+        return []
+
+    min_date = sorted_registration_dates[0]
+    max_date = sorted_registration_dates[-1]
+    if not min_date or not max_date:
+        return []
+
+    stats = []
+    oneday = datetime.timedelta(days=1)
+    current_date = min_date.registration_date.date()
+    end_date = max_date.registration_date.date()
+    while current_date <= end_date:
+        count = refugee_queryset.filter(
+            registration_date__gte=current_date,
+            registration_date__lt=current_date + oneday,
+        ).sum("people_count")
+        stats.append(
+            {"label": f"วันที่ {current_date.strftime("%d/%m/%Y")}", "count": count}
+        )
+        current_date += oneday
+    return stats
 
 
 @module.route("/admin")
@@ -105,6 +134,7 @@ def refugee_camp_dashboard():
             now=datetime.datetime.utcnow(),
             refugee_camp=None,
             age_stats=[],
+            daily_stats=[],
         )
 
     now = datetime.datetime.utcnow()
@@ -122,6 +152,7 @@ def refugee_camp_dashboard():
     ).sum("people_count")
 
     age_stats = get_refugee_age_stats(refugees)
+    daily_stats = get_refugee_daily_stats(refugees)
 
     return render_template(
         "dashboard/refugee_camp.html",
@@ -135,4 +166,5 @@ def refugee_camp_dashboard():
         recent_refugees=recent_refugees,
         refugee_camp=refugee_camp,
         age_stats=age_stats,
+        daily_stats=daily_stats,
     )

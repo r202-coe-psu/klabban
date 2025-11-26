@@ -134,6 +134,34 @@
       <div class="card-body">
         <div class="flex justify-between items-center mb-4">
           <div>
+            <h2 class="text-xl font-semibold">จำนวนผู้ลงทะเบียนรายวัน</h2>
+            <p class="text-sm text-gray-500">ข้อมูลอัปเดตล่าสุด {{ now | format_thai_datetime_short_month }}</p>
+          </div>
+        </div>
+        {% if not daily_stats %}
+          <div class="text-center text-gray-500 py-10"> 
+            ยังไม่มีข้อมูลการลงทะเบียนรายวัน
+          </div>
+        {% else  %}
+          {% for date_stat in daily_stats %}
+            <div class="flex items-center justify-between border border-gray-100 rounded-xl p-4">
+              <div>
+                <p class="font-semibold text-lg">{{ date_stat.label }}</p>
+                <p class="text-sm text-gray-500">จำนวนผู้อพยพที่ลงทะเบียนทั้งหมด</p>
+              </div>
+              <div class="text-2xl font-bold">{{ date_stat.count }} 
+                <span class="text-base font-medium">คน</span>
+              </div>
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card bg-white shadow border border-gray-100">
+      <div class="card-body">
+        <div class="flex justify-between items-center mb-4">
+          <div>
             <h2 class="text-xl font-semibold">ผู้ลงทะเบียนล่าสุด</h2>
             <p class="text-sm text-gray-500">ข้อมูลอัปเดตล่าสุด {{ now | format_thai_datetime_short_month }}</p>
           </div>
