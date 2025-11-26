@@ -28,10 +28,12 @@
   </div>
   <div class="w-full max-w-5xl text-center">
     <h2 class="text-4xl font-bold mb-2 text-black">รายการศูนย์พักพิง</h2>
+    {# 
     <a href="{{ url_for('refugees.index') }}">
       <p class="text-base text-gray-600">กดเพื่อดูรายชื่อผู้อพยพทั้งหมด</p>
       <p class="text-base text-gray-600">Click to view all refugees</p>
     </a>
+    #}
     <div class="mt-4 grid {% if refugee_camps|length > 2 %}
       md:grid-cols-3
       {% elif refugee_camps|length > 1 %}
