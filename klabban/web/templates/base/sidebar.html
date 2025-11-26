@@ -34,6 +34,15 @@
         </li>
         {% if "admin" in current_user.roles %}
         <li>
+          <a class="{{ 'drawer-menu-active' if request.path.startswith('/dashboard') else '' }}"
+            href="{{ url_for('dashboard.admin_dashboard') }}">
+            <i class="ph ph-chart-line text-lg"></i>
+            แดชบอร์ดผู้ดูแล
+          </a>
+        </li>
+        {% endif %}
+        {% if "admin" in current_user.roles %}
+        <li>
           <a class="{{ 'drawer-menu-active' if '/refugee_camps' in request.path else '' }}"
             href="{{ url_for('refugee_camps.index') }}">
             <i class="ph ph-house-line text-lg"></i>
@@ -49,31 +58,30 @@
           </a>
         </li>
         {% if "admin" in current_user.roles %}
-          <li>
-            <a class="{{ 'drawer-menu-active' if '/users' in request.path else '' }}"
-              href="{{ url_for('users.index') }}">
-              <i class="ph ph-users text-lg"></i>
-              ผู้ใช้งาน
-            </a>
-          </li>
+        <li>
+          <a class="{{ 'drawer-menu-active' if '/users' in request.path else '' }}" href="{{ url_for('users.index') }}">
+            <i class="ph ph-users text-lg"></i>
+            ผู้ใช้งาน
+          </a>
+        </li>
         {% endif %}
       </ul>
       <ul class="mt-auto menu gap-2 w-full">
         {% if current_user.is_authenticated %}
-          <li>
-            <a class="text-red-500" href="{{ url_for('accounts.logout') }}">
-              <i class="ph ph-sign-out text-lg"></i>
-              ออกจากระบบ
-            </a>
-          </li>
+        <li>
+          <a class="text-red-500" href="{{ url_for('accounts.logout') }}">
+            <i class="ph ph-sign-out text-lg"></i>
+            ออกจากระบบ
+          </a>
+        </li>
         {% else %}
-          <li>
-            <a class="text-white" href="{{ url_for('accounts.login') }}">
-              <i class="ph ph-sign-in text-lg"></i>
-              เข้าสู่ระบบ
-            </a>
-          </li>
+        <li>
+          <a class="text-white" href="{{ url_for('accounts.login') }}">
+            <i class="ph ph-sign-in text-lg"></i>
+            เข้าสู่ระบบ
+          </a>
+        </li>
         {% endif %}
       </ul>
+    </div>
   </div>
-</div>
