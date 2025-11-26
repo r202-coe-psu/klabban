@@ -26,6 +26,9 @@
                 <div class="grid grid-cols-3 max-sm:grid-cols-1 gap-x-4 items-center">
                     {{ renderer.base_render(search_form.refugee_camp, class="w-full h-full px-3", class_="!p-0") }}
                     {{ renderer.base_render(search_form.search) }}
+                    {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles)%}
+                        {{ renderer.base_render(search_form.country) }}
+                    {% endif %}
                     <button type="submit" class="btn btn-primary text-white sm:mt-8 max-sm:mt-3">
                         <span class="ph ph-magnifying-glass text-lg"></span>
                         ค้นหา / Search
