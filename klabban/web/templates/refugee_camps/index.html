@@ -25,7 +25,9 @@
                 <th>ลำดับ</th>
                 <th>ชื่อศูนย์พักพิง</th>
                 <th>ตำแหน่ง</th>
+                {% if "admin" in current_user.roles %}
                 <th class="text-right">จัดการ</th>
+                {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -41,6 +43,7 @@
                         -
                         {% endif %}
                     </td>
+                    {% if "admin" in current_user.roles %}
 
                     <td class="flex gap-2 justify-end">
                          <a class="btn btn-primary text-white" href="{{ url_for('refugees.create_or_edit', refugee_camp_id=refugee_camp.id, **request.args) }}">
@@ -69,6 +72,7 @@
                         refugee_camp_id=refugee_camp.id)
                         )}}
                     </td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>
