@@ -49,13 +49,16 @@ def create_or_edit_user(user_id):
     if user_id:
         user = models.User.objects.get(id=user_id)
         form = forms.users.CreateUserForm(obj=user)
-        form.role.data = user.roles[0] if user.roles else "user"
 
     if not form.validate_on_submit():
         print("Form errors:", form.errors)
+        form.role.data = user.roles[0] if user.roles else "user"
         return render_template("/users/create_or_edit.html", form=form, user_id=user_id)
 
-    if models.User.objects(username=form.username.data, id__ne=user_id).first():
+    if (
+        not user_id
+        and models.User.objects(username=form.username.data, id__ne=user_id).first()
+    ):
         flash("ชื่อบัญชีนี้มีผู้ใช้งานแล้ว กรุณาเปลี่ยนชื่อบัญชีใหม่", "error")
         return render_template("/users/create_or_edit.html", form=form, user_id=user_id)
 
@@ -67,8 +70,9 @@ def create_or_edit_user(user_id):
             )
 
     form.populate_obj(user)
+    if not user_id and form.password.data:
+        user.set_password(form.password.data)
     user.roles = [form.role.data]
-    user.set_password(form.password.data)
     user.save()
 
     return redirect(url_for("users.index"))

@@ -9,6 +9,7 @@ from flask_mongoengine import Pagination
 
 module = Blueprint("refugees", __name__, url_prefix="/refugees")
 
+
 @module.route("/")
 def index():
     view_mode = request.args.get("view_mode", "list")
@@ -57,6 +58,7 @@ def create_or_edit(refugee_id):
     form = forms.refugees.RefugeeForm()
     refugee = models.Refugee()
     if current_user.is_authenticated and "admin" in current_user.roles:
+        # 1. ถ้าเป็น admin ให้แสดงตัวเลือก refugee_camp ทั้งหมด
         form.refugee_camp.choices = [
             (str(camp.id), camp.name)
             for camp in models.RefugeeCamp.objects(status__ne="deactive").order_by(
@@ -64,39 +66,36 @@ def create_or_edit(refugee_id):
             )
         ]
     elif current_user.is_authenticated and "refugee_camp_staff" in current_user.roles:
+        # 2. ถ้าเป็น refugee_camp_staff ให้ตั้งค่า refugee_camp เป็นของตัวเอง
         form.refugee_camp.choices = [
             (str(current_user.refugee_camp.id), current_user.refugee_camp.name)
         ]
         form.refugee_camp.data = str(current_user.refugee_camp.id)
     else:
+        # 3. ถ้าไม่ใช่ admin หรือ refugee_camp_staff ให้ตั้งค่า refugee_camp ตาม request args
         form.refugee_camp.choices = []
-
-    refugee_camp_id = request.args.get("refugee_camp_id", None)
-    if refugee_camp_id:
-        refugee_camp = models.RefugeeCamp.objects.get(id=refugee_camp_id)
-        form.refugee_camp.choices = [
-            (str(refugee_camp.id), refugee_camp.name)
-        ]
-
-        form.refugee_camp.data = str(refugee_camp.id)
+        if request.args.get("refugee_camp_id"):
+            refugee_camp = models.RefugeeCamp.objects(
+                id=request.args.get("refugee_camp_id")
+            ).first()
+            form.refugee_camp.choices = [(str(refugee_camp.id), refugee_camp.name)]
+            form.refugee_camp.data = str(refugee_camp.id)
 
     if refugee_id:
         refugee = models.Refugee.objects.get(id=refugee_id)
         form = forms.refugees.RefugeeForm(obj=refugee)
 
-    if request.method == "GET":
+    # ถ้ามีค่าจาก request args ให้ตั้งค่า refugee_camp
+    refugee_camp_id = request.args.get("refugee_camp_id", None)
+    if refugee_camp_id:
+        refugee_camp = models.RefugeeCamp.objects(id=refugee_camp_id).first()
+        form.refugee_camp.data = str(refugee_camp.id)
+
+    if not form.validate_on_submit() or request.method == "GET":
         return render_template(
             "refugees/create_or_edit.html",
             form=form,
             refugee_id=refugee_id,
-        )
-
-    if not form.validate_on_submit():
-        return redirect(
-            url_for(
-                "refugees.index",
-                **request.args,
-            )
         )
 
     form.populate_obj(refugee)
