@@ -194,8 +194,30 @@
                             <a class="underline text-black cursor-pointer" href="{{ url_for('refugees.index', refugee_camp=refugee.refugee_camp.id, **camp_args) }}">{{ refugee.refugee_camp.name }}</a>
                         </td>
 
-                        <td class="px-4 py-3">
-                            {{ refugee.updated_date.strftime("%d %B %Y") }}
+                        <td>
+                            {% if "admin" in current_user.roles %}
+                                <div class="cursor-pointer tooltip tooltip-left bg-white text-black px-4 py-1">
+                                     <div class="tooltip-content text-start grid">
+                                        <div class="space-y-1">
+                                            <div class="flex gap-1">
+                                                <div class="font-medium">ผู้สร้าง:</div>
+                                                <div>{{ refugee.created_by.get_fullname() if refugee.created_by else "ไม่พบคนสร้าง" }}</div>
+                                            </div>
+                                            <div class="flex gap-1">
+                                                <div class="font-medium">ผู้แก้ไข:</div>
+                                                <div>{{ refugee.updated_by.get_fullname() if refugee.updated_by else "ไม่พบคนแก้ไข" }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tooltip tooltip-left" >
+                                        {{ refugee.updated_date.strftime("%d %B %Y") }}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="px-4 py-1">
+                                    {{ refugee.updated_date.strftime("%d %B %Y") }}
+                                </div>
+                            {% endif %}
                         </td>
 
                         <!-- ปุ่มจัดการ -->
