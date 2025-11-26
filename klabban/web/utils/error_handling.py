@@ -31,7 +31,9 @@ def init_error_handling(app: Flask):
         return (
             render_template(
                 "base/error.html",
-                error_msg="An error occurred. Please try again later.",
+                # error_msg="An error occurred. Please try again later.",
+                error_msg="กำลังอัปเดตระบบ กรุณารอสักครู่...",
+                error_msg_eng="Please wait a moment, the system is updating...",
             ),
             500,
         )
