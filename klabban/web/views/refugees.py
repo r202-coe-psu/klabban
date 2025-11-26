@@ -13,6 +13,8 @@ module = Blueprint("refugees", __name__, url_prefix="/refugees")
 
 @module.route("/")
 def index():
+    view_mode = request.args.get("view_mode", "list")
+
     page = request.args.get("page", 1, type=int)
     per_page = 50  # จำนวนรายการต่อหน้า
 
@@ -25,11 +27,9 @@ def index():
     refugee_camp_id = search_form.refugee_camp.data
 
     query = models.Refugee.objects(status__ne="deactive").order_by("name")
-    
+
     if search:
-        query = query.filter(
-            Q(name__icontains=search) | Q(nick_name__icontains=search)
-        )
+        query = query.filter(Q(name__icontains=search) | Q(nick_name__icontains=search))
     if refugee_camp_id:
         query = query.filter(refugee_camp=refugee_camp_id)
     try:
@@ -38,9 +38,10 @@ def index():
         refugees_pagination = Pagination(query, page=1, per_page=per_page)
 
     return render_template(
-        "/refugees/index.html", 
+        "/refugees/index.html",
         refugees_pagination=refugees_pagination,
         search_form=search_form,
+        view_mode=view_mode,
     )
 
 
