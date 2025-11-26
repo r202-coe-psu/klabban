@@ -1,20 +1,16 @@
 {% extends "/base/default_page.html" %}
 
-{% block title %}
-เว็บไซต์สำหรับหาญาติในศูนย์พักพิง
-{% endblock title %}
-
 {% block head %}
 {{ super() }}
 <meta name="description" content="เว็บไซต์สำหรับหาญาติในศูนย์พักพิง">
 <link rel="canonical" href="{{ request.url }}">
 <meta property="og:type" content="website">
-<meta property="og:title" content="เว็บไซต์สำหรับหาญาติในศูนย์พักพิง">
+<meta property="og:title" content="{{ config.APP_TITLE }}">
 <meta property="og:description" content="เว็บไซต์สำหรับหาญาติในศูนย์พักพิง">
 <meta property="og:url" content="{{ request.url }}">
-<meta property="og:image" content="https://example.com/preview.jpg">
+<meta property="og:image" content="https://hakon.psu.ac.th/static/images/logo/diis-logo.png">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="เว็บไซต์สำหรับหาญาติในศูนย์พักพิง">
+<meta name="twitter:title" content="{{ config.APP_TITLE }}">
 <meta name="twitter:description" content="เว็บไซต์สำหรับหาญาติในศูนย์พักพิง">
 {% endblock head %}
 
