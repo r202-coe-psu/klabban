@@ -4,24 +4,27 @@
 {% set title_page="จัดการผู้อพยพ" %}
 
 {% block content %}
-<form class="bg-white rounded-lg p-4" method="post" action="{{ url_for('refugees.create_or_edit', refugee_id=refugee_id) }}">
-    {{ form.csrf_token }}
-    {{ renderer.base_render(form.refugee_camp) }}
-    <div class="grid grid-cols-2 gap-x-4">
-        {{ renderer.base_render(form.nick_name) }}
-        {{ renderer.base_render(form.name) }}
-        {{ renderer.base_render(form.nationality) }}
-        {{ renderer.base_render(form.ethnicity) }}
-    </div>
-    {{ renderer.render_text_area_field(form.remark) }}
-    {{ renderer.base_render(form.status) }}
-    <div class="modal-action justify-end">
-        <a class="btn" href="{{ url_for('refugees.index') }}">
-            ปิด
-        </a>
-        <button class="btn btn-primary">
-            ยืนยัน
-        </button>
-    </div>
+<form class="bg-white rounded-lg p-4" method="post"
+  action="{{ url_for('refugees.create_or_edit', refugee_id=refugee_id) }}">
+  {{ form.csrf_token }}
+  {{ renderer.base_render(form.refugee_camp) }}
+  <div class="grid grid-cols-2 gap-x-4">
+    {{ renderer.base_render(form.nick_name) }}
+    {{ renderer.base_render(form.name) }}
+    {{ renderer.base_render(form.address) }}
+    {{ renderer.base_render(form.phone) }}
+    {{ renderer.base_render(form.nationality) }}
+    {{ renderer.base_render(form.ethnicity) }}
+  </div>
+  {{ renderer.render_text_area_field(form.remark) }}
+  {{ renderer.base_render(form.status) }}
+  <div class="modal-action justify-end">
+    <a class="btn" href="{{ url_for('refugees.index') }}">
+      ปิด
+    </a>
+    <button class="btn btn-primary">
+      ยืนยัน
+    </button>
+  </div>
 </form>
 {% endblock %}
