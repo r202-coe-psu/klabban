@@ -5,6 +5,7 @@ import datetime
 import pandas as pd
 import mongoengine as me
 from collections import Counter, defaultdict
+from dotenv import dotenv_values
 
 def to_py_datetime(x):
     if pd.isna(x):
@@ -141,21 +142,32 @@ def duplicate_drop(data_to_save):
 
 def main():
     # usage: python psu_data_script.py [path_to_excel] [nrows] [save]
-    path = Path(__file__).resolve().parents[1] / "data/psu_data.xlsx"
+    # default path: ../data/psu_data.xlsx (two levels up from this script)
+    default_path = Path(__file__).resolve().parents[1] / "data/psu_data.xlsx"
+    path = default_path
+    # allow overriding path via first CLI arg (unless the arg is "save")
+    if len(sys.argv) > 1 and sys.argv[1].lower() != "save":
+        path = Path(sys.argv[1])
     # nrows = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 5
     do_save = len(sys.argv) > 1 and sys.argv[1].lower() == "save"
 
     if not path.exists():
         print(f"File not found: {path}")
         return
-    # optional mongo connection if saving
     
+    config = dotenv_values(".env")
+    print(config)
     try:
-        MONGO_URI = "mongodb://localhost:27017/klabbandb"
-        me.connect(host=MONGO_URI)
+        dbname = config.get("MONGODB_DB")
+        host = config.get("MONGODB_HOST", "localhost")
+        port = int(config.get("MONGODB_PORT", 27017))
+        username = config.get("MONGODB_USERNAME", "")
+        password = config.get("MONGODB_PASSWORD", "")
+        me.connect(db=dbname, host=host, port=port, username=username, password=password)
         db = me.get_db()
-    except Exception:
+    except Exception as e:
         print("Connected to MongoDB (could not determine DB name).")
+        print(e)
         db = None
 
     # query admin document (use find_one to get the document, not a cursor)
