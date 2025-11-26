@@ -29,7 +29,7 @@ services:
         restart: always
         environment:
             KLABBAN_SETTINGS: /app/.env
-        command: /venv/bin/gunicorn --keep-alive 10 --timeout 1200 --log-level=DEBUG --bind 0.0.0.0:8080 "klabban.web:create_app()"
+        command: /venv/bin/gunicorn -w 16 --keep-alive 5 --timeout 1200 --log-level=DEBUG --bind 0.0.0.0:8080 "klabban.web:create_app()"
         logging:
             options:
                 max-size: "10m"
