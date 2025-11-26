@@ -121,6 +121,9 @@
                         <th class="text-left">ชื่อเล่น</th>
                         <th class="text-left">ชื่อ-นามสกุล</th>
                         <th class="text-left">ลงทะเบียนเมื่อ</th>
+                        {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles)%}
+                            <th class="text-left">ประเทศ</th>
+                        {% endif %}
                         <th class="text-left">สถานะ</th>
                         <th class="text-left">ศูนย์พักพิง</th>
                         <th class="text-left">ข้อมูลล่าสุด</th>
@@ -148,6 +151,12 @@
                         <td class="px-4 py-3">
                             {{ refugee.registration_date.strftime("%d %B %Y") }}
                         </td>
+
+                        {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles)%}
+                             <td class="px-4 py-3">
+                            {{ refugee.country if refugee.country else '-' }}
+                        </td>
+                        {% endif %}
 
                         <td class="px-4 py-3">
                             {{ render_refugee_status(refugee.status) }}
