@@ -3,7 +3,7 @@
 {% import "/components/dialogs.html" as dialog %}
 {% import "/components/paginations.html" as paginations %}
 
-{% set title_page="รายชื่อผู้อพยพ / Refugees List" %}
+{% set title_page="รายชื่อผู้อพยพ / Migrants List" %}
 
 {% block content %}
 
@@ -21,7 +21,7 @@
         <div class="flex flex-row max-sm:flex-col w-full sm:items-end justify-between mb-2 gap-4">
             <form method="GET">
                 <div class="text-xl font-medium text-gray-700">
-                    รายชื่อผู้อพยพ / Refugees
+                    รายชื่อผู้อพยพ / Migrants List
                 </div>
                 <div class="grid grid-cols-3 max-sm:grid-cols-1 gap-x-4 items-center">
                     {{ renderer.base_render(search_form.refugee_camp, class="w-full h-full px-3", class_="!p-0") }}
@@ -35,7 +35,7 @@
             {% if 'admin' in current_user.roles or 'refugee_camp_staff' in current_user.roles %}
             <a class="btn btn-primary text-white" href="{{ url_for('refugees.create_or_edit', **request.args) }}">
                 <span class="material-symbols-outlined text-sm">add</span>
-                เพิ่มผู้อพยพ / Add Refugee
+                เพิ่มผู้อพยพ / Add Migrant
             </a>
             {% endif %}
         </div>
@@ -90,7 +90,7 @@
                             {% endif %}
                         </h2>
                         <div>
-                            <p class="text-gray-500 font-light">ศูนย์พักพิง / Refugee Camp</p>
+                            <p class="text-gray-500 font-light">ศูนย์พักพิง / Migrant Camp</p>
                             <p>{{ refugee.refugee_camp.name }}</p>
                         </div>
                         {{ render_refugee_status(refugee.status) }}
