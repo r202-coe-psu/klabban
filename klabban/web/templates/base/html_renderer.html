@@ -27,7 +27,7 @@ is_hidden=False
   {% set style = style + " input-readonly" %}
 {% endif %}
 
-{% if field.type == "SelectField" %}
+{% if field.type == "SelectField" or field.type == "ModelSelectField" %}
   {% set style = style.replace("input", "select") + ' appearance-none' %}
 {% endif %}
 

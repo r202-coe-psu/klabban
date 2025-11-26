@@ -34,10 +34,19 @@
         </li>
         {% if "admin" in current_user.roles %}
         <li>
-          <a class="{{ 'drawer-menu-active' if request.path.startswith('/dashboard') else '' }}"
+          <a class="{{ 'drawer-menu-active' if request.path.startswith('/dashboard/admin') else '' }}"
             href="{{ url_for('dashboard.admin_dashboard') }}">
             <i class="ph ph-chart-line text-lg"></i>
             แดชบอร์ดผู้ดูแล
+          </a>
+        </li>
+        {% endif %}
+        {% if "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles %}
+        <li>
+          <a class="{{ 'drawer-menu-active' if request.path.startswith('/dashboard/refugee-camp') else '' }}"
+            href="{{ url_for('dashboard.refugee_camp_dashboard') }}">
+            <i class="ph ph-chart-line text-lg"></i>
+            แดชบอร์ดศูนย์พักพิง
           </a>
         </li>
         {% endif %}
