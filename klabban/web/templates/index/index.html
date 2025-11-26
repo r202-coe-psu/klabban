@@ -8,7 +8,10 @@
     </h1>
     <p class="text-xl text-gray-600">เว็บไซต์สำหรับหาญาติในศูนย์พักพิง</p>
   </div>
-  <div class="card w-full max-w-4xl bg-white shadow-lg border border-gray-100 rounded-xl mb-16">
+  <div class="w-full max-w-5xl text-center red-text-sm text-gray-500 mb-3">
+  <p class="text-error">ข้อมูลนี้สำหรับติดตามหาบุคคลสูญหายในสถานการณ์ภัยพิบัติเท่านั้น และจะลบออกเมื่อสถานการณ์คลี่คลาย</p>
+  </div>
+  <div class="card w-full max-w-4xl bg-white shadow-lg border border-gray-100 rounded-xl mb-10">
     <div class="card-body p-8">
       <h2 class="card-title text-xl mb-2">ค้นหาผู้อพยพ / Search for migrants</h2>
       <form action="{{ url_for('refugees.index') }}" method="get" class="flex flex-col md:flex-row gap-4 items-center">
