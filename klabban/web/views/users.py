@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from mongoengine.queryset.visitor import Q
 import datetime
 import uuid
-
+from flask_mongoengine import Pagination 
 from klabban.web import forms
 from klabban import models
 from klabban.web.utils.acl import roles_required
@@ -28,26 +28,16 @@ def index():
             | (Q(display_name__icontains=search))
             | (Q(email__icontains=search))
         )
-    total = users.count()
+    try:
+        pagination = Pagination(users, page, per_page=20)
+    except Exception as e:
+        pagination = Pagination(users, 1, per_page=20)
 
-    class Pagination:
-        def __init__(self, items, page, per_page, total):
-            self.items = items
-            self.page = page
-            self.per_page = per_page
-            self.total = total
-            self.pages = max(1, (total + per_page - 1) // per_page)
-            self.has_prev = page > 1
-            self.has_next = page < self.pages
-            self.prev_num = page - 1 if self.has_prev else None
-            self.next_num = page + 1 if self.has_next else None
-
-    pagination = Pagination(users, page, 20, total)
 
     form = forms.users.SearchCreateUserForm()
     form.search.data = search
 
-    return render_template("/users/index.html", users_pagination=pagination, form=form)
+    return render_template("/users/index.html", users_pagination=pagination, form=form, total=users.count())
 
 
 @module.route("/create", methods=["GET", "POST"], defaults={"user_id": None})
