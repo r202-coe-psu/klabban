@@ -6,6 +6,16 @@
 {% set title_page="รายชื่อผู้อพยพ / Refugees List" %}
 
 {% block content %}
+
+{% if not current_user.is_authenticated %}
+<div class="mb-4">
+    <a href="{{ url_for('index.index') }}">
+        <i class="ph ph-arrow-left text-lg"></i>
+        กลับไปหน้าหลัก / Back to Home
+    </a>
+</div>
+{% endif %}
+
 <div class="bg-white rounded-3xl border border-gray-300">
     <div class="overflow-x-auto p-6">
         <div class="flex flex-row max-sm:flex-col w-full sm:items-end justify-between mb-2 gap-4">
@@ -36,12 +46,12 @@
                 <a href="{{ url_for('refugees.index', view_mode='grid', **args) }}"
                     class="btn {{ 'bg-black text-white' if view_mode == 'grid' else ''}}">
                     ดูแบบการ์ด
-                    <span class="ph ph-squares-four"></span>
+                    <span class="text-lg ph ph-squares-four"></span>
                 </a>
                 <a href="{{ url_for('refugees.index', view_mode='list', **args) }}"
                     class="btn {{ 'bg-black text-white' if view_mode == 'list' else ''}}">
                     ดูแบบตาราง
-                    <span class="ph ph-list-dashes"></span>
+                    <span class="text-lg ph ph-list-dashes"></span>
                 </a>
             </div>
         </div>
