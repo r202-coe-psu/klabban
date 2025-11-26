@@ -205,7 +205,7 @@
         </div>
         <div class="grid grid-cols-4 max-lg:grid-cols-3 max-md:grid-cols-2 max-sm:grid-cols-1 gap-2">
           {% for country_stat in country_stats %}
-          <div class="flex items-center justify-between border border-gray-100 rounded-xl p-4">
+          <a href="{{ url_for('refugees.index', refugee_camp=refugee_camp.id, country=country_stat.value) }}" class="flex items-center justify-between border border-gray-100 rounded-xl p-4 cursor-pointer hover:shadow-md transition-shadow hover:border-gray-200">
             <div>
               <p class="font-semibold text-lg">{{ country_stat.label }}</p>
               <p class="text-sm text-gray-500">ผู้อพยพทั้งหมด</p>
@@ -213,7 +213,7 @@
             <div class="text-2xl font-bold">{{ country_stat.count }} 
               <span class="text-base font-medium">คน</span>
               </div>
-          </div>
+          </a>
           {% endfor %}
     
         </div>

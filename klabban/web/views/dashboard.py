@@ -60,7 +60,9 @@ def get_refugee_country_stats(refugee_queryset):
     countries = refugee_queryset.distinct("country")
     for country in countries:
         count = refugee_queryset.filter(country=country).sum("people_count")
-        country_stats.append({"label": country if country else "ไม่ระบุ", "count": count})
+        country_stats.append(
+            {"label": country if country else "ไม่ระบุ", "value": country, "count": count}
+        )
     return sorted(country_stats, key=lambda x: x["count"], reverse=True)
 
 

@@ -32,8 +32,9 @@ def index():
             query = models.Refugee.objects(status__ne="deactive").order_by("name")
     except Exception:
         query = models.Refugee.objects(id=None)
-    if search:
+    if search or country:
         query = models.Refugee.objects(status__ne="deactive").order_by("name")
+    if search:
         query = query.filter(
             Q(name__icontains=search)
             | Q(nick_name__icontains=search)
