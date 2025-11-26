@@ -45,7 +45,7 @@ def index():
     if country:
         query = query.filter(country__icontains=country)
     if request.args.get("exclude_thai"):
-        query = query.filter(country__ne="ไทย")
+        query = query.filter(country__ne="Thailand")
     try:
         refugees_pagination = Pagination(query, page=page, per_page=per_page)
     except ValueError:
