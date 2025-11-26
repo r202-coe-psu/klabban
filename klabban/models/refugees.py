@@ -31,7 +31,7 @@ class Refugee(me.Document):
     address = me.StringField(max_length=512)
     pets = me.StringField()
     expected_days = me.IntField()
-    people_count = me.IntField()
+    people_count = me.IntField(default=1, min_value=1)
     emergency_contact = me.StringField(max_length=255)
 
     remark = me.StringField()

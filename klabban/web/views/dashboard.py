@@ -16,9 +16,9 @@ def admin_dashboard():
     now = datetime.datetime.utcnow()
     seven_days_ago = now - datetime.timedelta(days=7)
 
-    total_refugees = models.Refugee.objects(status__ne="deactive").count()
-    active_refugees = models.Refugee.objects(status="active").count()
-    returned_refugees = models.Refugee.objects(status="back_home").count()
+    total_refugees = models.Refugee.objects(status__ne="deactive").sum("people_count")
+    active_refugees = models.Refugee.objects(status="active").sum("people_count")
+    returned_refugees = models.Refugee.objects(status="back_home").sum("people_count")
     active_camps = models.RefugeeCamp.objects(status="active").count()
 
     recent_refugees = (
@@ -26,11 +26,9 @@ def admin_dashboard():
         .order_by("-registration_date")
         .limit(5)
     )
-    registrations_last_week = (
-        models.Refugee.objects(
-            status__ne="deactive", registration_date__gte=seven_days_ago
-        ).count()
-    )
+    registrations_last_week = models.Refugee.objects(
+        status__ne="deactive", registration_date__gte=seven_days_ago
+    ).sum("people_count")
 
     camp_stats = []
     for camp in models.RefugeeCamp.objects(status="active").order_by("name"):
@@ -40,7 +38,7 @@ def admin_dashboard():
                 "name": camp.name,
                 "refugee_count": models.Refugee.objects(
                     refugee_camp=camp.id, status__ne="deactive"
-                ).count(),
+                ).sum("people_count"),
             }
         )
 
@@ -51,9 +49,7 @@ def admin_dashboard():
         returned_refugees=returned_refugees,
         active_camps=active_camps,
         registrations_last_week=registrations_last_week,
-        return_rate=(
-            (returned_refugees / total_refugees) if total_refugees else 0
-        ),
+        return_rate=((returned_refugees / total_refugees) if total_refugees else 0),
         camp_stats=camp_stats,
         recent_refugees=recent_refugees,
         now=now,
