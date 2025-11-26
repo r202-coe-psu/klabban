@@ -26,6 +26,7 @@
                 <div class="grid grid-cols-4 max-md:grid-cols-2 max-sm:grid-cols-1 gap-x-4 items-center">
                     {{ renderer.base_render(search_form.refugee_camp, class="w-full h-full px-3", class_="!p-0") }}
                     {{ renderer.base_render(search_form.search) }}
+                    <input name="view_mode" type="hidden" value="{{ view_mode }}">
                     {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles)%}
                         {{ renderer.base_render(search_form.country) }}
                         <div class="space-y-2">
@@ -51,6 +52,11 @@
             </a>
             {% endif %}
         </div>
+        {% if not search_form.search.data and ("refugee_camp_staff" not in current_user.roles or "admin" not in current_user.roles) %}
+            <div class="mb-4 text-sm text-gray-600 italic">
+                * รายชื่อผู้อพยพจะไม่แสดง จนกว่าจะระบุคำค้นหาในช่องค้นหาด้านบน
+            </div>
+        {% endif %}
         {% set args = request.args.to_dict() %}
         {% set _ = args.pop('view_mode', None) %}
         <div class="w-full flex justify-end mb-4">
@@ -93,10 +99,10 @@
                                     </span>
                                 </button>
                                 {{ dialog.DisactiveDialog(
-                                id="%s-disactive-dialog" | format(refugee.id),
-                                title="ยืนยันการลบรายการผู้อพยพ",
-                                body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                                url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
+                                    id="%s-disactive-dialog" | format(refugee.id),
+                                    title="ยืนยันการลบรายการผู้อพยพ",
+                                    body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+                                    url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
                                 )}}
                             </div>
                             {% endif %}
@@ -201,11 +207,16 @@
             </table>
 
         {% endif %}
+        {% if search_form.search.data and not refugees %}
+            <div class="mt-4 py-4 text-center text-gray-500 italic">
+                ไม่พบผู้อพยพที่ตรงกับคำค้นหา
+            </div>
+        {% endif %}
         {{ paginations.render_pagination(
-        pagination=refugees_pagination,
-        endpoint='refugees.index',
-        key_page='page',
-        kwargs=request.args.to_dict()
+            pagination=refugees_pagination,
+            endpoint='refugees.index',
+            key_page='page',
+            kwargs=request.args.to_dict()
         ) }}
     </div>
 </div>
