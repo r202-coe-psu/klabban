@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
 from flask_mongoengine.wtf import model_form
 from klabban.web import models
-from wtforms import StringField, SelectField
+from wtforms import StringField, SelectField, DateTimeLocalField
+from datetime import datetime
 
 BaseRefugeeForm = model_form(
     models.Refugee,
@@ -19,7 +20,6 @@ BaseRefugeeForm = model_form(
         "age": {"label": "อายุ / Age"},
         "gender": {"label": "เพศ / Gender"},
         "people_count": {"label": "จำนวนคน / People Count"},
-        "registration_date": {"label": "วันที่ลงทะเบียน / Registration Date"},
     },
     exclude=[
         "refugee_camp",
@@ -33,6 +33,12 @@ BaseRefugeeForm = model_form(
 
 class RefugeeForm(BaseRefugeeForm):
     refugee_camp = SelectField("ศูนย์พักพิง / Refugee Camp", choices=[])
+    registration_date = DateTimeLocalField(
+        "วันที่ลงทะเบียน / Registration Date",
+        default=datetime.now,
+        format="%Y-%m-%dT%H:%M",
+        render_kw={"placeholder": "เลือกวันที่และเวลา / Select Date and Time"},
+    )
 
 
 class RefugeeSearchForm(FlaskForm):
