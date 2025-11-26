@@ -1,7 +1,7 @@
 <div class="drawer-side shadow {{ 'hidden' if not current_user.is_authenticated else '' }} ">
   <label for="drawer-menu" aria-label="close sidebar" class="drawer-overlay h-full"></label>
 
-  <div class="flex flex-col h-full bg-gradient-to-b from-blue-600 to-blue-800 text-white w-64">
+  <div class="flex flex-col h-full bg-gradient-to-b from-blue-600 to-primary text-white w-64">
 
     <!-- Header -->
     <div class="px-8 py-5 flex items-center justify-between border-b border-blue-400/30">
@@ -11,8 +11,11 @@
         </div>
         <div>
           <div class="text-xl font-bold">
-            Klabban
+            หาคน
           </div>
+          {% if current_user.is_authenticated %}
+          {{ current_user.get_fullname() }}
+          {% endif %}
         </div>
       </div>
     </div>
@@ -22,11 +25,6 @@
     <div class="flex-grow text-sm menu w-full">
       <ul class="menu gap-2 w-full">
 
-        <!-- Main menu header -->
-        <li class="menu-title px-6 pt-4">
-          <span class="text-xs uppercase opacity-80 text-blue-100">Main menu</span>
-        </li>
-
         <li>
           <a class="{{ 'drawer-menu-active' if request.path == url_for('index.index') else '' }}"
             href="{{ url_for('index.index') }}">
@@ -34,7 +32,7 @@
             แดชบอร์ด
           </a>
         </li>
-
+        {% if "admin" in current_user.roles %}
         <li>
           <a class="{{ 'drawer-menu-active' if '/refugee_camps' in request.path else '' }}"
             href="{{ url_for('refugee_camps.index') }}">
@@ -42,6 +40,7 @@
             ศูนย์พักพิง
           </a>
         </li>
+        {% endif %}
         <li class="">
           <a class="{{ 'drawer-menu-active' if '/refugees' in request.path else '' }}"
             href="{{ url_for('refugees.index') }}">

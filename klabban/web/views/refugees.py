@@ -5,15 +5,17 @@ from klabban import models
 from klabban.web import forms
 from mongoengine.queryset.visitor import Q
 from uuid import uuid4
+from flask_mongoengine import Pagination
 
-import pandas as pd
-import datetime
 
 module = Blueprint("refugees", __name__, url_prefix="/refugees")
 
 
 @module.route("/")
 def index():
+    page = request.args.get("page", 1, type=int)
+    per_page = 50  # จำนวนรายการต่อหน้า
+
     search_form = forms.refugees.RefugeeSearchForm(request.args)
     search_form.refugee_camp.choices = [("", "ทั้งหมด")] + [
         (str(camp.id), camp.name)
@@ -22,16 +24,23 @@ def index():
     search = search_form.search.data
     refugee_camp_id = search_form.refugee_camp.data
 
-    refugees = models.Refugee.objects(status__ne="deactive").order_by("name")
+    query = models.Refugee.objects(status__ne="deactive").order_by("name")
+    
     if search:
-        refugees = refugees.filter(
+        query = query.filter(
             Q(name__icontains=search) | Q(nick_name__icontains=search)
         )
     if refugee_camp_id:
-        refugees = refugees.filter(refugee_camp=refugee_camp_id)
+        query = query.filter(refugee_camp=refugee_camp_id)
+    try:
+        refugees_pagination = Pagination(query, page=page, per_page=per_page)
+    except ValueError:
+        refugees_pagination = Pagination(query, page=1, per_page=per_page)
 
     return render_template(
-        "/refugees/index.html", refugees=refugees, search_form=search_form
+        "/refugees/index.html", 
+        refugees_pagination=refugees_pagination,
+        search_form=search_form,
     )
 
 

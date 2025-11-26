@@ -1,6 +1,8 @@
 {% extends "/base/default_page.html" %}
 {% import "base/html_renderer.html" as renderer %}
 {% import "/components/dialogs.html" as dialog %}
+{% import "/components/paginations.html" as paginations %}
+
 {% set title_page="รายชื่อผู้อพยพ" %}
 
 {% block content %}
@@ -38,7 +40,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for refugee in refugees %}
+                {% for refugee in refugees_pagination.items %}
                 <tr class="border-b border-x border-gray-200">
                     <td>{{ loop.index }}</td>
                     <td>{{ refugee.nick_name }}</td>
@@ -76,6 +78,12 @@
                 {% endfor %}
             </tbody>
         </table>
+        {{ paginations.render_pagination(
+            pagination=refugees_pagination,
+            endpoint='refugees.index',
+            key_page='page',
+            kwargs=request.args.to_dict()
+        ) }}
     </div>
 </div>
 {% endblock %}

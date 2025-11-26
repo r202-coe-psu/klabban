@@ -41,10 +41,10 @@
           {{ refugee_camp.name }}
         </h1>
         <p>
-          LINE ID : {{ refugee_camp.line_id }}
+          LINE ID : {{ refugee_camp.line_id if refugee_camp.line_id else '-' }}
         </p>
         <p>
-          ช่องทางติดต่อ : {{ refugee_camp.contact_info }}
+          ช่องทางติดต่อ : {{ refugee_camp.contact_info if refugee_camp.contact_info else '-' }}
         </p>
         <div class="flex flex-col gap-2 mt-2">
           <div class="grid grid-cols-2 max-lg:grid-cols-1 max-sm:grid-cols-2 gap-2 w-full">

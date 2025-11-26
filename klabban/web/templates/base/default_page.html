@@ -22,10 +22,12 @@
       <div
         class="navbar bg-base-100 {{ 'border-b border-transparent shadow-md px-4 py-6' if not current_user.is_authenticated else '' }} max-sm:flex-col max-sm: justify-center">
         <div class="navbar-start max-sm:justify-center">
+          {#
           <img src="/static/images/logo/psu_square.png" alt="diisLogio" class="h-10 w-10 mr-2 aspect-auto" />
           <img src="/static/images/logo/coe_psu.jpg" alt="diisLogio" class="h-10 w-10 mr-2" />
           <img src="/static/images/logo/r202.png" alt="diisLogio" class="h-10 w-10 mr-2" />
           <img src="/static/images/logo/import_star.png" alt="diisLogio" class="h-10 w-10 mr-2" />
+          #}
         </div>
         <div class="navbar-end gap-3 max-sm:justify-center max-sm:mt-2">
           {% if not current_user.is_authenticated %}
@@ -59,10 +61,11 @@
           </span>
         </div>
       </div>
-      <div class="lg:px-2 mx-2 pb-5">
+      <div class="lg:px-2 mx-2 pb-5 min-h-screen">
         {% block content %}
         {% endblock content %}
       </div>
+      {% include "base/footer.html" %}
     </div>
   </div>
   {% include "base/sidebar.html" %}
