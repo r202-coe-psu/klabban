@@ -66,7 +66,7 @@
             ผู้อพยพ
           </a>
         </li>
-        {% if "admin" in current_user.roles %}
+        {% if "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles %}
         <li>
           <a class="{{ 'drawer-menu-active' if '/users' in request.path else '' }}" href="{{ url_for('users.index') }}">
             <i class="ph ph-users text-lg"></i>

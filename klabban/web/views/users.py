@@ -12,12 +12,14 @@ module = Blueprint("users", __name__, url_prefix="/users")
 
 
 @module.route("", methods=["GET"])
-@roles_required(["admin"])
+@roles_required(["admin", "refugee_camp_staff"])
 def index():
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "", type=str).strip()
 
     users = models.User.objects()
+    if "refugee_camp_staff" in current_user.roles:
+        users = users.filter(refugee_camp=current_user.refugee_camp)
     if search:
         users = users.filter(
             (Q(username__icontains=search))
@@ -50,15 +52,29 @@ def index():
 
 @module.route("/create", methods=["GET", "POST"], defaults={"user_id": None})
 @module.route("/<user_id>/edit", methods=["GET", "POST"])
-@roles_required(["admin"])
+@roles_required(["admin", "refugee_camp_staff"])
 def create_or_edit_user(user_id):
     form = forms.users.CreateUserForm()
+
     user = models.User()
 
     if user_id:
         user = models.User.objects.get(id=user_id)
         form = forms.users.EditUserForm(obj=user)
-
+    if "refugee_camp_staff" in current_user.roles:
+        form.refugee_camp.choices = [
+            (str(current_user.refugee_camp.id), current_user.refugee_camp.name)
+        ]
+        print("Refugee camp staff, limited choices:", form.refugee_camp.choices)
+    else:
+        refugee_camps = models.RefugeeCamp.objects().order_by("name")
+        form.refugee_camp.choices = [
+            (str(camp.id), camp.name) for camp in refugee_camps
+        ]
+        print("All refugee camps:", form.refugee_camp.choices)
+    form.role.choices = [
+        ("refugee_camp_staff", "เจ้าหน้าที่ศูนย์พักพิง"),
+    ]
     if not form.validate_on_submit():
         print("Form errors:", form.errors)
         form.role.data = user.roles[0] if user.roles else "user"
@@ -81,6 +97,7 @@ def create_or_edit_user(user_id):
     form.populate_obj(user)
     if not user_id and form.password.data:
         user.set_password(form.password.data)
+    user.refugee_camp = models.RefugeeCamp.objects.get(id=form.refugee_camp.data)
     user.roles = [form.role.data]
     user.save()
 
@@ -88,7 +105,7 @@ def create_or_edit_user(user_id):
 
 
 @module.route("/<user_id>/delete", methods=["POST"])
-@roles_required(["admin"])
+@roles_required(["admin", "refugee_camp_staff"])
 def delete_user(user_id):
     user = models.User.objects(id=user_id).first()
     if user:
@@ -100,7 +117,7 @@ def delete_user(user_id):
 
 
 @module.route("/<user_id>/reset_password", methods=["POST"])
-@roles_required(["admin"])
+@roles_required(["admin", "refugee_camp_staff"])
 def reset_password_user(user_id):
     user = models.User.objects(id=user_id).first()
     if user:
