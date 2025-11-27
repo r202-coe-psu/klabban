@@ -116,10 +116,10 @@
       <div class="card w-full bg-white shadow-sm hover:shadow-xl border border-gray-200 hover:border-blue-200 rounded-2xl transition-all duration-300 group h-full flex flex-col">
         <div class="card-body p-6 flex flex-col h-full">
             <!-- Header Section -->
-            <div class="mb-4">
+            <div class="{% if refugee_camp.description or refugee_camp.contact_info %}mb-4{% else %}mb-3{% endif %}">
                 <div class="flex justify-between items-start gap-2 mb-3">
                     <h2 class="card-title text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-2">{{ refugee_camp.name }}</h2>
-                    <!-- Status Indicator (Optional) -->
+                    <!-- Status Indicator -->
                     <span class="relative flex h-3 w-3 mt-1.5 shrink-0">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
@@ -127,66 +127,69 @@
                 </div>
                 
                 <!-- Refugee Count Badge -->
-                <div class="mb-4">
+                <div class="{% if refugee_camp.description %}mb-4{% else %}mb-0{% endif %}">
                     <div class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg border border-blue-100 group-hover:bg-blue-100 group-hover:border-blue-200 transition-colors">
                         <i class="ph-fill ph-users text-lg"></i>
                         <span class="font-bold">{{ refugee_camp.refugee_count or 0 }}</span>
-                        <span class="text-sm font-medium">ผู้อพยพ / Migrants</span>
+                        <span class="text-sm font-medium">ผู้อพยพ</span>
                     </div>
                 </div>
 
                 <!-- Description -->
                 {% if refugee_camp.description %}
-                <p class="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed">{{ refugee_camp.description }}</p>
+                <p class="text-sm text-gray-600 mt-4 line-clamp-3 leading-relaxed">{{ refugee_camp.description }}</p>
                 {% endif %}
             </div>
 
             <!-- Contact Information -->
-             
-            <div class="mb-4 bg-gray-50 rounded-xl border border-gray-100">
-                {% if refugee_camp.line_id %}
-                <div class="flex items-start gap-3 text-sm">
-                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center shrink-0 text-green-600">
-                        <i class="ph-fill ph-chat-circle-dots text-lg"></i>
-                    </div>
-                    <div class="pt-1">
-                        <span class="font-semibold text-gray-700 block text-xs uppercase tracking-wider mb-0.5">LINE ID</span>
-                        <span class="text-gray-800 font-medium">{{ refugee_camp.line_id }}</span>
-                    </div>
-                </div>
-                {% endif %}
-                {% if refugee_camp.contact_info %}
+            {% if refugee_camp.contact_info %}
+            <div class="mb-4 bg-gray-50 rounded-xl border border-gray-100 p-4">
                 <div class="flex items-start gap-3 text-sm">
                     <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0 text-blue-600">
                         <i class="ph-fill ph-phone text-lg"></i>
                     </div>
-                    <div class="pt-1">
+                    <div class="pt-1 min-w-0 flex-1">
                         <span class="font-semibold text-gray-700 block text-xs uppercase tracking-wider mb-0.5">Contact</span>
-                        <span class="text-gray-800 font-medium">{{ refugee_camp.contact_info | safe }}</span>
+                        <span class="text-gray-800 font-medium wrap-break-word">{{ refugee_camp.contact_info | safe }}</span>
                     </div>
                 </div>
-                {% endif %}
             </div>
+            {% else %}
+            <div class="mb-4 bg-gray-50 rounded-xl border border-gray-100 p-4">
+                <div class="flex items-center gap-3 text-sm">
+                    <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0 text-gray-400">
+                        <i class="ph-fill ph-info text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <span class="text-gray-500 text-sm italic">ไม่มีข้อมูลการติดต่อ</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Action Buttons -->
-            <div class="flex flex-col gap-3 mt-auto pt-2">
-                <div class="grid grid-cols-2 gap-3 w-full">
+            <div class="flex flex-col gap-3 mt-auto {% if not refugee_camp.contact_info %}pt-4{% else %}pt-2{% endif %}">
+                {% if refugee_camp.other_link or refugee_camp.location_url %}
+                <div class="grid {% if refugee_camp.other_link and refugee_camp.location_url %}grid-cols-2{% else %}grid-cols-1{% endif %} gap-3 w-full">
                     {% if refugee_camp.other_link %}
-                    <a href="{{ refugee_camp.other_link }}" target="_blank" class="btn btn-outline btn-sm h-10 font-normal rounded-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 text-gray-600">
+                    <a href="{{ refugee_camp.other_link }}" target="_blank" class="btn btn-outline btn-sm h-10 font-normal rounded-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 text-gray-600 hover:text-gray-800 transition-colors">
                         <span class="material-symbols-outlined text-lg">open_in_new</span>
-                        ข้อมูลเพิ่มเติม
+                        <span class="hidden sm:inline">ข้อมูลเพิ่มเติม</span>
+                        <span class="sm:hidden">ข้อมูล</span>
                     </a>
                     {% endif %}
                     {% if refugee_camp.location_url %}
-                    <a href="{{ refugee_camp.location_url }}" target="_blank" class="btn btn-outline btn-sm h-10 font-normal rounded-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 text-gray-600">
+                    <a href="{{ refugee_camp.location_url }}" target="_blank" class="btn btn-outline btn-sm h-10 font-normal rounded-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 text-gray-600 hover:text-gray-800 transition-colors">
                         <span class="material-symbols-outlined text-lg">location_on</span>
-                        แผนที่
+                        <span>แผนที่</span>
                     </a>
                     {% endif %}
                 </div>
+                {% endif %}
                 <a href="{{ url_for('refugees.index', refugee_camp=refugee_camp.id) }}" class="btn btn-primary w-full text-white font-semibold text-base h-12 rounded-xl shadow-sm hover:shadow-md transition-all">
                     <i class="ph-bold ph-person text-xl"></i>
-                    ดูรายชื่อผู้อพยพ / View List
+                    <span class="hidden sm:inline">ดูรายชื่อผู้อพยพ / View List</span>
+                    <span class="sm:hidden">ดูรายชื่อ</span>
                 </a>
             </div>
         </div>
