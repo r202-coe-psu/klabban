@@ -83,13 +83,16 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {% for refugee in refugees_pagination.items %}
       <div>
-        <div class="card bg-base-100 shadow-md">
+        <div class="card bg-base-100 shadow-md min-h-[170px]">
           <div class="card-body p-4">
             <h2 class="card-title flex items-start justify-between gap-2">
               <div>
                 {{ loop.index + (refugees_pagination.page - 1) * refugees_pagination.per_page }}. {{ refugee.name }} {{ ("(" + refugee.nick_name + ")") if
                                 refugee.nick_name else "" }}
-              </div>
+            {% if refugee.people_count > 1 %}
+              <p class="text-sm text-gray-500 italic">รวมจำนวนคน {{ refugee.people_count }} คน</p>
+            {% endif %}
+              </div>              
               {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and
               refugee.refugee_camp.id == current_user.refugee_camp.id) %}
 
@@ -166,6 +169,9 @@
 
           <td class="px-4 py-3">
             {{ refugee.name }}
+            {% if refugee.people_count > 1 %}
+              <p class="text-sm text-gray-500 italic">รวมจำนวนคน {{ refugee.people_count }} คน</p>
+            {% endif %}
           </td>
 
           <td class="px-4 py-3">
