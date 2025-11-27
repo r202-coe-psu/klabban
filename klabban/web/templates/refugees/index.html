@@ -432,12 +432,12 @@
 {% endmacro %}
 
 {% macro render_refugee_status(status) %}
-<div class="border rounded-lg py-1 px-2 text-xs md:text-sm font-medium whitespace-nowrap w-fit
+<div class="border rounded-lg py-1 px-2 text-xs md:text-sm font-medium whitespace-nowrap w-fit 
     {{ 'text-blue-500 border-blue-500 bg-blue-50' if status == 'active' else '' }}
     {{ 'text-red-500 border-red-500 bg-red-50' if status == 'deactive' else '' }}
     {{ 'text-green-500 border-green-500 bg-green-50' if status == 'back_home' else '' }}
         ">
-  {{ 'อยู่ในศูนย์พักพิง / In Migrants Camp' if status == 'active' else '' }}
+  {{ 'อยู่ในศูนย์พักพิง / In Shelter' if status == 'active' else '' }}
   {{ 'ถูกลบออก / Deleted' if status == 'deactive' else '' }}
   {{ 'กลับบ้านแล้ว / Returned Home' if status == 'back_home' else '' }}
 </div>
