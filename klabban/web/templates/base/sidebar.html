@@ -75,19 +75,21 @@
         </li>
         {% endif %}
       </ul>
-      <ul class="mt-auto menu gap-2 w-full">
+      <ul class="mt-auto menu gap-2 w-full px-2 pb-4">
         {% if current_user.is_authenticated %}
         <li>
-          <a class="text-red-500" href="{{ url_for('accounts.logout') }}">
-            <i class="ph ph-sign-out text-lg"></i>
-            ออกจากระบบ
+          <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-500/80 hover:bg-red-500/100 text-red-200 hover:text-white border border-red-400/30 transition-all duration-200" 
+             href="{{ url_for('accounts.logout') }}">
+            <i class="ph ph-sign-out text-xl"></i>
+            <span class="font-medium">ออกจากระบบ</span>
           </a>
         </li>
         {% else %}
         <li>
-          <a class="text-white" href="{{ url_for('accounts.login') }}">
-            <i class="ph ph-sign-in text-lg"></i>
-            เข้าสู่ระบบ
+          <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/30 transition-all duration-200" 
+             href="{{ url_for('accounts.login') }}">
+            <i class="ph ph-sign-in text-xl"></i>
+            <span class="font-medium">เข้าสู่ระบบ</span>
           </a>
         </li>
         {% endif %}
