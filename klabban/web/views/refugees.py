@@ -132,6 +132,10 @@ def create_or_edit(refugee_id):
             form.refugee_camp.choices = [(str(refugee_camp.id), refugee_camp.name)]
             form.refugee_camp.data = str(refugee_camp.id)
 
+    # when edit keep refugee camp
+    if refugee_id:
+        form.refugee_camp.data = str(refugee.refugee_camp.id)
+
     # ถ้ามีค่าจาก request args ให้ตั้งค่า refugee_camp
     refugee_camp_id = request.args.get("refugee_camp_id", None)
     if refugee_camp_id:
