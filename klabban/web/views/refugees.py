@@ -26,6 +26,8 @@ def index():
     search = search_form.search.data
     refugee_camp_id = search_form.refugee_camp.data
     country = search_form.country.data
+    status = search_form.status.data
+    exclude_thai = request.args.get("exclude_thai", None)
     query = models.Refugee.objects(id=None)
     try:
         if "refugee_camp_staff" in current_user.roles or "admin" in current_user.roles:
@@ -44,7 +46,9 @@ def index():
         query = query.filter(refugee_camp=refugee_camp_id)
     if country:
         query = query.filter(country__icontains=country)
-    if request.args.get("exclude_thai"):
+    if status:
+        query = query.filter(status=status)
+    if exclude_thai:
         query = query.filter(country__ne="Thailand")
     try:
         refugees_pagination = Pagination(query, page=page, per_page=per_page)
