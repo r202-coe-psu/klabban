@@ -149,6 +149,9 @@
               </span>
               <h3 class="font-bold text-lg">{{ refugee.name }}</h3>
             </div>
+            {% if refugee.people_count > 1 %}
+            <p class="text-sm text-gray-500 italic">รวมจำนวน {{ refugee.people_count }} คน</p>
+            {% endif %}
             {% if refugee.nick_name %}
             <p class="text-sm text-gray-600">ชื่อเล่น: {{ refugee.nick_name }}</p>
             {% endif %}
@@ -274,18 +277,9 @@
               <div class="flex items-center gap-2">
                 {{ render_refugee_status(refugee.status) }}
                 {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
-                <button onclick="$('#{{refugee.id}}-change_status-dialog')[0].showModal()" class="text-blue-500 hover:text-blue-700">
+                <button onclick="$('#{{refugee.id}}-change_status-dialog-desktop')[0].showModal()" class="text-blue-500 hover:text-blue-700">
                   <i class="ph ph-arrows-clockwise"></i>
                 </button>
-                {{ dialog.ChangeStatusDialog(
-                  id="%s-change_status-dialog" | format(refugee.id),
-                  title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
-                  body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                  action_button_href=url_for("refugees.change_status", refugee_id=refugee.id, **request.args),
-                  refugee_name=refugee.name,
-                  bypass=(current_user.roles[0] in ["refugee_camp_staff", "admin"]) if current_user.is_authenticated else false,
-                  refugee_id=refugee.id
-                )}}
                 {% endif %}
               </div>
             </td>
@@ -329,13 +323,7 @@
             {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
             <td class="px-3 py-3">
               <div class="flex gap-1 justify-end">
-                {{ render_refugee_toolbar(refugee) }}
-                {{ dialog.DisactiveDialog(
-                  id="%s-disactive-dialog" | format(refugee.id),
-                  title="ยืนยันการลบรายการผู้อพยพ",
-                  body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                  url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
-                )}}
+                {{ render_refugee_toolbar(refugee, '-desktop') }}
               </div>
             </td>
             {% endif %}
@@ -344,6 +332,27 @@
           {% endfor %}
         </tbody>
       </table>
+    </div>
+    
+    <!-- Dialogs for Desktop Table (outside hidden wrapper) -->
+    <div class="hidden md:block">
+      {% for refugee in refugees_pagination.items %}
+        {{ dialog.ChangeStatusDialog(
+          id="%s-change_status-dialog-desktop" | format(refugee.id),
+          title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
+          body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+          action_button_href=url_for("refugees.change_status", refugee_id=refugee.id, **request.args),
+          refugee_name=refugee.name,
+          bypass=(current_user.roles[0] in ["refugee_camp_staff", "admin"]) if current_user.is_authenticated else false,
+          refugee_id=refugee.id
+        )}}
+        {{ dialog.DisactiveDialog(
+          id="%s-disactive-dialog-desktop" | format(refugee.id),
+          title="ยืนยันการลบรายการผู้อพยพ",
+          body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+          url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
+        )}}
+      {% endfor %}
     </div>
     {% endif %}
     {% if search_form.search.data and not refugees_pagination.items %}
@@ -407,7 +416,7 @@
 </script>
 {% endblock %}
 
-{% macro render_refugee_toolbar(refugee) %}
+{% macro render_refugee_toolbar(refugee, suffix='') %}
 <a href="{{ url_for('refugees.view_refugee', refugee_id=refugee.id, **request.args) }}"
   class="size-8 btn btn-outline btn-sm border-gray-300 text-green-600 hover:bg-green-100">
   <span class="material-symbols-outlined">visibility</span>
@@ -417,7 +426,7 @@
   <span class="material-symbols-outlined">edit_square</span>
 </a>
 <button class="size-8 btn btn-outline btn-sm border-gray-300 text-error hover:bg-red-100"
-  onclick="$('#{{refugee.id}}-disactive-dialog')[0].showModal()">
+  onclick="$('#{{refugee.id}}-disactive-dialog{{suffix}}')[0].showModal()">
   <span class="material-symbols-outlined">delete</span>
 </button>
 {% endmacro %}
@@ -428,8 +437,8 @@
     {{ 'text-red-500 border-red-500 bg-red-50' if status == 'deactive' else '' }}
     {{ 'text-green-500 border-green-500 bg-green-50' if status == 'back_home' else '' }}
         ">
-  {{ 'อยู่ในศูนย์พักพิง' if status == 'active' else '' }}
-  {{ 'ถูกลบออก' if status == 'deactive' else '' }}
-  {{ 'กลับบ้านแล้ว' if status == 'back_home' else '' }}
+  {{ 'อยู่ในศูนย์พักพิง / Returned Home' if status == 'active' else '' }}
+  {{ 'ถูกลบออก / Deleted' if status == 'deactive' else '' }}
+  {{ 'กลับบ้านแล้ว / Returned Home' if status == 'back_home' else '' }}
 </div>
 {% endmacro %}
