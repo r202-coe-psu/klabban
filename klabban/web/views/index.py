@@ -16,7 +16,7 @@ def index():
     for camp in refugee_camps:
         camp.refugee_count = models.Refugee.objects(
             refugee_camp=camp.id,
-            status__ne="active"
+            status="active"
         ).sum("people_count")
     
     # Sort camps by refugee count in descending order (highest first)
