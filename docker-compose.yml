@@ -13,6 +13,18 @@ services:
                 max-size: "10m"
                 max-file: "3"
 
+    redis:
+        image: redis
+        container_name: klabban-redis
+        volumes:
+            - ../deployment/klabban/redis/data:/data
+        restart: always
+        networks:
+            - default
+        logging:
+            options:
+                max-size: "10m"
+                max-file: "6"
     web:
         build: .
         image: klabban-image
@@ -35,5 +47,24 @@ services:
                 max-size: "10m"
                 max-file: "6"
 
+    worker:
+        build: .
+        image: klabban-worker-image
+        container_name: klabban-worker
+        volumes:
+            - ../deployment:/deployment
+            - /etc/localtime:/etc/localtime:ro
+        links:
+            - redis
+        networks:
+            - default
+        restart: always
+        environment:
+            KLABBAN_SETTINGS: /app/.env
+        command: /venv/bin/klabban-worker
+        logging:
+            options:
+                max-size: "10m"
+                max-file: "3"
 networks:
     default:
