@@ -51,3 +51,6 @@ cython_debug/
 # data repository
 data/
 *.dump
+
+# scripts
+scripts/mock-data.py
