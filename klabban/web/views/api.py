@@ -2,7 +2,7 @@ from flask import Blueprint
 
 from klabban.web import models
 
-module = Blueprint("api", __name__)
+module = Blueprint("apis", __name__, url_prefix="/apis")
 
 
 @module.route("/master/countries", methods=["GET", "POST"])
