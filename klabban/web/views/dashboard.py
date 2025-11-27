@@ -98,16 +98,21 @@ def admin_dashboard():
     ).sum("people_count")
 
     camp_stats = []
-    for camp in models.RefugeeCamp.objects(status="active").order_by("name"):
+    for camp in models.RefugeeCamp.objects(status="active"):
+        refugee_count = models.Refugee.objects(
+            refugee_camp=camp.id, status__ne="deactive"
+        ).sum("people_count")
+        
         camp_stats.append(
             {
                 "id": camp.id,
                 "name": camp.name,
-                "refugee_count": models.Refugee.objects(
-                    refugee_camp=camp.id, status__ne="deactive"
-                ).sum("people_count"),
+                "refugee_count": refugee_count,
             }
         )
+    
+    # Sort by refugee_count in descending order (highest first)
+    camp_stats = sorted(camp_stats, key=lambda x: x["refugee_count"], reverse=True)
 
     return render_template(
         "dashboard/admin.html",
