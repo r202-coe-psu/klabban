@@ -78,7 +78,7 @@
     let isLoading = true;
     let countries = [];
     const fetchCountries = () => {
-        fetch("{{ url_for('api.master_countries') }}")
+        fetch("{{ url_for('apis.master_countries') }}")
             .then(response => response.json())
             .then(data => {
                 countries = data.countries.filter(c => c != '');

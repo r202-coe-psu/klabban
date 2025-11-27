@@ -10,6 +10,7 @@ from .utils.error_handling import init_error_handling
 from .utils import acl
 from dotenv import dotenv_values
 from . import oauth2
+from . import caches
 
 app = Flask(__name__)
 
@@ -27,6 +28,7 @@ def create_app():
     app.config.update(config)
 
     views.register_blueprint(app)
+    caches.init_cache(app)
     models.init_db(app)
     acl.init_acl(app)
     redis_rq.init_rq(app)

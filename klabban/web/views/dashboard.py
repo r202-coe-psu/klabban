@@ -6,6 +6,7 @@ from mongoengine.queryset.queryset import QuerySet
 from mongoengine.queryset.visitor import Q
 from .. import models
 from .. import forms
+from .. import caches
 from ..utils.acl import roles_required
 from ..utils.template_filters import format_thai_date
 
@@ -79,6 +80,7 @@ def get_refugee_country_stats(refugee_queryset):
 @module.route("/admin")
 @login_required
 @roles_required(["admin"])
+@caches.cache.cached(timeout=60)
 def admin_dashboard():
     now = datetime.datetime.utcnow()
     seven_days_ago = now - datetime.timedelta(days=7)
@@ -131,6 +133,7 @@ def admin_dashboard():
 @module.route("/refugee-camp")
 @login_required
 @roles_required(["admin", "refugee_camp_staff"])
+@caches.cache.cached(timeout=60)
 def refugee_camp_dashboard():
     form = forms.dashboard.RefugeeCampDashboardForm(request.args)
     if "admin" not in current_user.roles:
