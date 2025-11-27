@@ -60,3 +60,11 @@ class RefugeeSearchForm(FlaskForm):
     )
     country = StringField("ประเทศ / Country")
     refugee_camp = SelectField("ศูนย์พักพิง / Migrant Camp", choices=[])
+    status = SelectField(
+        "สถานะ / Status",
+        choices=[
+            ("", "ทั้งหมด / All"),
+            ("active", "อยู่ในศูนย์พักพิง / In Camp"),
+            ("back_home", "กลับบ้านแล้ว / Back Home"),
+        ],
+    )
