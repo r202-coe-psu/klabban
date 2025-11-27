@@ -59,19 +59,19 @@ def get_refugee_country_stats(refugee_queryset):
     country_stats = []
     countries = refugee_queryset.distinct("country")
     unknown_count = 0
+
     for country in countries:
         count = refugee_queryset.filter(country=country).sum("people_count")
-        if not country:
-            unknown_count = count
-            continue
-        country_stats.append({"label": country, "value": country, "count": count})
-    null_country_entry = refugee_queryset.filter(country=None).sum("people_count")
-    if null_country_entry > 0:
-        unknown_count += null_country_entry
+        if not country:  # This handles both None and empty string
+            unknown_count += count
+        else:
+            country_stats.append({"label": country, "value": country, "count": count})
+
     if unknown_count > 0:
         country_stats.append(
             {"label": "ไม่ทราบประเทศ", "value": "", "count": unknown_count}
         )
+
     country_stats = sorted(country_stats, key=lambda x: x["count"], reverse=True)
     return country_stats
 
