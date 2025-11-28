@@ -476,7 +476,7 @@ def write_refugees_from_import_file(
                     existing_refugee.updated_date = datetime.datetime.now()
 
                     existing_refugee.save()
-                    updated_count += 1
+                    record_count += 1
                 else:
                     refugee = models.Refugee(
                         refugee_camp=refugee_camp_id,
