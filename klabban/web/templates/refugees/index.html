@@ -156,7 +156,6 @@
             <p class="text-sm text-gray-600">ชื่อเล่น: {{ refugee.nick_name }}</p>
             {% endif %}
           </div>
-          {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
           <div class="flex gap-1">
             {{ render_refugee_toolbar(refugee) }}
             {{ dialog.DisactiveDialog(
@@ -166,7 +165,6 @@
               url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
             )}}
           </div>
-          {% endif %}
         </div>
         
         <div class="space-y-2 text-sm">
@@ -174,7 +172,6 @@
             <span class="text-gray-500">สถานะ:</span>
             <div class="flex items-center gap-2">
               {{ render_refugee_status(refugee.status) }}
-              {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
               <button onclick="$('#{{refugee.id}}-change_status-dialog-mobile')[0].showModal()" class="text-blue-500">
                 <i class="ph ph-arrows-clockwise"></i>
               </button>
@@ -187,7 +184,6 @@
                 bypass=(current_user.roles[0] in ["refugee_camp_staff", "admin"]) if current_user.is_authenticated else false,
                 refugee_id=refugee.id
               )}}
-              {% endif %}
             </div>
           </div>
           
@@ -267,20 +263,23 @@
               {{ refugee.registration_date.strftime("%d %b %Y") }}
             </td>
 
-            {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
+            {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles)%}
             <td class="px-3 py-3 hidden xl:table-cell">
+              {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
               {{ refugee.country if refugee.country else '-' }}
+              {% else %}
+              -
+              {% endif %}
+
             </td>
             {% endif %}
 
             <td class="px-3 py-3">
               <div class="flex items-center gap-2">
                 {{ render_refugee_status(refugee.status) }}
-                {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
                 <button onclick="$('#{{refugee.id}}-change_status-dialog-desktop')[0].showModal()" class="text-blue-500 hover:text-blue-700">
                   <i class="ph ph-arrows-clockwise"></i>
                 </button>
-                {% endif %}
               </div>
             </td>
 
