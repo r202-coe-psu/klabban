@@ -40,7 +40,7 @@ BaseRefugeeForm = model_form(
         "created_date",
         "updated_date",
         "camps_log",
-        "resource",
+        "source",
     ],
 )
 
