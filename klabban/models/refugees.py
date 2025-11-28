@@ -10,6 +10,7 @@ REFUGEE_STATUS_CHOICES = [
 
 GENDER = [("male", "ชาย"), ("female", "หญิง"), ("other", "ไม่ระบุ")]
 
+
 class RefugeeStatusLog(me.EmbeddedDocument):
     status = me.StringField(choices=REFUGEE_STATUS_CHOICES, required=True)
     changed_by = me.ReferenceField("User")
@@ -58,5 +59,3 @@ class Refugee(me.Document):
     updated_by = me.ReferenceField("User")
     created_date = me.DateTimeField(default=datetime.datetime.now)
     updated_date = me.DateTimeField(default=datetime.datetime.now)
-
-
