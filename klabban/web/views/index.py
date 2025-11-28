@@ -15,8 +15,7 @@ def index():
     # Count refugees for each camp (only active refugees) and attach to camp object
     for camp in refugee_camps:
         camp.refugee_count = models.Refugee.objects(
-            refugee_camp=camp.id,
-            status="active"
+            refugee_camp=camp.id, status="active"
         ).sum("people_count")
 
     # Sort camps by refugee count in descending order (highest first)
