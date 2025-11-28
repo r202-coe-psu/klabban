@@ -227,6 +227,16 @@ def change_camp(refugee_id, camp_id):
     print(f"Changing camp of refugee {refugee.name} to {new_camp.name}")
     refugee.refugee_camp = new_camp
     # Log the camp change
+    camp_log = models.RefugeeCampsLog(
+        refugee_camp=new_camp,
+        changed_by=(
+            current_user._get_current_object()
+            if current_user.is_authenticated
+            else None
+        ),
+        ip_address=request.headers.get("X-Forwarded-For", request.remote_addr),
+    )
+    refugee.camps_log.append(camp_log)
     refugee.save()
 
     return redirect(url_for("refugees.index", **request.args))
