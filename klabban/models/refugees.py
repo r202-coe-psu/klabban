@@ -10,17 +10,20 @@ REFUGEE_STATUS_CHOICES = [
 
 GENDER = [("male", "ชาย"), ("female", "หญิง"), ("other", "ไม่ระบุ")]
 
+
 class RefugeeStatusLog(me.EmbeddedDocument):
     status = me.StringField(choices=REFUGEE_STATUS_CHOICES, required=True)
     changed_by = me.ReferenceField("User")
     changed_date = me.DateTimeField(default=datetime.datetime.now)
     ip_address = me.StringField()  # To accommodate IPv6 addresses
 
+
 class RefugeeCampsLog(me.EmbeddedDocument):
     refugee_camp = me.ReferenceField("RefugeeCamp", dbref=True)
     changed_by = me.ReferenceField("User")
     changed_date = me.DateTimeField(default=datetime.datetime.now)
     ip_address = me.StringField()  # To accommodate IPv6 addresses
+
 
 class Refugee(me.Document):
     meta = {
@@ -64,5 +67,3 @@ class Refugee(me.Document):
     updated_by = me.ReferenceField("User")
     created_date = me.DateTimeField(default=datetime.datetime.now)
     updated_date = me.DateTimeField(default=datetime.datetime.now)
-
-

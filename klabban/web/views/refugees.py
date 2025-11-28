@@ -17,7 +17,7 @@ def index():
 
     page = request.args.get("page", 1, type=int)
     per_page = 50  # จำนวนรายการต่อหน้า
-    camp_choice =  [
+    camp_choice = [
         (str(camp.id), camp.name)
         for camp in models.RefugeeCamp.objects(status__ne="deactive").order_by("name")
     ]
@@ -38,7 +38,7 @@ def index():
     try:
         if "refugee_camp_staff" in current_user.roles or "admin" in current_user.roles:
             query = models.Refugee.objects(status__ne="deactive").order_by("name")
-    except Exception:   
+    except Exception:
         query = models.Refugee.objects(id=None)
     if search or country:
         query = models.Refugee.objects(status__ne="deactive").order_by("name")
@@ -188,18 +188,14 @@ def create_or_edit(refugee_id):
             refugee.created_by = current_user._get_current_object()
         refugee.updated_by = current_user._get_current_object()
 
-    user = (
-        current_user._get_current_object()
-        if current_user.is_authenticated
-        else None
-    )
+    user = current_user._get_current_object() if current_user.is_authenticated else None
     ip_address = request.headers.get("X-Forwarded-For", request.remote_addr)
 
     log = models.RefugeeStatusLog(
-            status=refugee.status,
-            changed_by=user,
-            ip_address=ip_address,
-        )
+        status=refugee.status,
+        changed_by=user,
+        ip_address=ip_address,
+    )
     camp_log = models.RefugeeCampsLog(
         refugee_camp=refugee.refugee_camp,
         changed_by=user,
@@ -218,6 +214,7 @@ def create_or_edit(refugee_id):
     refugee.save()
 
     return redirect(url_for("refugees.index"))
+
 
 @module.route("/<refugee_id>/change_camp/<camp_id>", methods=["POST", "GET"])
 @roles_required(["admin", "refugee_camp_staff"])

@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from mongoengine.queryset.visitor import Q
 import datetime
 import uuid
-from flask_mongoengine import Pagination 
+from flask_mongoengine import Pagination
 from klabban.web import forms
 from klabban import models
 from klabban.web.utils.acl import roles_required
@@ -33,11 +33,12 @@ def index():
     except Exception as e:
         pagination = Pagination(users, 1, per_page=20)
 
-
     form = forms.users.SearchCreateUserForm()
     form.search.data = search
 
-    return render_template("/users/index.html", users_pagination=pagination, form=form, total=users.count())
+    return render_template(
+        "/users/index.html", users_pagination=pagination, form=form, total=users.count()
+    )
 
 
 @module.route("/create", methods=["GET", "POST"], defaults={"user_id": None})
@@ -51,7 +52,7 @@ def create_or_edit_user(user_id):
         ("user", "ผู้ใช้งานทั่วไป"),
         ("admin", "ผู้ดูแลระบบ"),
         ("refugee_camp_staff", "เจ้าหน้าที่ศูนย์พักพิง"),
-    ]   
+    ]
     if user_id:
         user = models.User.objects.get(id=user_id)
         form = forms.users.EditUserForm(obj=user)
@@ -73,7 +74,7 @@ def create_or_edit_user(user_id):
             ("refugee_camp_staff", "เจ้าหน้าที่ศูนย์พักพิง"),
             ("user", "ผู้ใช้งานทั่วไป"),
         ]
-      
+
     if not form.validate_on_submit():
         print("Form errors:", form.errors)
         form.role.data = user.roles[0] if user.roles else "user"

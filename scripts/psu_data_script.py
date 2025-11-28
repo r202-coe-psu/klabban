@@ -7,6 +7,7 @@ import mongoengine as me
 from collections import Counter, defaultdict
 from dotenv import dotenv_values
 
+
 def to_py_datetime(x, sheet_name=None):
     if pd.isna(x):
         return format_sheet_date(sheet_name)
@@ -19,7 +20,8 @@ def to_py_datetime(x, sheet_name=None):
     except Exception:
         return None
 
-def map_row_to_doc(row, created_by_id=None, camp_id=None,sheet_name=None):
+
+def map_row_to_doc(row, created_by_id=None, camp_id=None, sheet_name=None):
     """
     Map a pandas Series row (Thai column names) to a dict ready for insertion.
     Adjust keys according to your Refugee schema.
@@ -28,7 +30,7 @@ def map_row_to_doc(row, created_by_id=None, camp_id=None,sheet_name=None):
     name = row.get("ชื่อ-สกุล")
 
     registration_date = to_py_datetime(row.get("วัน/เวลาที่เข้าพัก"), sheet_name=sheet_name)
-        
+
     expected_leave = to_py_datetime(row.get("วันที่คาดว่าจะออกจากศูนย์พักพิง"))
     age = row.get("อายุ")
     try:
@@ -40,7 +42,9 @@ def map_row_to_doc(row, created_by_id=None, camp_id=None,sheet_name=None):
     if pd.notna(row.get("โรคประจำตัว")):
         congenital_disease.append(str(row.get("โรคประจำตัว")))
     if pd.notna(row.get("ถ้าหากมีโรคประจำตัว (โปรดตอบ)  และ ได้พกยาอะไรมาบ้าง")):
-        congenital_disease.append(str(row.get("ถ้าหากมีโรคประจำตัว (โปรดตอบ)  และ ได้พกยาอะไรมาบ้าง")))
+        congenital_disease.append(
+            str(row.get("ถ้าหากมีโรคประจำตัว (โปรดตอบ)  และ ได้พกยาอะไรมาบ้าง"))
+        )
 
     def _clean(val, to_str=False, to_int=False):
         # normalize pandas/Excel NaN and empty strings to None
@@ -81,8 +85,9 @@ def map_row_to_doc(row, created_by_id=None, camp_id=None,sheet_name=None):
         "registration_date": registration_date,
         "is_public_searchable": True,
         "status": "active",
-        "congenital_disease": " | ".join(congenital_disease) if congenital_disease else None,
-
+        "congenital_disease": (
+            " | ".join(congenital_disease) if congenital_disease else None
+        ),
         # extra fields from the sheet (clean NaN/empty values)
         "phone": _clean(row.get("เบอร์โทร"), to_str=True),
         "age": age,
@@ -90,8 +95,9 @@ def map_row_to_doc(row, created_by_id=None, camp_id=None,sheet_name=None):
         "pets": _clean(row.get("สัตว์เลี้ยง"), to_str=True),
         "expected_days": _clean(row.get("คาดว่าจะเข้าพักอาศัยจำนวนกี่วัน"), to_int=True),
         "people_count": _clean(row.get("เข้าพักกี่คน"), to_int=True),
-        "emergency_contact": _clean(row.get("บุคคลติดต่อฉุกเฉิน (ชื่อ-สกุล และเบอร์โทร)"), to_str=True),
-
+        "emergency_contact": _clean(
+            row.get("บุคคลติดต่อฉุกเฉิน (ชื่อ-สกุล และเบอร์โทร)"), to_str=True
+        ),
         "created_by": created_by_id,
         "updated_by": created_by_id,
         "created_date": datetime.datetime.now(),
@@ -100,10 +106,11 @@ def map_row_to_doc(row, created_by_id=None, camp_id=None,sheet_name=None):
     # remove None entries for cleaner insert
     return {k: v for k, v in doc.items() if v is not None}
 
+
 def format_sheet_date(name):
-    if name in ['241168（1）', '241168（2）', '241168 (3)']:
-        return datetime.datetime(2025, 11 ,24)
-    elif name in ['251168-1', ' 251168-2', '251168-3', '251168-4']:
+    if name in ["241168（1）", "241168（2）", "241168 (3)"]:
+        return datetime.datetime(2025, 11, 24)
+    elif name in ["251168-1", " 251168-2", "251168-3", "251168-4"]:
         return datetime.datetime(2025, 11, 25)
     else:
         return None
@@ -122,14 +129,16 @@ def duplicate_drop(data_to_save):
             examples[norm].append((idx, name))
 
     duplicates = {n: c for n, c in counter.items() if c > 1}
-    print(f"\nSummary: total_rows={len(data_to_save)}, unique_names={len(counter)}, duplicate_groups={len(duplicates)}")
+    print(
+        f"\nSummary: total_rows={len(data_to_save)}, unique_names={len(counter)}, duplicate_groups={len(duplicates)}"
+    )
     if duplicates:
         print("Top duplicate name groups (count — examples index:name):")
         for norm, count in sorted(duplicates.items(), key=lambda x: -x[1])[:20]:
             ex = examples[norm]
             ex_str = ", ".join(f"{i}:{nm}" for i, nm in ex)
             print(f"{count} — {ex_str}")
-    
+
     # remove duplicates by normalized name (keep first occurrence)
     seen = set()
     unique_docs = []
@@ -148,8 +157,12 @@ def duplicate_drop(data_to_save):
 
     print(f"Dropped {len(dropped_docs)} duplicate rows")
     if dropped_docs:
-        print("Some dropped examples (index:name):", ", ".join(f"{i}:{n}" for i, n in dropped_docs[:10]))
+        print(
+            "Some dropped examples (index:name):",
+            ", ".join(f"{i}:{n}" for i, n in dropped_docs[:10]),
+        )
     return unique_docs
+
 
 def main():
     # usage: python psu_data_script.py [path_to_excel] [nrows] [save]
@@ -165,7 +178,7 @@ def main():
     if not path.exists():
         print(f"File not found: {path}")
         return
-    
+
     config = dotenv_values(".env")
     print(config)
     try:
@@ -174,7 +187,9 @@ def main():
         port = int(config.get("MONGODB_PORT", 27017))
         username = config.get("MONGODB_USERNAME", "")
         password = config.get("MONGODB_PASSWORD", "")
-        me.connect(db=dbname, host=host, port=port, username=username, password=password)
+        me.connect(
+            db=dbname, host=host, port=port, username=username, password=password
+        )
         db = me.get_db()
     except Exception as e:
         print("Connected to MongoDB (could not determine DB name).")
@@ -186,8 +201,8 @@ def main():
     camp = None
     if db is not None:
         try:
-            admin = db['users'].find_one({"username": "admin"})
-            camp = db['refugee_camps'].find_one({"name": "มหาวิทยาลัยสงขลานครินทร์"})
+            admin = db["users"].find_one({"username": "admin"})
+            camp = db["refugee_camps"].find_one({"name": "มหาวิทยาลัยสงขลานครินทร์"})
         except Exception as e:
             print("Error querying admin user:", e)
     # obtain admin _id to use as created_by reference (None if not found)
@@ -195,17 +210,24 @@ def main():
     camp_id = camp.get("_id") if camp else None
     print("admin:", admin)
     print("camp_id:", camp_id)
-    
+
     xls = pd.ExcelFile(path)
     # show sheet names (or use pd.read_excel(...).shape for a dataframe)
     print(f"Loaded: {path} — sheets: {xls.sheet_names}")
-    sheet_list = ['241168（1）', '241168（2）', '241168 (3)', '251168-1', ' 251168-2', '251168-3', '251168-4']
+    sheet_list = [
+        "241168（1）",
+        "241168（2）",
+        "241168 (3)",
+        "251168-1",
+        " 251168-2",
+        "251168-3",
+        "251168-4",
+    ]
     data_to_save = []
     for sheet_name in sheet_list:
         print(f"\nProcessing sheet: {sheet_name}")
         df = pd.read_excel(path, sheet_name=sheet_name)
         print(f"Shape: {df.shape}")
-
 
         for i, row in df.iterrows():
             # skip rows with missing or empty name
@@ -215,7 +237,9 @@ def main():
                 continue
             if isinstance(name_val, str) and not name_val.strip():
                 continue
-            doc = map_row_to_doc(row, created_by_id=admin_id, camp_id=camp_id, sheet_name=sheet_name)
+            doc = map_row_to_doc(
+                row, created_by_id=admin_id, camp_id=camp_id, sheet_name=sheet_name
+            )
             # print(f"Row {i}: name={doc.get('name')}, registration_date={doc.get('registration_date')}, age={doc.get('age')}")
             data_to_save.append(doc)
     print("All sheet lens:", len(data_to_save))
@@ -226,9 +250,10 @@ def main():
     if do_save:
         try:
             for doc in data_to_save:
-                db['refugees'].insert_one(doc)
+                db["refugees"].insert_one(doc)
         except Exception as e:
             print("Error inserting documents:", e)
- 
+
+
 if __name__ == "__main__":
     main()
