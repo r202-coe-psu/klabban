@@ -17,7 +17,9 @@
 <div class="bg-white rounded-3xl border border-gray-300">
   <div class="overflow-x-auto p-6">
     <div class="flex flex-row max-sm:flex-col w-full sm:items-end justify-between mb-2 gap-4"></div>
-      <form method="GET">
+      <form method="POST">
+        {{ form.csrf_token}}
+        
         <div class="text-xl font-medium text-gray-700 flex justify-between items-center w-full">
           <p>แจ้งปัญหาการเปลี่ยนสถานะผู้อพยพ / Immigration status change</p>
         </div>
@@ -30,7 +32,7 @@
           <a class="btn" href="{{ url_for('refugees.index') }}">
             ยกเลิก / Cancel
           </a>
-          <button class="btn btn-primary" type="submit" id="submit-refugee-button">
+          <button class="btn btn-primary" type="submit">
             ยืนยัน / Save
           </button>
         </div>
