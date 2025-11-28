@@ -289,11 +289,16 @@ def create_description(refugee_id):
 
     ip_address = request.headers.get("X-Forwarded-For", request.remote_addr)
 
-    refugee.description = form.description.data
-    refugee.updated_by = (
-        current_user._get_current_object() if current_user.is_authenticated else None
+    log = models.RefugeeNoteLog(
+        ip_address=ip_address,
     )
 
+    refugee.description = form.description.data
+    # refugee.updated_by = (
+    #     current_user._get_current_object() if current_user.is_authenticated else None
+    # )
+
+    refugee.note_log.append(log)
     refugee.save()
 
     flash(f"แจ้งปัญหาการเปลี่ยนสถานะผู้อพยพสำเร็จ", "success")
