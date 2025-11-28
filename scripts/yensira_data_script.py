@@ -32,6 +32,15 @@ def format_gender(x):
         return "other"
 
 
+def title_to_gender(x):
+    if "นาย" in x or "เด็กชาย" in x or "ด.ช." in x:
+        return "male"
+    elif "นาง" in x or "เด็กหญิง" in x or "ด.ญ." in x:
+        return "female"
+    else:
+        return "other"
+
+
 def save(row, created_by=None, camp=None):
     """
     Save a row to the Refugee model.
@@ -52,10 +61,15 @@ def save(row, created_by=None, camp=None):
         refugee.reload()
         print(f"save refugee '{refugee.name}' with ID: {refugee.id}")
 
-    refugee.congenital_disease = row.get("โรคประจำตัว")
-    refugee.phone = row.get("เบอร์โทรศัพท์")
-    refugee.citizen_id = row.get("เลขบัตรประชาชน")
+    # print("row data:", row.to_dict())
+    refugee.congenital_disease = row.get("โรค")
+    refugee.phone = row.get("เบอร์โทร")
+    refugee.gender = title_to_gender(row.get("title"))
+    refugee.metadata["citizen_id"] = row.get("เลขบัตรประชาชน")
     refugee.metadata["HN"] = row.get("HN")
+    refugee.metadata["patient"] = row.get("ผู้ป่วย", False)
+    refugee.metadata["relative"] = row.get("ญาติ", False)
+    # print("updated refugee data:", refugee.to_mongo().to_dict())
 
     refugee.save()
     print(f"update refugee '{refugee.name}' with ID: {refugee.id}")
@@ -131,7 +145,9 @@ def main():
             lambda x: " ".join(x.dropna().astype(str).str.strip()), axis=1
         )
 
-        df = df.drop(df.columns[1:4], axis=1)
+        df = df.drop(df.columns[2:4], axis=1)
+        # Rename the second column (index 1) to "title"
+        df = df.rename(columns={df.columns[1]: "title"})
 
         # Convert 'ผู้ป่วย' and 'ญาติ' columns to boolean based on '/' presence
         if "ผู้ป่วย" in df.columns:
