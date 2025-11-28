@@ -307,14 +307,63 @@ def create_description(refugee_id):
 
 
 @module.route("/view_descriptions")
+@roles_required(["admin", "refugee_camp_staff"])
 def view_description():
 
-    # pagination
+    page = request.args.get("page", 1, type=int)
+    per_page = 50  # จำนวนรายการต่อหน้า
+    camp_choice, active_camps = get_refugee_camp_choices()
 
-    return render_template("refugees/view_description.html")
+    search_form = forms.refugees.RefugeeSearchForm(request.args)
+    search_form.refugee_camp.choices = [("", "ทั้งหมด")] + active_camps
+    search = search_form.search.data
+    refugee_camp_id = search_form.refugee_camp.data
+    country = search_form.country.data
+    status = search_form.status.data
+    exclude_thai = request.args.get("exclude_thai", None)
+
+    change_camp_form = forms.refugees.ChangeRefugeeCampForm()
+    change_camp_form.refugee_camp.choices = camp_choice
+    change_camp_form.refugee_camp.data = ""
+
+    query = models.Refugee.objects(id=None)
+    try:
+        if "refugee_camp_staff" in current_user.roles or "admin" in current_user.roles:
+            query = models.Refugee.objects(status__ne="deactive").order_by("name")
+    except Exception:
+        query = models.Refugee.objects(id=None)
+    if search or country:
+        query = models.Refugee.objects(status__ne="deactive").order_by("name")
+    if search:
+        query = query.filter(
+            Q(name__icontains=search)
+            | Q(nick_name__icontains=search)
+            | Q(phone__icontains=search)
+        )
+    if refugee_camp_id:
+        query = query.filter(refugee_camp=refugee_camp_id)
+    if country:
+        query = query.filter(country__icontains=country)
+    if status:
+        query = query.filter(status=status)
+    if exclude_thai:
+        query = query.filter(country__ne="Thailand")
+    try:
+        refugees_pagination = Pagination(query, page=page, per_page=per_page)
+    except ValueError:
+        refugees_pagination = Pagination(query, page=1, per_page=per_page)
+
+    return render_template(
+        "refugees/view_description.html",
+        refugees_pagination=refugees_pagination,
+        search_form=search_form,
+        change_camp_form=change_camp_form,
+    )
+
 
 
 @module.route("change_status_description")
+@roles_required(["admin", "refugee_camp_staff"])
 def change_status_description():
 
     # if
