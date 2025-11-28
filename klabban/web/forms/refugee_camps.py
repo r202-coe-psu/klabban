@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from flask_mongoengine.wtf import model_form
 from klabban.web import models
 from wtforms import SelectField
+from flask_wtf.file import FileField, FileAllowed
 
 BaseRefugeeCampForm = model_form(
     models.RefugeeCamp,
@@ -14,10 +15,15 @@ BaseRefugeeCampForm = model_form(
         "other_link": {"label": "ลิงก์อื่น ๆ"},
         "description": {"label": "รายละเอียด"},
     },
+    exclude=["image"],
 )
 
 
 class RefugeeCampForm(BaseRefugeeCampForm):
+    image_file = FileField(
+        "รูปภาพ",
+        validators=[FileAllowed(["jpg", "jpeg", "png"])],
+    )
     pass
 
 

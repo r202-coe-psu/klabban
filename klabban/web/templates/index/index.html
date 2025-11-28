@@ -63,12 +63,18 @@
       {% endif %} gap-2">
       {% for refugee_camp in refugee_camps %}
       <div class="card w-full bg-white shadow-lg border border-gray-100 rounded-xl flex flex-col h-full">
+        {% if refugee_camp.image %}
+        <figure>
+          <img src="{{ url_for('refugee_camps.serve_file', file_id=refugee_camp.image.id) }}" alt="{{ refugee_camp.name }}"
+            class="w-full" />
+        </figure>
+        {% endif %}
         <div class="card-body p-4 text-start flex flex-col h-full">
             <div>
-                <h2 class="card-title text-xl mb-2">{{ refugee_camp.name }}</h2>
-                {% if refugee_camp.line_id %}
-                <p class="text-l text-gray-600">LINE ID : {{ refugee_camp.line_id }}</p>
-                {% endif %}
+              <h2 class="card-title text-xl mb-2">{{ refugee_camp.name }}</h2>
+              {% if refugee_camp.line_id %}
+              <p class="text-l text-gray-600">LINE ID : {{ refugee_camp.line_id }}</p>
+              {% endif %}
                 <p class="text-l text-gray-600">ช่องทางติดต่อ : {{ refugee_camp.contact_info | safe }}</p>
             </div>
 

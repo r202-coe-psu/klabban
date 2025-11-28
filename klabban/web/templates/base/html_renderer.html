@@ -1157,3 +1157,88 @@ items-center justify-center cursor-pointer mx-auto h-40 bg-white hover:bg-gray-1
   }
 </script>
 {% endmacro%}
+
+{% macro render_file_dropzone(field, accept="image/png,image/jpeg,.png,.jpg,.jpeg", max_files=10, help_text="Drag & drop PNG/JPEG files here or click to select", class_="") -%}
+<fieldset class="form-control w-full mb-4">
+  <legend class="text-xs py-2 font-bold">
+    {{ field.label.text }}
+    {% if field.flags.required %}<span class="text-error">*</span>{% endif %}
+  </legend>
+
+  <div id="dropzone-{{ field.id }}"
+    class="dropzone border-dashed border-2 border-gray-300 rounded-lg p-6 text-center cursor-pointer {{ class_ }}"
+    style="transition: border-color 0.2s"
+    onclick="document.getElementById('fileinput-{{ field.id }}').click();"
+    ondragover="event.preventDefault(); this.style.borderColor='#3b82f6';"
+    ondragleave="event.preventDefault(); this.style.borderColor='#d1d5db';"
+    ondrop="handleDrop(event, '{{ field.id }}', {{ max_files }});">
+
+    <div class="dz-message text-gray-500">
+      <span class="block mb-2">{{ help_text }}</span>
+      <span class="text-xs text-gray-400">Accepted: PNG (.png), JPG/JPEG (.jpg/.jpeg)</span>
+    </div>
+    <ul id="file-list-{{ field.id }}" class="mt-4 text-left text-sm" onclick="event.stopPropagation();">
+    </ul>
+  </div>
+
+  {{ field(class_="hidden", id="fileinput-" ~ field.id, accept=accept) }}
+
+  <span class="validator-hint">
+    {% for error in field.errors %}
+      {{ error }}
+      {% if not loop.last %}<br />{% endif %}
+    {% endfor %}
+  </span>
+</fieldset>
+
+<script>
+  function handleDrop(event, fieldId, maxFiles) {
+    event.preventDefault();
+    const input = document.getElementById('fileinput-' + fieldId);
+    let files = Array.from(event.dataTransfer.files);
+    files = files.filter(file =>
+      file.type === 'image/png' ||
+      file.type === 'image/jpeg' ||
+      file.name.endsWith('.png') ||
+      file.name.endsWith('.jpg') ||
+      file.name.endsWith('.jpeg')
+    );
+    if (files.length > maxFiles) {
+      alert('You can upload up to ' + maxFiles + ' files.');
+      files = files.slice(0, maxFiles);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const dropzones = document.querySelectorAll('[id^="dropzone-"]');
+    dropzones.forEach(function (dropzone) {
+      const fieldId = dropzone.id.replace('dropzone-', '');
+      const input = document.getElementById('fileinput-' + fieldId);
+      input.addEventListener('change', function () {
+        let files = Array.from(input.files).filter(file =>
+          file.type === 'image/png' ||
+          file.type === 'image/jpeg' ||
+          file.name.endsWith('.png') ||
+          file.name.endsWith('.jpg') ||
+          file.name.endsWith('.jpeg')
+        );
+      });
+    });
+  });
+
+  window.handleDrop = handleDrop;
+</script>
+
+<style>
+  .dropzone:hover {
+    border-color: #3b82f6;
+  }
+  .dropzone ul {
+    margin: 0;
+    padding: 0;
+  }
+  .dropzone li {
+    list-style: none;
+  }
+</style>
+{%- endmacro %}

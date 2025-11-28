@@ -3,26 +3,35 @@
 {% set modal_header = 'เพิ่มศูนย์พักพิงใหม่' %}
 
 <dialog class="modal modal-open" id="{{ modal_id }}">
-  <div class="modal-box">
+  <div class="modal-box w-full max-w-4xl">
     <h3 class="text-lg">{{ modal_header }}</h3>
     <span class="text-sm text-gray-600">กรอกข้อมูลศูนย์พักพิงใหม่ในแบบฟอร์มด้านล่าง</span>
     <form method="post"
+      enctype="multipart/form-data"
       action="{{ url_for('refugee_camps.create_or_edit_refugee_camp', refugee_camp_id=refugee_camp_id) }}">
       {{ form.csrf_token }}
-      <div class="flex flex-col">
-        {{ renderer.base_render(form.name) }}
-      </div>
-      <div class="flex flex-col">
-        {{ renderer.base_render(form.location_url) }}
-      </div>
-      <div class="flex flex-col">
-        {{ renderer.render_text_area_field(form.contact_info) }}
-      </div>
-      <div class="flex flex-col">
-        {{ renderer.base_render(form.other_link) }}
-      </div>
-      <div class="flex flex-col">
-        {{ renderer.render_text_area_field(form.description) }}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex flex-col">
+          {{ renderer.base_render(form.name) }}
+          {{ renderer.base_render(form.location_url) }}
+          {{ renderer.render_text_area_field(form.contact_info) }}
+          {{ renderer.base_render(form.other_link) }}
+          {{ renderer.render_text_area_field(form.description) }}
+        </div>
+        <div class="flex flex-col">
+          {{ renderer.render_file_dropzone(form.image_file)}}
+        {% if refugee_camp_image %}
+        <div class="mt-2">
+          <label class="label">
+            <span class="text-sm text-gray-600">รูปภาพปัจจุบัน:</span>
+          </label>
+          <figure>
+            <img src="{{ url_for('refugee_camps.serve_file', file_id=refugee_camp_image.id) }}" alt="Current Image"
+              class="w-full max-w-sm" />
+          </figure>
+        </div>
+        {% endif %}
+        </div>
       </div>
       <div class="modal-action justify-end">
         <button type="button" class="btn"

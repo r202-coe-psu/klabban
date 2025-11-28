@@ -5,6 +5,7 @@ from klabban.models.refugees import Refugee, RefugeeStatusLog
 from klabban.models.refugee_camps import RefugeeCamp
 from klabban.models.oauth2 import OAuth2Token
 from klabban.models.export_refugee_files import ExportRefugeeFile
+from klabban.models.files import File
 
 import mongoengine as me
 
@@ -15,6 +16,7 @@ __all__ = [
     "RefugeeCamp",
     "OAuth2Token",
     "ExportRefugeeFile",
+    "File"
 ]
 
 db = MongoEngine()

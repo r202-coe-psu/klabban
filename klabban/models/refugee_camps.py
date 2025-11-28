@@ -10,9 +10,10 @@ class RefugeeCamp(me.Document):
     contact_info = me.StringField()
     line_id = me.StringField(max_length=128)
     other_link = me.StringField(max_length=2048)
+    image = me.ReferenceField("File", dbref=True)
 
     status = me.StringField(choices=("deactive", "active"), default="active")
-   
+
     created_by = me.ReferenceField(
         "User",
     )

@@ -39,16 +39,18 @@ def create_or_edit_refugee_camp(refugee_camp_id):
     if refugee_camp_id:
         refugee_camp = models.RefugeeCamp.objects.get(id=refugee_camp_id)
         form = forms.refugee_camps.RefugeeCampForm(obj=refugee_camp)
+        refugee_camp_image = refugee_camp.image
     else:
         refugee_camp.created_by = current_user._get_current_object()
+        refugee_camp_image = None
 
     if request.method == "GET":
-
         return render_template(
             "/components/refugee_camps/create_or_edit_modal.html",
             form=form,
             modal_id=modal_id,
             refugee_camp_id=refugee_camp_id,
+            refugee_camp_image=refugee_camp_image,
         )
 
     if not form.validate_on_submit():
@@ -64,6 +66,30 @@ def create_or_edit_refugee_camp(refugee_camp_id):
     refugee_camp.updated_at = datetime.datetime.now()
     refugee_camp.save()
 
+    if form.image_file.data:
+        storage = form.image_file.data
+        storage.seek(0, 2)
+        filesize = storage.tell() / 1000
+        storage.seek(0)
+
+        file_doc = models.File(
+            title=storage.filename,
+            mimetype=storage.content_type,
+            uploaded_by=current_user._get_current_object(),
+            uploaded_date=datetime.datetime.now(),
+            filesize=filesize,
+            owner=current_user._get_current_object(),
+        )
+        print(file_doc.refugee_camp)
+        file_doc.file.put(
+            storage,
+            content_type=storage.content_type,
+            filename=storage.filename,
+        )
+        file_doc.save()
+
+        refugee_camp.image = file_doc
+        refugee_camp.save()
     return redirect(url_for("refugee_camps.index"))
 
 
@@ -139,3 +165,9 @@ def download_exported_file(refugee_camp_id):
         as_attachment=True,
         download_name=f"refugee_data_{refugee_camp.name}.xlsx",
     )
+
+
+@module.route("/file/<file_id>")
+def serve_file(file_id):
+    file_doc = models.File.objects.get(id=file_id)
+    return send_file(file_doc.file, mimetype=file_doc.mimetype)
