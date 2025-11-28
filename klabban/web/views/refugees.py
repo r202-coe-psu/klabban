@@ -111,6 +111,7 @@ def create_or_edit(refugee_id):
     if refugee_id:
         refugee = models.Refugee.objects.get(id=refugee_id)
         form = forms.refugees.RefugeeForm(obj=refugee)
+        old_status = refugee.status
 
     if current_user.is_authenticated and "admin" in current_user.roles:
         # 1. ถ้าเป็น admin ให้แสดงตัวเลือก refugee_camp ทั้งหมด
@@ -175,6 +176,18 @@ def create_or_edit(refugee_id):
         if not refugee_id:
             refugee.created_by = current_user._get_current_object()
         refugee.updated_by = current_user._get_current_object()
+
+    if refugee_id and form.status.data != old_status:
+        log = models.RefugeeStatusLog(
+            status=refugee.status,
+            changed_by=(
+                current_user._get_current_object()
+                if current_user.is_authenticated
+                else None
+            ),
+            ip_address=request.headers.get("X-Forwarded-For", request.remote_addr),
+        )
+        refugee.status_log.append(log)
 
     refugee.save()
 
