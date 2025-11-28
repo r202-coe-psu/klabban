@@ -16,6 +16,11 @@ class RefugeeStatusLog(me.EmbeddedDocument):
     changed_date = me.DateTimeField(default=datetime.datetime.now)
     ip_address = me.StringField()  # To accommodate IPv6 addresses
 
+class RefugeeCampsLog(me.EmbeddedDocument):
+    refugee_camp = me.ReferenceField("RefugeeCamp", dbref=True)
+    changed_by = me.ReferenceField("User")
+    changed_date = me.DateTimeField(default=datetime.datetime.now)
+    ip_address = me.StringField()  # To accommodate IPv6 addresses
 
 class Refugee(me.Document):
     meta = {
@@ -53,6 +58,7 @@ class Refugee(me.Document):
         default="active",
     )
     status_log = me.EmbeddedDocumentListField("RefugeeStatusLog")
+    camps_log = me.EmbeddedDocumentListField("RefugeeCampsLog")
 
     created_by = me.ReferenceField("User")
     updated_by = me.ReferenceField("User")
