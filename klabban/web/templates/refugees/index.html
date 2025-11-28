@@ -122,6 +122,22 @@
               {% set _ = camp_args.pop('refugee_camp', None) %}
               <a class="underline text-black cursor-pointer"
                 href="{{ url_for('refugees.index', refugee_camp=refugee.refugee_camp.id, **camp_args) }}">{{ refugee.refugee_camp.name }}</a>
+              {# Change Camp Dialog #}
+              {% if ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles) %}
+                <button onclick="$('#{{refugee.id}}_change_camp_dialog')[0].showModal()">
+                  <i class="ph ph-arrows-clockwise"></i>
+                </button>
+                {{ dialog.ChangeRefugeeCampDialog(
+                  id="%s_change_camp_dialog" | format(refugee.id),
+                  title="ยืนยันการเปลี่ยนศูนย์พักพิงผู้อพยพ",
+                  body="คุณต้องการที่จะเปลี่ยนศูนย์พักพิงผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+                  refugee_name=refugee.name,
+                  refugee_id=refugee.id,
+                  form_action=url_for("refugees.change_camp", refugee_id=refugee.id, camp_id=change_camp_form.refugee_camp.data, **request.args),
+                  change_camp_form=change_camp_form,
+                  current_camp_id=refugee.refugee_camp.id
+                )}}
+              {% endif %}
             </div>
             <div class="flex items-center gap-2">
               {{ render_refugee_status(refugee.status) }}
@@ -202,6 +218,22 @@
                href="{{ url_for('refugees.index', refugee_camp=refugee.refugee_camp.id, **camp_args) }}">
               {{ refugee.refugee_camp.name }}
             </a>
+            {# Change Camp Dialog #}
+            {% if ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles) %}
+              <button onclick="$('#{{refugee.id}}_change_camp_dialog_mobile')[0].showModal()">
+                <i class="ph ph-arrows-clockwise"></i>
+              </button>
+              {{ dialog.ChangeRefugeeCampDialog(
+                id="%s_change_camp_dialog_mobile" | format(refugee.id),
+                title="ยืนยันการเปลี่ยนศูนย์พักพิงผู้อพยพ",
+                body="คุณต้องการที่จะเปลี่ยนศูนย์พักพิงผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+                refugee_name=refugee.name,
+                refugee_id=refugee.id,
+                form_action=url_for("refugees.change_camp", refugee_id=refugee.id, camp_id=change_camp_form.refugee_camp.data, **request.args),
+                change_camp_form=change_camp_form,
+                current_camp_id=refugee.refugee_camp.id
+              )}}
+            {% endif %}
           </div>
           
           {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles) %}
@@ -297,6 +329,12 @@
                 href="{{ url_for('refugees.index', refugee_camp=refugee.refugee_camp.id, **camp_args) }}">
                 {{ refugee.refugee_camp.name }}
               </a>
+              {# Change Camp Dialog #}
+              {% if ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles) %}
+                <button onclick="$('#{{refugee.id}}_change_camp_dialog_desktop')[0].showModal()">
+                  <i class="ph ph-arrows-clockwise"></i>
+                </button>
+              {% endif %}
             </td>
 
             <td class="px-3 py-3 hidden lg:table-cell">
@@ -357,6 +395,16 @@
           title="ยืนยันการลบรายการผู้อพยพ",
           body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
           url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
+        )}}
+        {{ dialog.ChangeRefugeeCampDialog(
+          id="%s_change_camp_dialog_desktop" | format(refugee.id),
+          title="ยืนยันการเปลี่ยนศูนย์พักพิงผู้อพยพ",
+          body="คุณต้องการที่จะเปลี่ยนศูนย์พักพิงผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+          refugee_name=refugee.name,
+          refugee_id=refugee.id,
+          form_action=url_for("refugees.change_camp", refugee_id=refugee.id, camp_id=change_camp_form.refugee_camp.data, **request.args),
+          change_camp_form=change_camp_form,
+          current_camp_id=refugee.refugee_camp.id
         )}}
       {% endfor %}
     </div>
