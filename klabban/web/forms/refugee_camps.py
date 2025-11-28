@@ -1,7 +1,9 @@
 from flask_wtf import FlaskForm
 from flask_mongoengine.wtf import model_form
 from klabban.web import models
-from wtforms import SelectField
+from wtforms import SelectField, FileField
+from flask_wtf.file import FileAllowed, FileRequired
+
 
 BaseRefugeeCampForm = model_form(
     models.RefugeeCamp,
@@ -23,3 +25,15 @@ class RefugeeCampForm(BaseRefugeeCampForm):
 
 class ExportRefugeeDataForm(FlaskForm):
     refugee_camp_export = SelectField("เลือกศูนย์พักพิง / Migrant Camp", choices=[])
+
+
+class ImportRefugeeDataForm(FlaskForm):
+    excel_file = FileField(
+        "อัปโหลดไฟล์",
+        validators=[
+            FileRequired(),
+            FileAllowed(["xlsx", "csv"], "ไฟล์ที่อนุญาต: excel, csv"),
+        ],
+        description="หมายเหตุ: ช่อง วันที่ ใช้เป็นรูปแบบ ปปปป-ดด-วว ชช:นน:วว",
+    )
+    refugee_camp = SelectField("เลือกศูนย์พักพิง / Migrant Camp", choices=[])

@@ -16,6 +16,7 @@
 </div>
 {% endif %}
 <div id="export-refugee-modal-container"></div>
+<div id="import-refugee-modal-container"></div>
 <div class="bg-white rounded-3xl border border-gray-300">
   <div class="overflow-x-auto p-6">
     <div class="flex flex-row max-sm:flex-col w-full sm:items-end justify-between mb-2 gap-4">
@@ -48,6 +49,11 @@
       </form>
       {% if 'admin' in current_user.roles or 'refugee_camp_staff' in current_user.roles %}
       <div class="justify-end flex flex-col gap-2 w-fit">
+        <button hx-get="{{ url_for('refugee_camps.import_refugee_modal') }}" hx-target="#import-refugee-modal-container"
+          hx-trigger="click" hx-swap="innerHTML" class="btn bg-green-400 text-white">
+          <span class="ph ph-file-xls text-lg"></span>
+          นําเข้าข้อมูลผู้อพยพ / Import Migrants Data
+        </button>
         <button hx-get="{{ url_for('refugee_camps.export_refugee_modal') }}" hx-target="#export-refugee-modal-container"
           hx-trigger="click" hx-swap="innerHTML" class="btn btn-secondary text-white">
           <span class="ph ph-file-xls text-lg"></span>

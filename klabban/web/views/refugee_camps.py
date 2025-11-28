@@ -139,3 +139,112 @@ def download_exported_file(refugee_camp_id):
         as_attachment=True,
         download_name=f"refugee_data_{refugee_camp.name}.xlsx",
     )
+
+
+# @module.route("/import_refugee_modal")
+# @roles_required(["admin", "refugee_camp_staff"])
+# def import_refugee_modal():
+#     modal_id = uuid4()
+#     form = forms.refugee_camps.ImportRefugeeDataForm()
+
+#     refugee_camps = []
+#     if "refugee_camp_staff" in current_user.roles:
+#         if current_user.refugee_camp:
+#             refugee_camps = models.RefugeeCamp.objects(id=current_user.refugee_camp.id)
+#     if not refugee_camps:
+#         refugee_camps = models.RefugeeCamp.objects(status="active").order_by("name")
+
+#     form.refugee_camp.choices = [(str(rc.id), rc.name) for rc in refugee_camps]
+
+#     return render_template(
+#         "/components/refugee_camps/import_refugee_modal.html",
+#         modal_id=modal_id,
+#         form=form,
+#     )
+
+
+@module.route("/download_template")
+@roles_required(["admin", "refugee_camp_staff"])
+def download_template():
+    output = utils.import_refugee_excel.get_template()
+    output.seek(0)
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="ข้อมูลผู้อพยพ.xlsx",
+    )
+
+
+@module.route("/import_refugees", methods=["GET", "POST"])
+@roles_required(["admin", "refugee_camp_staff"])
+def import_refugee_modal():
+    form = forms.refugee_camps.ImportRefugeeDataForm()
+    modal_id = uuid4()
+
+    refugee_camps = []
+    if "refugee_camp_staff" in current_user.roles:
+        if current_user.refugee_camp:
+            refugee_camps = models.RefugeeCamp.objects(id=current_user.refugee_camp.id)
+    if not refugee_camps:
+        refugee_camps = models.RefugeeCamp.objects(status="active").order_by("name")
+
+    form.refugee_camp.choices = [(str(rc.id), rc.name) for rc in refugee_camps]
+
+    # ดึง import logs
+    import_logs = (
+        models.ImportRefugeeFile.objects().order_by("-uploaded_date").limit(20)
+    )
+
+    if not form.validate_on_submit():
+        return render_template(
+            "/components/refugee_camps/import_refugee_modal.html",
+            modal_id=modal_id,
+            form=form,
+            import_logs=import_logs,
+        )
+
+    refugee_camp_id = form.refugee_camp.data
+    file = form.excel_file.data
+
+    refugee_camp_id = form.refugee_camp.data
+    file = form.excel_file.data
+    if file:
+        import_refugee_file = models.ImportRefugeeFile(
+            refugee_camp=models.RefugeeCamp.objects.get(id=refugee_camp_id),
+            file_name=file.filename,
+            created_by=current_user._get_current_object(),
+            upload_status="pending",
+        )
+        file.seek(0)
+        import_refugee_file.file.put(
+            file,
+            filename=file.filename,
+            content_type=file.content_type,
+        )
+        import_refugee_file.save()
+
+        job_id = redis_rq.redis_queue.queue.enqueue(
+            utils.import_refugee_excel.process_import_refugee_file,
+            args=(
+                import_refugee_file,
+                current_user._get_current_object(),
+                refugee_camp_id,
+            ),
+            timeout=3600,
+            job_timeout=1200,
+        )
+
+        flash("ระบบกำลังประมวลผลไฟล์ที่อัปโหลด กรุณารอสักครู่", "pending")
+    else:
+        flash("กรุณาเลือกไฟล์ที่จะอัปโหลด", "error")
+    return redirect(url_for("refugees.index"))
+
+
+@module.route("/import_logs/<log_id>/errors")
+@roles_required(["admin", "refugee_camp_staff"])
+def get_import_log_errors(log_id):
+    try:
+        import_log = models.ImportRefugeeFile.objects.get(id=log_id)
+        return {"success": True, "errors": import_log.error_messages}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
