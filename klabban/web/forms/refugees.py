@@ -25,6 +25,9 @@ BaseRefugeeForm = model_form(
         "pets": {"label": "สัตว์เลี้ยง / Pets"},
         "expected_days": {"label": "จำนวนวันที่คาดว่าจะพัก / Expected Days"},
         "emergency_contact": {"label": "กรณีติดต่อฉุกเฉิน / Emergency Contact"},
+        "description": {
+            "label": "รายละเอียดสำหรับแจ้งฝ่ายลงทะเบียน / Details for registration notification"
+        },
     },
     exclude=[
         "status_log",
