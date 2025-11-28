@@ -47,7 +47,7 @@
                 <i class="ph ph-house text-base"></i>
                 กำลังพักพิง
               </p>
-              <p class="text-4xl font-bold mt-1 text-blue-500">{{ active_refugees }}</p>
+              <p class="text-4xl font-bold mt-1 text-blue-500">{{ active_refugees | format_number }}</p>
             </div>
             <div class="text-blue-600 p-3 rounded-xl bg-blue-100">
               <i class="ph ph-house text-2xl"></i>
@@ -63,7 +63,7 @@
                 <i class="ph ph-check-circle text-base"></i>
                 กลับบ้านแล้ว
               </p>
-              <p class="text-4xl font-bold mt-1  ">{{ returned_refugees }}</p>
+              <p class="text-4xl font-bold mt-1  ">{{ returned_refugees | format_number }}</p>
             </div>
             <div class="bg-emerald-100 text-emerald-600 p-3 rounded-xl">
               <i class="ph ph-check-circle text-2xl"></i>
@@ -102,7 +102,7 @@
         <div class="card-body space-y-5">
           <div>
             <p class="text-sm text-gray-500">ลงทะเบียนล่าสุด (7 วัน)</p>
-            <p class="text-4xl font-bold">{{ registrations_last_week }}</p>
+            <p class="text-4xl font-bold">{{ registrations_last_week | format_number }}</p>
           </div>
           <div>
             <p class="text-sm text-gray-500">อัตราผู้กลับบ้าน</p>
@@ -187,7 +187,7 @@
                 <p class="font-semibold text-lg">{{ date_stat.label }}</p>
                 <p class="text-sm text-gray-500">จำนวนผู้อพยพที่ลงทะเบียนทั้งหมด</p>
               </div>
-              <div class="text-2xl font-bold">{{ date_stat.count }} 
+              <div class="text-2xl font-bold">{{ date_stat.count | format_number }} 
                 <span class="text-base font-medium">คน</span>
               </div>
             </div>
@@ -210,7 +210,7 @@
               <p class="font-semibold text-lg">{{ country_stat.label }}</p>
               <p class="text-sm text-gray-500">ผู้อพยพทั้งหมด</p>
             </div>
-            <div class="text-2xl font-bold">{{ country_stat.count }} 
+            <div class="text-2xl font-bold">{{ country_stat.count | format_number }} 
               <span class="text-base font-medium">คน</span>
               </div>
           </a>
