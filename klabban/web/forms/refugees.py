@@ -85,3 +85,7 @@ class RefugeeNoteForm(FlaskForm):
         "รายละเอียดสำหรับแจ้งฝ่ายลงทะเบียน / Details for registration notification",
         validators=[DataRequired()],
     )
+
+    staff_note = StringField(
+        "รายละเอียดจากเจ้าหน้าที่ / Details from the staff",
+    )

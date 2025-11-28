@@ -306,6 +306,7 @@ def create_description(refugee_id):
     return redirect(url_for("refugees.index"))
 
 
+# หน้าแสดงผู้อพยพที่มีการส่ง description
 @module.route("/view_descriptions")
 @roles_required(["admin", "refugee_camp_staff"])
 def view_description():
@@ -348,6 +349,12 @@ def view_description():
         query = query.filter(status=status)
     if exclude_thai:
         query = query.filter(country__ne="Thailand")
+
+    query = query.filter(
+        description__ne="",
+        status__ne="back_home",
+    )
+
     try:
         refugees_pagination = Pagination(query, page=page, per_page=per_page)
     except ValueError:
@@ -361,11 +368,39 @@ def view_description():
     )
 
 
+# เพิ่ม status ว่าอ่าน description ที่ผู้อพผลส่งมาหรือยัง
+@module.route("/change_status_description/<refugee_id>")
+def change_status_description(refugee_id):
 
-@module.route("change_status_description")
-@roles_required(["admin", "refugee_camp_staff"])
-def change_status_description():
+    refugee = models.Refugee.objects.get(id=refugee_id)
 
-    # if
+    if refugee:
+        if refugee.note_status == "unread":
+            refugee.note_status = "read"
+
+        else:
+            refugee.note_status = "unread"
+
+        refugee.save()
+
+    return redirect(url_for("refugees.view_description"))
+
+
+# @module.route("/staff/note/create", methods=["GET", "POST"], defaults={"refugee_id": None})
+# staff สามารถเพิ่ม note ไว้ในกรณีที่ผู้อพยพคนนี้มีปัญหา
+@module.route("add_staff_note/<refugee_id>/", methods=["GET", "POST"])
+def add_staff_note(refugee_id):
+    if refugee_id:
+        refugee = models.Refugee.objects.get(id=refugee_id)
+        form = forms.refugees.RefugeeNoteForm(obj=refugee)
+
+        if not form.validate_on_submit():
+            return render_template("refugees/add_staff_note.html", form=form)
+
+        refugee.staff_note = form.staff_note.data
+
+        refugee.save()
+
+        flash(f"เพิ่ม note สำหรับ {refugee.name} สำเร็จ", "success")
 
     return redirect(url_for("refugees.view_description"))

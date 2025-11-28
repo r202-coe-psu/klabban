@@ -69,7 +69,7 @@ class Refugee(me.Document):
     is_public_searchable = me.BooleanField(default=True)
 
     # สำหรับกรณีที่ผู้อพยพจะเปลี่ยนสถานะกลับบ้านแล้วเปลี่ยนไม่ได้ ให้แจ้งคำขอมาให้ staff ช่วยเช็คอีกที
-    description = me.StringField(max_length=512)
+    description = me.StringField(max_length=512, default="")
     # remark จาก staff เผื่อมีปัญหาอะไรได้ note เก็บไว้
     staff_note = me.StringField(max_length=512)
     note_status = me.StringField(

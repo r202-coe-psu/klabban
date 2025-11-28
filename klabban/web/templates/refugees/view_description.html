@@ -103,15 +103,32 @@
               <p class="whitespace-pre-line">-</p>
               {% endif %}
             </td>
-						<td class="px-3 py-3">
-							ข้อความของเจ้าหน้าที่
+            <td class="px-3 py-3">
+                {% if refugee.staff_note %}
+                {{ refugee.staff_note }}
+                {% else %}
+                -
+                {% endif %}
             </td>
 
             <!-- ปุ่มจัดการ -->
             {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
             <td class="px-3 py-3">
               <div class="flex gap-1 justify-end">
-								test
+				<div class="tooltip" data-tip="{{ 'อ่านแล้ว' if refugee.note_status == 'read' else 'ยังไม่อ่าน' }}">
+                    <a class="btn btn-circle" href="{{ url_for('refugees.change_status_description', refugee_id=refugee.id) }}">
+                    {% if refugee.note_status == "read" %}
+                    <i class="ph ph-eye text-2xl text-green-500"></i>
+                    {% else %}
+                    <i class="ph ph-eye-closed text-2xl"></i>
+                    {% endif %}
+                    </a>
+                </div>
+                <div class="tooltip" data-tip="เพิ่ม note">
+                    <a class="btn btn-circle" href="{{ url_for('refugees.add_staff_note', refugee_id=refugee.id) }}">
+                        <i class="ph ph-note text-2xl"></i>
+                    </a>
+                </div>
               </div>
             </td>
             {% endif %}
