@@ -112,6 +112,7 @@ def create_or_edit(refugee_id):
         refugee = models.Refugee.objects.get(id=refugee_id)
         form = forms.refugees.RefugeeForm(obj=refugee)
         old_status = refugee.status
+        old_camp = refugee.refugee_camp
 
     if current_user.is_authenticated and "admin" in current_user.roles:
         # 1. ถ้าเป็น admin ให้แสดงตัวเลือก refugee_camp ทั้งหมด
@@ -126,21 +127,9 @@ def create_or_edit(refugee_id):
         form.refugee_camp.choices = [
             (str(current_user.refugee_camp.id), current_user.refugee_camp.name)
         ]
-        form.refugee_camp.data = str(current_user.refugee_camp.id)
     else:
         # 3. ถ้าไม่ใช่ admin หรือ refugee_camp_staff ให้ตั้งค่า refugee_camp ตาม request args
         form.refugee_camp.choices = []
-        if request.args.get("refugee_camp_id"):
-            refugee_camp = models.RefugeeCamp.objects(
-                id=request.args.get("refugee_camp_id")
-            ).first()
-            form.refugee_camp.choices = [(str(refugee_camp.id), refugee_camp.name)]
-            form.refugee_camp.data = str(refugee_camp.id)
-
-    # when edit keep refugee camp
-    if refugee_id:
-        form.refugee_camp.data = str(refugee.refugee_camp.id)
-
     # ถ้ามีค่าจาก request args ให้ตั้งค่า refugee_camp
     refugee_camp_id = request.args.get("refugee_camp_id", None)
     if refugee_camp_id:
@@ -148,6 +137,19 @@ def create_or_edit(refugee_id):
         form.refugee_camp.data = str(refugee_camp.id)
 
     if not form.validate_on_submit() or request.method == "GET":
+        if refugee_id:
+            form.refugee_camp.data = str(refugee.refugee_camp.id)
+
+        if current_user.is_authenticated and "refugee_camp_staff" in current_user.roles:
+            form.refugee_camp.data = str(current_user.refugee_camp.id)
+
+        if request.args.get("refugee_camp_id"):
+            refugee_camp = models.RefugeeCamp.objects(
+                id=request.args.get("refugee_camp_id")
+            ).first()
+            form.refugee_camp.choices = [(str(refugee_camp.id), refugee_camp.name)]
+            form.refugee_camp.data = str(refugee_camp.id)
+
         return render_template(
             "refugees/create_or_edit.html",
             form=form,
@@ -172,22 +174,38 @@ def create_or_edit(refugee_id):
 
     form.populate_obj(refugee)
     refugee.refugee_camp = models.RefugeeCamp.objects.get(id=form.refugee_camp.data)
+    print(refugee.refugee_camp.name)
     if current_user.is_authenticated:
         if not refugee_id:
             refugee.created_by = current_user._get_current_object()
         refugee.updated_by = current_user._get_current_object()
 
-    if refugee_id and form.status.data != old_status:
-        log = models.RefugeeStatusLog(
+    user = (
+        current_user._get_current_object()
+        if current_user.is_authenticated
+        else None
+    )
+    ip_address = request.headers.get("X-Forwarded-For", request.remote_addr)
+
+    log = models.RefugeeStatusLog(
             status=refugee.status,
-            changed_by=(
-                current_user._get_current_object()
-                if current_user.is_authenticated
-                else None
-            ),
-            ip_address=request.headers.get("X-Forwarded-For", request.remote_addr),
+            changed_by=user,
+            ip_address=ip_address,
         )
+    camp_log = models.RefugeeCampsLog(
+        refugee_camp=refugee.refugee_camp,
+        changed_by=user,
+        ip_address=ip_address,
+    )
+
+    if not refugee_id:
         refugee.status_log.append(log)
+        refugee.camps_log.append(camp_log)
+    elif refugee_id:
+        if form.status.data != old_status:
+            refugee.status_log.append(log)
+        elif form.refugee_camp.data != old_camp:
+            refugee.camps_log.append(camp_log)
 
     refugee.save()
 

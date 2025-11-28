@@ -1,7 +1,7 @@
 from flask_mongoengine import MongoEngine
 from flask import Flask
 from klabban.models.users import User
-from klabban.models.refugees import Refugee, RefugeeStatusLog, REFUGEE_STATUS_CHOICES
+from klabban.models.refugees import Refugee, RefugeeStatusLog, RefugeeCampsLog, REFUGEE_STATUS_CHOICES
 from klabban.models.refugee_camps import RefugeeCamp
 from klabban.models.oauth2 import OAuth2Token
 from klabban.models.export_refugee_files import ExportRefugeeFile
@@ -18,6 +18,7 @@ __all__ = [
     "RefugeeCamp",
     "OAuth2Token",
     "ExportRefugeeFile",
+    "RefugeeCampsLog",
 ]
 
 db = MongoEngine()
