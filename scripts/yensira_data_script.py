@@ -69,8 +69,7 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1].lower() != "save":
         path = Path(sys.argv[1])
     # nrows = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 5
-    do_save = len(sys.argv) > 1 and sys.argv[1].lower() == "save"
-    path_name = sys.argv[2] if len(sys.argv) > 2 else "data/yensira.xlsx"
+    path_name = sys.argv[1] if len(sys.argv) > 1 else "data/yensira.xlsx"
 
     path = Path(path_name)
     print("Default path:", path)
