@@ -1,3 +1,5 @@
+{% import "base/html_renderer.html" as renderer %}
+
 {% macro Dialog(
 id,
 title,
@@ -268,6 +270,14 @@ refugee_id=""
       <input class="border p-2 w-full" type="text" id="{{ id }}-refugee-name-input" value="" placeholder='{{ refugee_name }}' autocomplete="off" />
     {% endif %}
 
+    <div class="mt-2">
+      <p>
+        ไม่สามารถยืนยันข้อมูลได้ใช่ไหม?
+        <a class="link" href="{{ url_for('refugees.create_description', refugee_id=refugee_id) }}">คลิกที่นี่</a>
+      </p>
+    </div>
+
+    
     <div class="modal-action">
       <form method="{{ method }}" action="{{ action_button_href }}" id="{{ id }}-action-form">
         {# ปุ่มยกเลิก (เปลี่ยน type เป็น button เพื่อกัน submit โดยไม่ตั้งใจ) #}
@@ -324,5 +334,101 @@ refugee_id=""
       }
     }
   };
+</script>
+{% endmacro %}
+
+{% macro ChangeRefugeeCampDialog(
+  id,
+  title="ยืนยันการเปลี่ยนศูนย์พักพิงผู้อพยพ",
+  body="คุณต้องการที่จะเปลี่ยนศูนย์พักพิงผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+  refugee_name="",
+  refugee_id="",
+  current_camp_id="",
+  form_action=url_for("refugees.change_camp", refugee_id=refugee.id, camp_id=change_camp_form.refugee_camp.data, **request.args),
+  change_camp_form=change_camp_form
+) %}
+
+<dialog id="{{ id }}" class="modal modal-bottom sm:modal-middle">
+  <div class="modal-box {{ class_ }}">
+    {% if close_at_corner %}
+    <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 outline-none"
+      onclick="document.getElementById('{{ id }}').close();">✕</button>
+    {% endif %}
+
+    <h3 class="font-bold text-xl">{{ title | safe }}</h3>
+    <p class="py-4" style="overflow-wrap: break-word;">{{ body | safe }}</p>
+
+    <form method="POST" action="{{ form_action }}" >
+      <div class="form-control w-full max-w-xs">
+        <fieldset class="w-full">
+          <label class="label">
+            <span class="label-text">เลือกศูนย์พักพิงผู้อพยพ / Select Refugee Camp</span>
+          </label>
+          <select id="{{ id }}_select_field" name="refugee_camp" class="select select-bordered w-full max-w-xs">
+            <option value="" disabled selected>-- เลือกศูนย์พักพิงผู้อพยพ -- / -- Select Refugee Camp --</option>
+            {% for camp in change_camp_form.refugee_camp.choices %}
+              <option value="{{ camp[0]|string }}" {% if camp[0]|string == current_camp_id|string %} disabled {% endif %}>
+                {{ camp[1] }} 
+                {% if camp[0]|string == current_camp_id|string %}
+                 (ศูนย์พักพิงปัจจุบัน / Current Camp) 
+                {% endif %}
+              </option>
+            {% endfor %}
+          </select>
+        </fieldset>
+
+      </div>
+
+      <div class="modal-action flex flex-col sm:flex-row gap-2">
+        <button type="button" class="btn" onclick="document.getElementById('{{ id }}').close();">
+          ยกเลิก / Cancel
+        </button>
+        <button type="button" id="{{ id }}-change_camp-submit" class="btn btn-primary">
+          ยืนยันการเปลี่ยนศูนย์พักพิง / Confirm Change
+        </button>
+      </div>
+    </form>   
+  </div>
+
+  {% if click_outside_to_close %}
+  <form method="dialog" class="modal-backdrop"><button>กดเพื่อปิด</button></form>
+  {% endif %}
+</dialog>
+
+<script>
+  let select_field_{{ id }} = document.getElementById("{{ id }}_select_field");
+  console.log("Select field found:", select_field_{{ id }});
+  select_field_{{ id }}.addEventListener('change', function() {
+    // This function will execute when the selected option changes
+    const selectedValue = this.value; // 'this' refers to the select element
+    console.log('Selected value:', selectedValue);
+
+    // Perform DOM manipulation or other actions based on the selected value
+    // Example: Update a paragraph with the selected value
+    document.getElementById('outputParagraph').textContent = 'You selected: ' + selectedValue;
+  });
+  {# When submit add query string to action form <camp_id>#}
+  
+  document.getElementById("{{ id }}-change_camp-submit").addEventListener("click", function() {
+  var form = this.closest("form");
+  var selectElement = select_field_{{ id }};
+  
+  console.log("Looking for element ID:", "{{ id }}_select_field");
+  console.log("Select element found:", selectElement);
+  var selectedCampId = selectElement ? selectElement.value : "";
+
+  // Check if no camp is selected or if the default option is selected
+  if (!selectedCampId || selectedCampId === "") {
+    alert("กรุณาเลือกศูนย์พักพิงผู้อพยพ / Please select a refugee camp");
+    return;
+  }
+
+  // Update form action with selected camp_id as query parameter
+  var baseAction = "{{ url_for('refugees.change_camp', refugee_id=refugee_id, camp_id='' ) }}";
+  form.action = baseAction + selectedCampId + "?{{ request.query_string.decode('utf-8') }}";
+
+  console.log("Final form action:", form.action);
+  form.submit();
+});
 </script>
 {% endmacro %}

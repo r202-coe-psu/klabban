@@ -10,7 +10,7 @@ def import_excel(base_path="."):
     if not user:
         print("admin user not found, please run init-admin.py first")
         return
-    
+
     pd = pandas.read_excel(f"{base_path}/data/refugees.xlsx")
 
     for index, row in pd.iterrows():
@@ -22,12 +22,10 @@ def import_excel(base_path="."):
             name=row.get("name"),
             nick_name=row.get("nick_name", ""),
             phone=row.get("phone", ""),
-            address=row.get("address", "")
+            address=row.get("address", ""),
         )
         refugee.save()
         print(f"refugee {row.get('name')} imported successfully")
-
-    
 
 
 if __name__ == "__main__":

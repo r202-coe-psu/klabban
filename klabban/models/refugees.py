@@ -8,12 +8,34 @@ REFUGEE_STATUS_CHOICES = [
     ("deactive", "ปิดการใช้งาน"),
 ]
 
+NOTE_STATUS_CHOICES = [("unread", "ยังไม่อ่าน"), ("read", "อ่านแล้ว")]
+
+
 GENDER = [("male", "ชาย"), ("female", "หญิง"), ("other", "ไม่ระบุ")]
 
 
 class RefugeeStatusLog(me.EmbeddedDocument):
     status = me.StringField(choices=REFUGEE_STATUS_CHOICES, required=True)
     changed_by = me.ReferenceField("User")
+    changed_date = me.DateTimeField(default=datetime.datetime.now)
+    ip_address = me.StringField()  # To accommodate IPv6 addresses
+
+
+class RefugeeCampsLog(me.EmbeddedDocument):
+    refugee_camp = me.ReferenceField("RefugeeCamp", dbref=True)
+    changed_by = me.ReferenceField("User")
+    changed_date = me.DateTimeField(default=datetime.datetime.now)
+    ip_address = me.StringField()  # To accommodate IPv6 addresses
+
+
+class RefugeeCampsLog(me.EmbeddedDocument):
+    refugee_camp = me.ReferenceField("RefugeeCamp", dbref=True)
+    changed_by = me.ReferenceField("User")
+    changed_date = me.DateTimeField(default=datetime.datetime.now)
+    ip_address = me.StringField()  # To accommodate IPv6 addresses
+
+
+class RefugeeNoteLog(me.EmbeddedDocument):
     changed_date = me.DateTimeField(default=datetime.datetime.now)
     ip_address = me.StringField()  # To accommodate IPv6 addresses
 
@@ -48,6 +70,15 @@ class Refugee(me.Document):
     is_public_searchable = me.BooleanField(default=True)
     source = me.StringField(max_length=255)
 
+    # สำหรับกรณีที่ผู้อพยพจะเปลี่ยนสถานะกลับบ้านแล้วเปลี่ยนไม่ได้ ให้แจ้งคำขอมาให้ staff ช่วยเช็คอีกที
+    description = me.StringField(max_length=512, default="")
+    # remark จาก staff เผื่อมีปัญหาอะไรได้ note เก็บไว้
+    staff_note = me.StringField(max_length=512)
+    note_status = me.StringField(
+        choices=NOTE_STATUS_CHOICES,
+        default="unread",
+    )
+
     # universal field
     metadata = me.DictField()
 
@@ -56,6 +87,8 @@ class Refugee(me.Document):
         default="active",
     )
     status_log = me.EmbeddedDocumentListField("RefugeeStatusLog")
+    camp_log = me.EmbeddedDocumentListField("RefugeeCampsLog")
+    note_log = me.EmbeddedDocumentListField("RefugeeNoteLog")
 
     created_by = me.ReferenceField("User")
     updated_by = me.ReferenceField("User")

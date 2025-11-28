@@ -28,6 +28,9 @@ BaseRefugeeForm = model_form(
         "pets": {"label": "สัตว์เลี้ยง / Pets"},
         "expected_days": {"label": "จำนวนวันที่คาดว่าจะพัก / Expected Days"},
         "emergency_contact": {"label": "กรณีติดต่อฉุกเฉิน / Emergency Contact"},
+        "description": {
+            "label": "รายละเอียดสำหรับแจ้งฝ่ายลงทะเบียน / Details for registration notification"
+        },
     },
     exclude=[
         "status_log",
@@ -36,6 +39,7 @@ BaseRefugeeForm = model_form(
         "updated_by",
         "created_date",
         "updated_date",
+        "camps_log",
         "resource",
     ],
 )
@@ -71,4 +75,21 @@ class RefugeeSearchForm(FlaskForm):
             ("active", "อยู่ในศูนย์พักพิง / In Camp"),
             ("back_home", "กลับบ้านแล้ว / Back Home"),
         ],
+    )
+
+
+class ChangeRefugeeCampForm(FlaskForm):
+    refugee_camp = SelectField(
+        "ศูนย์พักพิงใหม่ / New Migrant Camp", choices=[], validators=[DataRequired()]
+    )
+
+
+class RefugeeNoteForm(FlaskForm):
+    description = StringField(
+        "รายละเอียดสำหรับแจ้งฝ่ายลงทะเบียน / Details for registration notification",
+        validators=[DataRequired()],
+    )
+
+    staff_note = StringField(
+        "รายละเอียดจากเจ้าหน้าที่ / Details from the staff",
     )

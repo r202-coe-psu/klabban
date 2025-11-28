@@ -1,0 +1,210 @@
+{% extends "/base/default_page.html" %}
+{% import "base/html_renderer.html" as renderer %}
+{% import "/components/dialogs.html" as dialog %}
+{% import "/components/paginations.html" as paginations %}
+
+{% set title_page="คำร้องจากผู้อพยพ / Requests from Migrants" %}
+
+
+{% block content %}
+{% if not current_user.is_authenticated %}
+<div class="mb-4">
+  <a href="{{ url_for('index.index') }}">
+    <i class="ph ph-arrow-left text-lg"></i>
+    กลับไปหน้าหลัก / Back to Home
+  </a>
+</div>
+{% endif %}
+
+<div class="bg-white rounded-3xl border border-gray-300">
+	<div class="overflow-x-auto p-6">
+		<div class="flex flex-row max-sm:flex-col w-full sm:items-end justify-between mb-2 gap-4">
+			<form method="GET">
+        <div class="text-xl font-medium text-gray-700 flex justify-between items-center w-full">
+          <p>คำร้องจากผู้อพยพ / Requests from Migrants</p>
+
+        </div>
+        <div class="grid grid-cols-5 max-md:grid-cols-2 max-sm:grid-cols-1 gap-x-4 items-center">
+          {{ renderer.base_render(search_form.refugee_camp) }}
+          <div class="col-span-2">
+            {{ renderer.base_render(search_form.search) }}
+          </div>
+          {{ renderer.base_render(search_form.status) }}
+          <input name="view_mode" type="hidden" value="{{ view_mode }}">
+          {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in
+          current_user.roles)%}
+          <div class="space-y-2">
+            <p class="text-xs fieldset-legend">แสดงเฉพาะชาวต่างชาติ</p>
+            <input type="checkbox" name="exclude_thai" class="toggle toggle-primary" {% if
+            request.args.get('exclude_thai') %}checked{% endif %} />
+          </div>
+          {{ renderer.base_render(search_form.country) }}
+          {% endif %}
+          <button type="submit" class="btn btn-primary text-white sm:mt-8 max-sm:mt-3">
+            <span class="ph ph-magnifying-glass text-lg"></span>
+            ค้นหา / Search
+          </button>
+        </div>
+      </form>
+		</div>
+
+		<!-- Desktop: Table View -->
+    <div class="hidden md:block overflow-x-auto">
+      <table class="table w-full text-sm border border-gray-200">
+        <thead class="text-gray-700 bg-gray-50">
+          <tr>
+            <th class="text-center px-3 py-3">ลำดับ</th>
+            <th class="text-left px-3 py-3 min-w-[150px]">ชื่อ-นามสกุล</th>
+            <th class="text-left px-3 py-3 min-w-[180px]">สถานะ</th>
+            <th class="text-left px-3 py-3 min-w-[150px]">ศูนย์พักพิง</th>
+						<th class="text-left px-3 py-3 min-w-[150px]">คำร้องจากผู้พังพิง</th>
+						<th class="text-left px-3 py-3 min-w-[150px]">รายละเอียดจากเจ้าหน้าที่</th>
+            {% if "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles %}
+            <th class="text-right px-3 py-3 min-w-[120px]">จัดการ</th>
+            {% endif %}
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for refugee in refugees_pagination.items %}
+          <tr class="border-b border-gray-200 hover:bg-gray-50">
+
+            <!-- ลำดับ -->
+            <td class="text-center px-3 py-3">
+              {{ loop.index + (refugees_pagination.page - 1) * refugees_pagination.per_page }}
+            </td>
+
+
+          <td class="px-4 py-3">
+            {{ refugee.name }}
+            {% if refugee.people_count > 1 %}
+              <p class="text-sm text-gray-500 italic">รวมจำนวนคน {{ refugee.people_count }} คน</p>
+            {% endif %}
+          </td>
+
+            <td class="px-3 py-3">
+              <div class="flex items-center gap-2">
+                {{ render_refugee_status(refugee.status) }}
+              </div>
+            </td>
+
+            <td class="px-3 py-3">
+
+              <p class="">
+                {{ refugee.refugee_camp.name }}
+              </p>
+            </td>
+
+        
+            <td class="px-3 py-3">
+							{% if refugee.description %}
+              <p class="whitespace-pre-line">{{ refugee.description }}</p>
+							{% else %}
+              <p class="whitespace-pre-line">-</p>
+              {% endif %}
+            </td>
+            <td class="px-3 py-3">
+                {% if refugee.staff_note %}
+                {{ refugee.staff_note }}
+                {% else %}
+                -
+                {% endif %}
+            </td>
+
+            <!-- ปุ่มจัดการ -->
+            {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
+            <td class="px-3 py-3">
+              <div class="flex gap-1 justify-end">
+				<div class="tooltip" data-tip="{{ 'อ่านแล้ว' if refugee.note_status == 'read' else 'ยังไม่อ่าน' }}">
+                    <a class="btn btn-circle" href="{{ url_for('refugees.change_status_description', refugee_id=refugee.id) }}">
+                    {% if refugee.note_status == "read" %}
+                    <i class="ph ph-eye text-2xl text-green-500"></i>
+                    {% else %}
+                    <i class="ph ph-eye-closed text-2xl"></i>
+                    {% endif %}
+                    </a>
+                </div>
+                <div class="tooltip" data-tip="เพิ่ม note">
+                    <a class="btn btn-circle" href="{{ url_for('refugees.add_staff_note', refugee_id=refugee.id) }}">
+                        <i class="ph ph-note text-2xl"></i>
+                    </a>
+                </div>
+              </div>
+            </td>
+            {% endif %}
+
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+		<!-- Mobile: Table View -->
+		<div class="md:hidden space-y-4">
+			{% for refugee in refugees_pagination.items %}
+			<div class="border border-gray-200 rounded-lg p-4 space-y-3">
+				<div class="flex justify-between items-center">
+					<div class="font-medium text-gray-700">
+						{{ refugee.name }}
+					</div>
+					<div>
+						{{ render_refugee_status(refugee.status) }}
+					</div>
+				</div>
+				<div>
+					<span class="font-medium text-gray-600">ศูนย์พักพิง:</span>
+					<span>{{ refugee.refugee_camp.name }}</span>
+				</div>
+				<div>
+					<span class="font-medium text-gray-600">คำร้องจากผู้อพยพ:</span>
+					<p class="whitespace			-pre-line mt-1">
+						{% if refugee.description %}
+							{{ refugee.description }}
+							{% else %}
+							-
+							{% endif %}	
+					</p>
+				</div>
+				<div>
+					<span class="font-medium text-gray-600">รายละเอียดจากเจ้าหน้าที่:</span>
+					<p class="whitespace-pre-line mt-1">
+						ข้อความของเจ้าหน้าที่
+					</p>
+				</div>
+				{% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and refugee.refugee_camp.id == current_user.refugee_camp.id) %}
+				<div class="text-right">
+					test
+				</div>			
+				{% endif %}
+			</div>
+			{% endfor %}
+		</div>	
+
+		{% if search_form.search.data and not refugees_pagination.items %}
+    <div class="mt-4 py-4 text-center text-gray-500 italic">
+      ไม่พบผู้อพยพที่ตรงกับคำค้นหา
+    </div>
+    {% endif %}
+    {{ paginations.render_pagination(
+            pagination=refugees_pagination,
+            endpoint='refugees.view_description',
+            key_page='page',
+            kwargs=request.args.to_dict()
+        ) }}
+
+	</div>
+</div>
+
+{% endblock content %}
+
+{% macro render_refugee_status(status) %}
+<div class="border rounded-lg py-1 px-2 text-xs md:text-sm font-medium whitespace-nowrap w-fit 
+    {{ 'text-blue-500 border-blue-500 bg-blue-50' if status == 'active' else '' }}
+    {{ 'text-red-500 border-red-500 bg-red-50' if status == 'deactive' else '' }}
+    {{ 'text-green-500 border-green-500 bg-green-50' if status == 'back_home' else '' }}
+        ">
+  {{ 'อยู่ในศูนย์พักพิง / In Shelter' if status == 'active' else '' }}
+  {{ 'ถูกลบออก / Deleted' if status == 'deactive' else '' }}
+  {{ 'กลับบ้านแล้ว / Returned Home' if status == 'back_home' else '' }}
+</div>
+{% endmacro %}
