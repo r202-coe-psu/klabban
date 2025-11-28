@@ -69,3 +69,6 @@ class RefugeeSearchForm(FlaskForm):
             ("back_home", "กลับบ้านแล้ว / Back Home"),
         ],
     )
+
+class ChangeRefugeeCampForm(FlaskForm):
+    refugee_camp = SelectField("ศูนย์พักพิงใหม่ / New Migrant Camp", choices=[], validators=[DataRequired()])

@@ -17,22 +17,28 @@ def index():
 
     page = request.args.get("page", 1, type=int)
     per_page = 50  # จำนวนรายการต่อหน้า
-
-    search_form = forms.refugees.RefugeeSearchForm(request.args)
-    search_form.refugee_camp.choices = [("", "ทั้งหมด")] + [
+    camp_choice =  [
         (str(camp.id), camp.name)
         for camp in models.RefugeeCamp.objects(status__ne="deactive").order_by("name")
     ]
+
+    search_form = forms.refugees.RefugeeSearchForm(request.args)
+    search_form.refugee_camp.choices = [("", "ทั้งหมด")] + camp_choice
     search = search_form.search.data
     refugee_camp_id = search_form.refugee_camp.data
     country = search_form.country.data
     status = search_form.status.data
     exclude_thai = request.args.get("exclude_thai", None)
+
+    change_camp_form = forms.refugees.ChangeRefugeeCampForm()
+    change_camp_form.refugee_camp.choices = camp_choice
+    change_camp_form.refugee_camp.data = ""
+
     query = models.Refugee.objects(id=None)
     try:
         if "refugee_camp_staff" in current_user.roles or "admin" in current_user.roles:
             query = models.Refugee.objects(status__ne="deactive").order_by("name")
-    except Exception:
+    except Exception:   
         query = models.Refugee.objects(id=None)
     if search or country:
         query = models.Refugee.objects(status__ne="deactive").order_by("name")
@@ -59,6 +65,7 @@ def index():
         "/refugees/index.html",
         refugees_pagination=refugees_pagination,
         search_form=search_form,
+        change_camp_form=change_camp_form,
         view_mode=view_mode,
     )
 
@@ -210,6 +217,19 @@ def create_or_edit(refugee_id):
     refugee.save()
 
     return redirect(url_for("refugees.index"))
+
+@module.route("/<refugee_id>/change_camp/<camp_id>", methods=["POST", "GET"])
+@roles_required(["admin", "refugee_camp_staff"])
+def change_camp(refugee_id, camp_id):
+    refugee = models.Refugee.objects.get(id=refugee_id)
+    new_camp = models.RefugeeCamp.objects.get(id=camp_id)
+
+    print(f"Changing camp of refugee {refugee.name} to {new_camp.name}")
+    refugee.refugee_camp = new_camp
+    # Log the camp change
+    refugee.save()
+
+    return redirect(url_for("refugees.index", **request.args))
 
 
 @module.route("/<refugee_id>", methods=["GET"])
