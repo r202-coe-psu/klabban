@@ -88,6 +88,7 @@
           <tr>
             <th>วันที่นำเข้า</th>
             <th>ชื่อไฟล์</th>
+            <th>จํานวนข้อมูล</th>
             <th>ศูนย์พักพิง</th>
             <th>สถานะ</th>
             <th>ผู้นำเข้า</th>
@@ -100,6 +101,7 @@
               <tr>
                 <td>{{ log.uploaded_date.strftime('%d/%m/%Y %H:%M') }}</td>
                 <td>{{ log.file_name }}</td>
+                <td>{{ log.record_count }}</td>
                 <td>{{ log.refugee_camp.name }}</td>
                 <td>
                   {% if log.upload_status == 'completed' %}

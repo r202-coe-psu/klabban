@@ -228,9 +228,7 @@ def write_refugees_from_import_file(
     else:
         df = pd.read_csv(file)
 
-    success_count = 0
-    error_count = 0
-    errors = []
+    record_count = 0
 
     for index, row in df.iterrows():
         try:
@@ -338,6 +336,7 @@ def write_refugees_from_import_file(
                 registration_date=registration_date,
                 back_home_date=back_home_date,
                 status=status,
+                metadata={"imported_from_excel_file": True},
                 created_by=current_user,
                 created_date=datetime.datetime.now(),
                 updated_by=current_user,
@@ -345,18 +344,11 @@ def write_refugees_from_import_file(
             )
 
             refugee.save()
-            success_count += 1
+            record_count += 1
 
         except Exception as e:
-            error_count += 1
-            errors.append(f"แถวที่ {index + 2}: {str(e)}")
-
-    return {
-        "success_count": success_count,
-        "error_count": error_count,
-        "errors": errors,
-        "total_processed": success_count + error_count,
-    }
+            print(f"Error processing row {index + 2}: {e}")
+    return record_count
 
 
 def process_import_refugee_file(import_refugee_file, current_user, refugee_camp_id):
@@ -371,10 +363,11 @@ def process_import_refugee_file(import_refugee_file, current_user, refugee_camp_
     file.seek(0)
     import_refugee_file.upload_status = "processing"
     import_refugee_file.save()
-    write_refugees_from_import_file(
+    record_count = write_refugees_from_import_file(
         refugee_camp_id=refugee_camp_id,
         file=file,
         current_user=current_user,
     )
     import_refugee_file.upload_status = "completed"
+    import_refugee_file.record_count = record_count
     import_refugee_file.save()
