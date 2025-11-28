@@ -306,3 +306,11 @@ def view_description():
     # pagination
 
     return render_template("refugees/view_description.html")
+
+
+@module.route("change_status_description")
+def change_status_description():
+
+    # if
+
+    return redirect(url_for("refugees.view_description"))
