@@ -249,27 +249,6 @@ def change_camp(refugee_id, camp_id):
     return redirect(url_for("refugees.index", **request.args))
 
 
-@module.route("/<refugee_id>/change_camp/<camp_id>", methods=["POST", "GET"])
-@roles_required(["admin", "refugee_camp_staff"])
-def change_camp(refugee_id, camp_id):
-    refugee = models.Refugee.objects.get(id=refugee_id)
-    new_camp = models.RefugeeCamp.objects.get(id=camp_id)
-    refugee.refugee_camp = new_camp
-    # Log the camp change
-    camp_log = models.RefugeeCampsLog(
-        refugee_camp=new_camp,
-        changed_by=(
-            current_user._get_current_object()
-            if current_user.is_authenticated
-            else None
-        ),
-        ip_address=request.headers.get("X-Forwarded-For", request.remote_addr),
-    )
-    refugee.camp_log.append(camp_log)
-    refugee.save()
-
-    return redirect(url_for("refugees.index", **request.args))
-
 
 @module.route("/<refugee_id>", methods=["GET"])
 @roles_required(["admin", "refugee_camp_staff"])
