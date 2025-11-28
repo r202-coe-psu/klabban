@@ -145,7 +145,7 @@ def main():
 
         sheet_data = []
         for i, row in df.iterrows():
-            if not row.get("name"):
+            if not row.get("name") or not str(row.get("name")).strip():
                 continue
             sheet_data.append(row)
 
