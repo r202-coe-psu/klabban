@@ -14,7 +14,7 @@
               <i class="ph ph-users text-base"></i>
               ผู้อพยพทั้งหมด
             </p>
-            <p class="text-4xl font-bold mt-1 text-blue-600">{{ total_refugees }}</p>
+            <p class="text-4xl font-bold mt-1 text-blue-600">{{ total_refugees | format_number }}</p>
           </div>
           <div class="bg-blue-100 text-blue-600 p-3 rounded-xl">
             <i class="ph ph-users text-2xl"></i>
@@ -30,7 +30,7 @@
               <i class="ph ph-house text-base"></i>
               กำลังพักพิง
             </p>
-            <p class="text-4xl font-bold mt-1 text-blue-500">{{ active_refugees }}</p>
+            <p class="text-4xl font-bold mt-1 text-blue-500">{{ active_refugees | format_number }}</p>
           </div>
           <div class="text-blue-600 p-3 rounded-xl bg-blue-100">
             <i class="ph ph-house text-2xl"></i>
@@ -46,7 +46,7 @@
               <i class="ph ph-check-circle text-base"></i>
               กลับบ้านแล้ว
             </p>
-            <p class="text-4xl font-bold mt-1  ">{{ returned_refugees }}</p>
+            <p class="text-4xl font-bold mt-1  ">{{ returned_refugees | format_number }}</p>
           </div>
           <div class="bg-emerald-100 text-emerald-600 p-3 rounded-xl">
             <i class="ph ph-check-circle text-2xl"></i>

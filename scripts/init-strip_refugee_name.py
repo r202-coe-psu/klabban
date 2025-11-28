@@ -16,6 +16,7 @@ def strip_refugee_name():
         refugee.save()
     print(f"Total refugee names updated: {count}")
 
+
 if __name__ == "__main__":
     DB_NAME = "klabbandb"
     if len(sys.argv) > 1:

@@ -13,15 +13,11 @@ class LoginForm(FlaskForm):
         "Username",
         validators=[validators.InputRequired(), validators.Length(min=3, max=64)],
     )
-    password = PasswordField(
-        "Password", validators=[validators.InputRequired()]
-    )
+    password = PasswordField("Password", validators=[validators.InputRequired()])
 
 
 class SetupPasswordForm(FlaskForm):
-    password = PasswordField(
-        "รหัสผ่าน", validators=[validators.InputRequired()]
-    )
+    password = PasswordField("รหัสผ่าน", validators=[validators.InputRequired()])
     confirm_password = PasswordField(
         "ยืนยันรหัสผ่าน",
         validators=[

@@ -2,7 +2,7 @@ from flask import abort, Blueprint, render_template, redirect, url_for, request,
 from flask_login import login_required, current_user
 from ..utils.acl import roles_required
 from klabban import models
-from klabban.web import forms
+from klabban.web import caches, forms
 from mongoengine.queryset.visitor import Q
 from uuid import uuid4
 from flask_mongoengine import Pagination
@@ -11,19 +11,31 @@ from datetime import datetime
 module = Blueprint("refugees", __name__, url_prefix="/refugees")
 
 
+@caches.cache.memoize(timeout=60)
+def get_refugee_camp_choices():
+    camps = models.RefugeeCamp.objects(status__ne="deactive").order_by("name")
+    camp_choice = [(str(camp.id), camp.name) for camp in camps]
+    active_camps = []
+    for camp in camps:
+        # Count refugees in this camp
+        refugee_count = models.Refugee.objects(
+            refugee_camp=camp.id, status__ne="deactive"
+        ).count()
+        if refugee_count > 0:
+            active_camps.append((str(camp.id), camp.name))
+    return camp_choice, active_camps
+
+
 @module.route("/")
 def index():
     view_mode = request.args.get("view_mode", "list")
 
     page = request.args.get("page", 1, type=int)
     per_page = 50  # จำนวนรายการต่อหน้า
-    camp_choice =  [
-        (str(camp.id), camp.name)
-        for camp in models.RefugeeCamp.objects(status__ne="deactive").order_by("name")
-    ]
+    camp_choice, active_camps = get_refugee_camp_choices()
 
     search_form = forms.refugees.RefugeeSearchForm(request.args)
-    search_form.refugee_camp.choices = [("", "ทั้งหมด")] + camp_choice
+    search_form.refugee_camp.choices = [("", "ทั้งหมด")] + active_camps
     search = search_form.search.data
     refugee_camp_id = search_form.refugee_camp.data
     country = search_form.country.data
@@ -188,18 +200,14 @@ def create_or_edit(refugee_id):
             refugee.created_by = current_user._get_current_object()
         refugee.updated_by = current_user._get_current_object()
 
-    user = (
-        current_user._get_current_object()
-        if current_user.is_authenticated
-        else None
-    )
+    user = current_user._get_current_object() if current_user.is_authenticated else None
     ip_address = request.headers.get("X-Forwarded-For", request.remote_addr)
 
     log = models.RefugeeStatusLog(
-            status=refugee.status,
-            changed_by=user,
-            ip_address=ip_address,
-        )
+        status=refugee.status,
+        changed_by=user,
+        ip_address=ip_address,
+    )
     camp_log = models.RefugeeCampsLog(
         refugee_camp=refugee.refugee_camp,
         changed_by=user,
@@ -218,6 +226,28 @@ def create_or_edit(refugee_id):
     refugee.save()
 
     return redirect(url_for("refugees.index"))
+
+@module.route("/<refugee_id>/change_camp/<camp_id>", methods=["POST", "GET"])
+@roles_required(["admin", "refugee_camp_staff"])
+def change_camp(refugee_id, camp_id):
+    refugee = models.Refugee.objects.get(id=refugee_id)
+    new_camp = models.RefugeeCamp.objects.get(id=camp_id)
+    refugee.refugee_camp = new_camp
+    # Log the camp change
+    camp_log = models.RefugeeCampsLog(
+        refugee_camp=new_camp,
+        changed_by=(
+            current_user._get_current_object()
+            if current_user.is_authenticated
+            else None
+        ),
+        ip_address=request.headers.get("X-Forwarded-For", request.remote_addr),
+    )
+    refugee.camp_log.append(camp_log)
+    refugee.save()
+
+    return redirect(url_for("refugees.index", **request.args))
+
 
 @module.route("/<refugee_id>/change_camp/<camp_id>", methods=["POST", "GET"])
 @roles_required(["admin", "refugee_camp_staff"])

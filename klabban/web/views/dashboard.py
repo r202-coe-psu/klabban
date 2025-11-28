@@ -104,7 +104,7 @@ def admin_dashboard():
         refugee_count = models.Refugee.objects(
             refugee_camp=camp.id, status__ne="deactive"
         ).sum("people_count")
-        
+
         camp_stats.append(
             {
                 "id": camp.id,
@@ -112,7 +112,7 @@ def admin_dashboard():
                 "refugee_count": refugee_count,
             }
         )
-    
+
     # Sort by refugee_count in descending order (highest first)
     camp_stats = sorted(camp_stats, key=lambda x: x["refugee_count"], reverse=True)
 
