@@ -164,6 +164,7 @@ def create_or_edit(refugee_id):
         )
 
     is_confirm = request.form.get("is_confirm", "no")
+    form.name.data = form.name.data.strip()
     duplicated_refugee = models.Refugee.objects(
         name=form.name.data,
     )
@@ -181,7 +182,7 @@ def create_or_edit(refugee_id):
 
     form.populate_obj(refugee)
     refugee.refugee_camp = models.RefugeeCamp.objects.get(id=form.refugee_camp.data)
-    print(refugee.refugee_camp.name)
+
     if current_user.is_authenticated:
         if not refugee_id:
             refugee.created_by = current_user._get_current_object()
@@ -223,8 +224,6 @@ def create_or_edit(refugee_id):
 def change_camp(refugee_id, camp_id):
     refugee = models.Refugee.objects.get(id=refugee_id)
     new_camp = models.RefugeeCamp.objects.get(id=camp_id)
-
-    print(f"Changing camp of refugee {refugee.name} to {new_camp.name}")
     refugee.refugee_camp = new_camp
     # Log the camp change
     camp_log = models.RefugeeCampsLog(
