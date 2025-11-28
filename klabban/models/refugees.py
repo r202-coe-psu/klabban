@@ -17,11 +17,13 @@ class RefugeeStatusLog(me.EmbeddedDocument):
     changed_date = me.DateTimeField(default=datetime.datetime.now)
     ip_address = me.StringField()  # To accommodate IPv6 addresses
 
+
 class RefugeeCampsLog(me.EmbeddedDocument):
     refugee_camp = me.ReferenceField("RefugeeCamp", dbref=True)
     changed_by = me.ReferenceField("User")
     changed_date = me.DateTimeField(default=datetime.datetime.now)
     ip_address = me.StringField()  # To accommodate IPv6 addresses
+
 
 class RefugeeCampsLog(me.EmbeddedDocument):
     refugee_camp = me.ReferenceField("RefugeeCamp", dbref=True)
@@ -57,6 +59,8 @@ class Refugee(me.Document):
     registration_date = me.DateTimeField(default=datetime.datetime.now)
     back_home_date = me.DateTimeField()
     is_public_searchable = me.BooleanField(default=True)
+
+    description = me.StringField(max_length=255)
 
     # universal field
     metadata = me.DictField()
