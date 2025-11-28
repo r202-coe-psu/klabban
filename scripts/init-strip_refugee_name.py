@@ -6,7 +6,7 @@ from klabban.models import Refugee
 
 def strip_refugee_name():
     refugees = Refugee.objects()
-    count += 0
+    count = 0
     for refugee in refugees:
         old_name = refugee.name
         refugee.name = refugee.name.strip()
