@@ -50,7 +50,7 @@ def index():
     try:
         if "refugee_camp_staff" in current_user.roles or "admin" in current_user.roles:
             query = models.Refugee.objects(status__ne="deactive").order_by("name")
-    except Exception:   
+    except Exception:
         query = models.Refugee.objects(id=None)
     if search or country:
         query = models.Refugee.objects(status__ne="deactive").order_by("name")
@@ -227,6 +227,7 @@ def create_or_edit(refugee_id):
 
     return redirect(url_for("refugees.index"))
 
+
 @module.route("/<refugee_id>/change_camp/<camp_id>", methods=["POST", "GET"])
 @roles_required(["admin", "refugee_camp_staff"])
 def change_camp(refugee_id, camp_id):
@@ -247,7 +248,6 @@ def change_camp(refugee_id, camp_id):
     refugee.save()
 
     return redirect(url_for("refugees.index", **request.args))
-
 
 
 @module.route("/<refugee_id>", methods=["GET"])
@@ -275,3 +275,18 @@ def delete_refugee(refugee_id):
         refugee.status = "deactive"
         refugee.save()
     return redirect(url_for("refugees.index"))
+
+
+# ผู้อพยพไม่สามารถกดยืนยันชื่อได้(Error) ให้ทิ้ง note ไว้ให้ผู้ดูแลระบบมาตรวจสอบที่หลัง
+@module.route("/description/create", methods=["GET", "POST"])
+def create_description():
+    form = forms.refugees.RefugeeForm()
+
+    if not form.validate_on_submit():
+
+        return render_template("refugees/note_on_validation_fail.html", form=form)
+
+    return redirect("dashboard.index")
+
+
+# @module.route("/note/create")

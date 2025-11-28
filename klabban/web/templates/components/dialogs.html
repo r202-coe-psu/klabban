@@ -270,6 +270,14 @@ refugee_id=""
       <input class="border p-2 w-full" type="text" id="{{ id }}-refugee-name-input" value="" placeholder='{{ refugee_name }}' autocomplete="off" />
     {% endif %}
 
+    <div class="mt-2">
+      <p>
+        ไม่สามารถยืนยันข้อมูลได้ใช่ไหม?
+        <a class="link" href="{{ url_for('refugees.create_description') }}">คลิกที่นี่</a>
+      </p>
+    </div>
+
+    
     <div class="modal-action">
       <form method="{{ method }}" action="{{ action_button_href }}" id="{{ id }}-action-form">
         {# ปุ่มยกเลิก (เปลี่ยน type เป็น button เพื่อกัน submit โดยไม่ตั้งใจ) #}
