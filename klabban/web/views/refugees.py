@@ -278,15 +278,31 @@ def delete_refugee(refugee_id):
 
 
 # ผู้อพยพไม่สามารถกดยืนยันชื่อได้(Error) ให้ทิ้ง note ไว้ให้ผู้ดูแลระบบมาตรวจสอบที่หลัง
-@module.route("/description/create", methods=["GET", "POST"])
-def create_description():
-    form = forms.refugees.RefugeeForm()
+@module.route("/description/create/<refugee_id>", methods=["GET", "POST"])
+def create_description(refugee_id):
+
+    # form = forms.refugees.RefugeeForm()
+    if refugee_id:
+        refugee = models.Refugee.objects.get(id=refugee_id)
+        form = forms.refugees.RefugeeForm(obj=refugee)
 
     if not form.validate_on_submit():
 
         return render_template("refugees/note_on_validation_fail.html", form=form)
 
+    ip_address = request.headers.get("X-Forwarded-For", request.remote_addr)
+
+    # Log
+    # log = ...(
+    # ip_address=ip_address,
+    # )
+
     return redirect("dashboard.index")
 
 
-# @module.route("/note/create")
+@module.route("/view_descriptions")
+def view_description():
+
+    # pagination
+
+    return render_template("refugees/view_description.html")

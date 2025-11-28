@@ -60,12 +60,20 @@
         </li>
         {% endif %}
         <li class="">
-          <a class="{{ 'drawer-menu-active' if '/refugees' in request.path else '' }}"
+          <a class="{{ 'drawer-menu-active' if '/refugees' in request.path and 'view_description' not in request.path else '' }}"
             href="{{ url_for('refugees.index') }}">
             <i class="ph ph-person text-lg"></i>
             ผู้อพยพ
           </a>
         </li>
+        {% if "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles %}
+        <li>
+          <a class="{{ 'drawer-menu-active' if '/refugees' in request.path and 'view_descriptions' in request.path else '' }}" href="{{ url_for('refugees.view_description') }}">
+            <i class="ph ph-note text-lg"></i>
+            คำร้องจากผู้อพยพ
+          </a>
+        </li>
+        {% endif %}
         {% if "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles %}
         <li>
           <a class="{{ 'drawer-menu-active' if '/users' in request.path else '' }}" href="{{ url_for('users.index') }}">
