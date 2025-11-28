@@ -7,15 +7,18 @@ import re
 from openpyxl import load_workbook
 from io import BytesIO
 from klabban.models.refugees import REFUGEE_STATUS_CHOICES, GENDER
+from flask import flash
 
 REQUIRE_HEADER = [
     "ชื่อ-นามสกุล",
     "วันที่ลงทะเบียน",
+    "ศูนย์พักพิง",
 ]
 
 HEADER = [
     "ชื่อเล่น",
     "ชื่อ-นามสกุล",
+    "เลขบัตรประจำตัวประชาชน",
     "ที่อยู่",
     "เบอร์โทรศัพท์",
     "สัญชาติ",
@@ -32,6 +35,7 @@ HEADER = [
     "วันที่ลงทะเบียน",
     "วันที่กลับบ้าน",
     "สถานะ",
+    "ศูนย์พักพิง",
 ]
 
 
@@ -40,6 +44,7 @@ def get_template():
     example_data = {
         "ชื่อเล่น": ["แดง", "น้อย"],
         "ชื่อ-นามสกุล": ["สมชาย ใจดี", "สมหญิง รักสงบ"],
+        "เลขบัตรประจำตัวประชาชน": ["1234567890123", "9876543210987"],
         "ที่อยู่": [
             "123 หมู่ 1 ต.สันทราย อ.สันทราย จ.เชียงใหม่",
             "456 หมู่ 2 ต.แม่เหียะ อ.เมือง จ.เชียงใหม่",
@@ -47,7 +52,7 @@ def get_template():
         "เบอร์โทรศัพท์": ["0812345678", "0898765432"],
         "สัญชาติ": ["ไทย", "ไทย"],
         "เชื้อชาติ": ["ไทย", "ไทย"],
-        "ประเทศ": ["Thailand", "Myanmar"],
+        "ประเทศ": ["Thailand", "Thailand"],
         "อายุ": [35, 28],
         "เพศ": ["ชาย", "หญิง"],
         "โรคประจำตัว": ["เบาหวาน", ""],
@@ -62,6 +67,7 @@ def get_template():
         "วันที่ลงทะเบียน": ["01/12/2024", "15/12/2024"],
         "วันที่กลับบ้าน": ["", ""],
         "สถานะ": ["กำลังพักพิง", "กำลังพักพิง"],
+        "ศูนย์พักพิง": ["มหาวิทยาลัยสงขลาครินทร์", "มหาวิทยาลัยสงขลาครินทร์"],
     }
 
     df = pd.DataFrame(example_data)
@@ -150,7 +156,26 @@ def get_template():
     return output
 
 
-def validate_import_file(import_refugee_file, file):
+def check_existing_refugee(
+    refugee_camp,
+    name,
+):
+    query = models.Refugee.objects(
+        refugee_camp=refugee_camp,
+        name=name,
+    )
+
+    return query.first()
+
+
+def get_refugee_camp_from_name(name):
+    query = models.RefugeeCamp.objects(
+        name=name,
+    )
+    return query.first()
+
+
+def validate_import_file(import_refugee_file, file, refugee_camp):
     if (
         file.filename
         and not file.filename.endswith(".xlsx")
@@ -202,12 +227,98 @@ def validate_import_file(import_refugee_file, file):
         if missing_fields:
             error_rows.append(f"แถวที่ {index + 2}: ขาดข้อมูล {', '.join(missing_fields)}")
 
+        # ตรวจสอบว่าศูนย์พักพิงมีอยู่ในระบบหรือไม่
+        if pd.notna(row.get("ศูนย์พักพิง")):
+            if refugee_camp != "all":
+                camp_name = str(row.get("ศูนย์พักพิง")).strip()
+                if camp_name != refugee_camp.name:
+                    error_rows.append(
+                        f"แถวที่ {index + 2}: ศูนย์พักพิงไม่ตรงกับที่เลือก ({refugee_camp.name})"
+                    )
+            else:
+                camp_name = str(row.get("ศูนย์พักพิง")).strip()
+                refugee_camp = get_refugee_camp_from_name(camp_name)
+                if not refugee_camp:
+                    error_rows.append(
+                        f"แถวที่ {index + 2}: ไม่พบศูนย์พักพิง '{camp_name}' ในระบบ"
+                    )
+                elif refugee_camp.status != "active":
+                    error_rows.append(
+                        f"แถวที่ {index + 2}: ศูนย์พักพิง '{camp_name}' ไม่ได้เปิดใช้งาน"
+                    )
+
+        # ตรวจสอบรูปแบบวันที่ลงทะเบียน
+        if pd.notna(row.get("วันที่ลงทะเบียน")):
+            if not isinstance(row.get("วันที่ลงทะเบียน"), datetime.datetime):
+                date_str = str(row.get("วันที่ลงทะเบียน")).strip()
+                try:
+                    # ตรวจสอบว่าเป็น format DD/MM/YYYY หรือไม่
+                    pd.to_datetime(date_str, format="%d/%m/%Y", dayfirst=True)
+                except:
+                    error_rows.append(
+                        f"แถวที่ {index + 2}: รูปแบบวันที่ลงทะเบียนไม่ถูกต้อง ต้องเป็น DD/MM/YYYY เช่น 25/12/2024"
+                    )
+
+        # ตรวจสอบรูปแบบวันที่กลับบ้าน (ถ้ามี)
+        if pd.notna(row.get("วันที่กลับบ้าน")):
+            if not isinstance(row.get("วันที่กลับบ้าน"), datetime.datetime):
+                date_str = str(row.get("วันที่กลับบ้าน")).strip()
+                if date_str:  # ถ้าไม่ใช่ค่าว่าง
+                    try:
+                        pd.to_datetime(date_str, format="%d/%m/%Y", dayfirst=True)
+                    except:
+                        error_rows.append(
+                            f"แถวที่ {index + 2}: รูปแบบวันที่กลับบ้านไม่ถูกต้อง ต้องเป็น DD/MM/YYYY เช่น 25/12/2024"
+                        )
+
+        # ตรวจสอบค่าตัวเลข
+        if pd.notna(row.get("อายุ")):
+            try:
+                age = int(float(row.get("อายุ")))
+                if age < 0 or age > 150:
+                    error_rows.append(f"แถวที่ {index + 2}: อายุต้องอยู่ระหว่าง 0-150 ปี")
+            except:
+                error_rows.append(f"แถวที่ {index + 2}: อายุต้องเป็นตัวเลขเท่านั้น")
+
+        if pd.notna(row.get("จำนวนคน")):
+            try:
+                people_count = int(float(row.get("จำนวนคน")))
+                if people_count < 1:
+                    error_rows.append(f"แถวที่ {index + 2}: จำนวนคนต้องมากกว่า 0")
+            except:
+                error_rows.append(f"แถวที่ {index + 2}: จำนวนคนต้องเป็นตัวเลขเท่านั้น")
+
+        if pd.notna(row.get("จำนวนวันที่คาดว่าจะพัก")):
+            try:
+                expected_days = int(float(row.get("จำนวนวันที่คาดว่าจะพัก")))
+                if expected_days < 0:
+                    error_rows.append(f"แถวที่ {index + 2}: จำนวนวันต้องเป็นค่าบวก")
+            except:
+                error_rows.append(f"แถวที่ {index + 2}: จำนวนวันต้องเป็นตัวเลขเท่านั้น")
+
+        # ตรวจสอบเพศ
+        if pd.notna(row.get("เพศ")):
+            gender_thai = str(row.get("เพศ")).strip()
+            valid_genders = [choice[1] for choice in GENDER]
+            if gender_thai not in valid_genders:
+                error_rows.append(
+                    f"แถวที่ {index + 2}: เพศไม่ถูกต้อง ต้องเป็น {', '.join(valid_genders)}"
+                )
+
+        # ตรวจสอบสถานะ
+        if pd.notna(row.get("สถานะ")):
+            status_thai = str(row.get("สถานะ")).strip()
+            valid_statuses = [choice[1] for choice in REFUGEE_STATUS_CHOICES]
+            if status_thai not in valid_statuses:
+                error_rows.append(
+                    f"แถวที่ {index + 2}: สถานะไม่ถูกต้อง ต้องเป็น {', '.join(valid_statuses)}"
+                )
+
     if error_rows:
         import_refugee_file.error_messages = error_rows
         import_refugee_file.save()
         return False
 
-    # บันทึก DataFrame สำหรับใช้ในการ import
     import_refugee_file.save()
 
     return True
@@ -219,9 +330,10 @@ def format_str(value):
 
 
 def write_refugees_from_import_file(
-    refugee_camp_id,
+    refugee_camp,
     file,
     current_user,
+    source,
 ):
     if file.filename.endswith(".xlsx"):
         df = pd.read_excel(file)
@@ -316,44 +428,98 @@ def write_refugees_from_import_file(
             if pd.notna(row.get("สัญชาติ")):
                 nationality = str(row.get("สัญชาติ")).strip()
 
-            refugee = models.Refugee(
-                refugee_camp=refugee_camp_id,
-                nick_name=format_str(row.get("ชื่อเล่น")),
-                name=format_str(row.get("ชื่อ-นามสกุล")),
-                address=format_str(row.get("ที่อยู่")),
-                phone=phone,
-                nationality=nationality,
-                ethnicity=ethinicity,
-                country=country,
-                age=age,
-                gender=gender,
-                congenital_disease=format_str(row.get("โรคประจำตัว")),
-                people_count=people_count,
-                pets=format_str(row.get("สัตว์เลี้ยง")),
-                expected_days=expected_stay_days,
-                emergency_contact=format_str(row.get("กรณีติดต่อฉุกเฉิน")),
-                remark=format_str(row.get("หมายเหตุ")),
-                registration_date=registration_date,
-                back_home_date=back_home_date,
-                status=status,
-                metadata={"imported_from_excel_file": True},
-                created_by=current_user,
-                created_date=datetime.datetime.now(),
-                updated_by=current_user,
-                updated_date=datetime.datetime.now(),
-            )
+            if pd.notna(row.get("ศูนย์พักพิง")):
+                if refugee_camp == "all":
+                    camp_name = str(row.get("ศูนย์พักพิง")).strip()
+                    refugee_camp_obj = models.RefugeeCamp.objects(
+                        name=camp_name, status="active"
+                    ).first()
+                    if refugee_camp_obj:
+                        refugee_camp_id = refugee_camp_obj.id
+                if refugee_camp != "all":
+                    refugee_camp_id = refugee_camp.id
 
-            refugee.save()
-            record_count += 1
+            if pd.notna(row.get("ชื่อ-นามสกุล")) and pd.notna(row.get("ชื่อเล่น")):
+                existing_refugee = check_existing_refugee(
+                    refugee_camp=refugee_camp_id,
+                    name=str(row.get("ชื่อ-นามสกุล")).strip(),
+                )
+                if existing_refugee:
+                    # Update ข้อมูลเดิม
+                    existing_refugee.nick_name = format_str(row.get("ชื่อเล่น"))
+                    existing_refugee.name = format_str(row.get("ชื่อ-นามสกุล"))
+                    existing_refugee.identification_number = format_str(
+                        row.get("เลขบัตรประจำตัวประชาชน")
+                    )
+                    existing_refugee.address = format_str(row.get("ที่อยู่"))
+                    existing_refugee.phone = phone
+                    existing_refugee.nationality = nationality
+                    existing_refugee.ethnicity = ethinicity
+                    existing_refugee.country = country
+                    existing_refugee.age = age
+                    existing_refugee.gender = gender
+                    existing_refugee.congenital_disease = format_str(
+                        row.get("โรคประจำตัว")
+                    )
+                    existing_refugee.people_count = people_count
+                    existing_refugee.pets = format_str(row.get("สัตว์เลี้ยง"))
+                    existing_refugee.expected_days = expected_stay_days
+                    existing_refugee.emergency_contact = format_str(
+                        row.get("กรณีติดต่อฉุกเฉิน")
+                    )
+                    existing_refugee.remark = format_str(row.get("หมายเหตุ"))
+                    existing_refugee.registration_date = registration_date
+                    existing_refugee.back_home_date = back_home_date
+                    existing_refugee.source = source
+                    existing_refugee.status = status
+                    existing_refugee.updated_by = current_user
+                    existing_refugee.updated_date = datetime.datetime.now()
+
+                    existing_refugee.save()
+                    updated_count += 1
+                else:
+                    refugee = models.Refugee(
+                        refugee_camp=refugee_camp_id,
+                        nick_name=format_str(row.get("ชื่อเล่น")),
+                        name=format_str(row.get("ชื่อ-นามสกุล")),
+                        identification_number=format_str(
+                            row.get("เลขบัตรประจำตัวประชาชน")
+                        ),
+                        address=format_str(row.get("ที่อยู่")),
+                        phone=phone,
+                        nationality=nationality,
+                        ethnicity=ethinicity,
+                        country=country,
+                        age=age,
+                        gender=gender,
+                        congenital_disease=format_str(row.get("โรคประจำตัว")),
+                        people_count=people_count,
+                        pets=format_str(row.get("สัตว์เลี้ยง")),
+                        expected_days=expected_stay_days,
+                        emergency_contact=format_str(row.get("กรณีติดต่อฉุกเฉิน")),
+                        remark=format_str(row.get("หมายเหตุ")),
+                        registration_date=registration_date,
+                        back_home_date=back_home_date,
+                        status=status,
+                        source=source,
+                        metadata={"imported_from_excel_file": True},
+                        created_by=current_user,
+                        created_date=datetime.datetime.now(),
+                        updated_by=current_user,
+                        updated_date=datetime.datetime.now(),
+                    )
+
+                    refugee.save()
+                    record_count += 1
 
         except Exception as e:
             print(f"Error processing row {index + 2}: {e}")
     return record_count
 
 
-def process_import_refugee_file(import_refugee_file, current_user, refugee_camp_id):
+def process_import_refugee_file(import_refugee_file, current_user, refugee_camp):
     file = import_refugee_file.file
-    results = validate_import_file(import_refugee_file, file)
+    results = validate_import_file(import_refugee_file, file, refugee_camp)
     if not results:
         import_refugee_file.file.delete()
         import_refugee_file.file = None
@@ -364,9 +530,10 @@ def process_import_refugee_file(import_refugee_file, current_user, refugee_camp_
     import_refugee_file.upload_status = "processing"
     import_refugee_file.save()
     record_count = write_refugees_from_import_file(
-        refugee_camp_id=refugee_camp_id,
+        refugee_camp=refugee_camp,
         file=file,
         current_user=current_user,
+        source=import_refugee_file.source,
     )
     import_refugee_file.upload_status = "completed"
     import_refugee_file.record_count = record_count
