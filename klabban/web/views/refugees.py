@@ -207,12 +207,12 @@ def create_or_edit(refugee_id):
 
     if not refugee_id:
         refugee.status_log.append(log)
-        refugee.camps_log.append(camp_log)
+        refugee.camp_log.append(camp_log)
     elif refugee_id:
         if form.status.data != old_status:
             refugee.status_log.append(log)
         elif form.refugee_camp.data != old_camp:
-            refugee.camps_log.append(camp_log)
+            refugee.camp_log.append(camp_log)
 
     refugee.save()
 
@@ -236,7 +236,7 @@ def change_camp(refugee_id, camp_id):
         ),
         ip_address=request.headers.get("X-Forwarded-For", request.remote_addr),
     )
-    refugee.camps_log.append(camp_log)
+    refugee.camp_log.append(camp_log)
     refugee.save()
 
     return redirect(url_for("refugees.index", **request.args))
