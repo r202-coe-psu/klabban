@@ -15,7 +15,7 @@ def format_date(date: datetime.datetime, formatter: str = "%d/%m/%Y"):
     return date.strftime(formatter)
 
 
-def format_number(data: str | int | float, digits: int = 2):
+def format_number(data: str | int | float, digits: int = 0):
     if digits == 0:
         return f"{data:,.0f}"
     else:

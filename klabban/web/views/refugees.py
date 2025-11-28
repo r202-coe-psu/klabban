@@ -2,7 +2,7 @@ from flask import abort, Blueprint, render_template, redirect, url_for, request,
 from flask_login import login_required, current_user
 from ..utils.acl import roles_required
 from klabban import models
-from klabban.web import forms
+from klabban.web import caches, forms
 from mongoengine.queryset.visitor import Q
 from uuid import uuid4
 from flask_mongoengine import Pagination
@@ -10,6 +10,20 @@ from datetime import datetime
 
 module = Blueprint("refugees", __name__, url_prefix="/refugees")
 
+@caches.cache.memorize(timeout=60)
+def get_refugee_camp_choices():
+    camps = models.RefugeeCamp.objects(status__ne="deactive").order_by("name")
+    camp_choice =  [
+        (str(camp.id), camp.name)
+        for camp in camps
+    ]
+    active_camps = []
+    for camp in camps:
+        # Count refugees in this camp
+        refugee_count = models.Refugee.objects(refugee_camp=camp.id, status__ne="deactive").count()
+        if refugee_count > 0:
+            active_camps.append((str(camp.id), camp.name))
+    return camp_choice, active_camps
 
 @module.route("/")
 def index():
@@ -23,7 +37,7 @@ def index():
     ]
 
     search_form = forms.refugees.RefugeeSearchForm(request.args)
-    search_form.refugee_camp.choices = [("", "ทั้งหมด")] + camp_choice
+    search_form.refugee_camp.choices = [("", "ทั้งหมด")] + active_camps
     search = search_form.search.data
     refugee_camp_id = search_form.refugee_camp.data
     country = search_form.country.data
