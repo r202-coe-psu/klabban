@@ -35,7 +35,7 @@ class MissingPerson(me.Document):
         max_length=100
     )  # หมายเลขบัตรประชาชนผู้แจ้ง
     reporter_country = me.StringField(default="Thailand")  # ประเทศของผู้แจ้ง
-    reporter_proince_info = me.StringField()  # จังหวัดของผู้แจ้ง
+    reporter_province_info = me.StringField()  # จังหวัดของผู้แจ้ง
     reporter_district_info = me.StringField()  # อําเภอของผู้แจ้ง
     reporter_subdistrict_info = me.StringField()  # ตําบลของผู้แจ้ง
     reporter_address_info = me.StringField()  # ที่อยู่บ้านเลขที่ของผู้แจ้ง

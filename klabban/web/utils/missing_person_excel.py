@@ -403,19 +403,19 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
                         break
 
             # แปลงวันที่รับศพ
-            received_body_date = None
+            body_received_date = None
             if pd.notna(row.get("วันที่รับศพ")):
                 try:
                     if isinstance(row.get("วันที่รับศพ"), datetime.datetime):
-                        received_body_date = row.get("วันที่รับศพ").date()
+                        body_received_date = row.get("วันที่รับศพ")
                     else:
                         date_str = str(row.get("วันที่รับศพ")).strip()
                         if date_str:
-                            received_body_date = pd.to_datetime(
+                            body_received_date = pd.to_datetime(
                                 date_str, format="%d/%m/%Y", dayfirst=True
-                            ).date()
+                            )
                 except:
-                    received_body_date = None
+                    body_received_date = None
 
             # แปลงอายุ
             missing_age = None
@@ -443,7 +443,7 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
             # ข้อมูลคนหาย/เสียชีวิต
             missing_first_name = format_str(row.get("ชื่อคนหาย/เสียชีวิต"))
             missing_last_name = format_str(row.get("นามสกุลคนหาย/เสียชีวิต"))
-            missing_id_number = format_str(row.get("หมายเลขบัตรประจาชนคนหาย/เสียชีวิต"))
+            missing_id_number = format_str(row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต"))
 
             # ตรวจสอบว่ามีข้อมูลซ้ำหรือไม่
             existing_person = check_existing_missing_person(
@@ -462,19 +462,21 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
                 existing_person.age = missing_age
                 existing_person.identification_number = missing_id_number
                 existing_person.country = format_str(row.get("ประเทศคนหาย/เสียชีวิต"))
-                existing_person.province = format_str(row.get("จังหวัดคนหาย/เสียชีวิต"))
-                existing_person.district = format_str(row.get("อำเภอคนหาย/เสียชีวิต"))
-                existing_person.sub_district = format_str(row.get("ตำบลคนหาย/เสียชีวิต"))
-                existing_person.address = format_str(row.get("ที่อยู่บ้านเลขที่คนหาย/เสียชีวิต"))
-                existing_person.status = status
-                existing_person.physical_description = format_str(
-                    row.get("ลักษณะรูปพรรณ")
+                existing_person.province_info = format_str(row.get("จังหวัดคนหาย/เสียชีวิต"))
+                existing_person.district_info = format_str(row.get("อำเภอคนหาย/เสียชีวิต"))
+                existing_person.subdistrict_info = format_str(
+                    row.get("ตำบลคนหาย/เสียชีวิต")
                 )
-                existing_person.testimony = format_str(row.get("คำให้การ/สอบปากคำ"))
-                existing_person.received_body_date = received_body_date
+                existing_person.address_info = format_str(
+                    row.get("ที่อยู่บ้านเลขที่คนหาย/เสียชีวิต")
+                )
+                existing_person.missing_person_status = status
+                existing_person.physical_mark = format_str(row.get("ลักษณะรูปพรรณ"))
+                existing_person.statement = format_str(row.get("คำให้การ/สอบปากคำ"))
+                existing_person.body_received_date = body_received_date
 
                 # ข้อมูลผู้แจ้ง
-                existing_person.relationship = format_str(
+                existing_person.deceased_relationship = format_str(
                     row.get("ความสัมพันธ์กับผู้หาย/เสียชีวิต")
                 )
                 existing_person.reporter_title_name = format_str(
@@ -487,11 +489,19 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
                     row.get("หมายเลขบัตรประชาชนผู้แจ้ง")
                 )
                 existing_person.reporter_country = format_str(row.get("ประเทศผู้แจ้ง"))
-                existing_person.reporter_province = format_str(row.get("จังหวัดผู้แจ้ง"))
-                existing_person.reporter_district = format_str(row.get("อำเภอผู้แจ้ง"))
-                existing_person.reporter_sub_district = format_str(row.get("ตำบลผู้แจ้ง"))
-                existing_person.reporter_address = format_str(row.get("ที่อยู่บ้านเลขที่ผู้แจ้ง"))
-                existing_person.reporter_phone = reporter_phone
+                existing_person.reporter_province_info = format_str(
+                    row.get("จังหวัดผู้แจ้ง")
+                )
+                existing_person.reporter_district_info = format_str(
+                    row.get("อำเภอผู้แจ้ง")
+                )
+                existing_person.reporter_subdistrict_info = format_str(
+                    row.get("ตำบลผู้แจ้ง")
+                )
+                existing_person.reporter_address_info = format_str(
+                    row.get("ที่อยู่บ้านเลขที่ผู้แจ้ง")
+                )
+                existing_person.reporter_phone_number = reporter_phone
                 existing_person.code = format_str(row.get("CODE"))
 
                 existing_person.updated_by = current_user
@@ -508,17 +518,17 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
                     last_name=missing_last_name,
                     age=missing_age,
                     identification_number=missing_id_number,
-                    country=format_str(row.get("ประเทศคนหาย/เสียชีวิต")) or "ไทย",
-                    province=format_str(row.get("จังหวัดคนหาย/เสียชีวิต")),
-                    district=format_str(row.get("อำเภอคนหาย/เสียชีวิต")),
-                    sub_district=format_str(row.get("ตำบลคนหาย/เสียชีวิต")),
-                    address=format_str(row.get("ที่อยู่บ้านเลขที่คนหาย/เสียชีวิต")),
-                    status=status,
+                    country=format_str(row.get("ประเทศคนหาย/เสียชีวิต")) or "Thailand",
+                    province_info=format_str(row.get("จังหวัดคนหาย/เสียชีวิต")),
+                    district_info=format_str(row.get("อำเภอคนหาย/เสียชีวิต")),
+                    subdistrict_info=format_str(row.get("ตำบลคนหาย/เสียชีวิต")),
+                    address_info=format_str(row.get("ที่อยู่บ้านเลขที่คนหาย/เสียชีวิต")),
+                    missing_person_status=status,
                     # ข้อมูลเพิ่มเติม
-                    physical_description=format_str(row.get("ลักษณะรูปพรรณ")),
-                    testimony=format_str(row.get("คำให้การ/สอบปากคำ")),
-                    received_body_date=received_body_date,
-                    relationship=format_str(row.get("ความสัมพันธ์กับผู้หาย/เสียชีวิต")),
+                    physical_mark=format_str(row.get("ลักษณะรูปพรรณ")),
+                    statement=format_str(row.get("คำให้การ/สอบปากคำ")),
+                    body_received_date=body_received_date,
+                    deceased_relationship=format_str(row.get("ความสัมพันธ์กับผู้หาย/เสียชีวิต")),
                     # ข้อมูลผู้แจ้ง
                     reporter_title_name=format_str(row.get("คำนำหน้าชื่อผู้แจ้ง")),
                     reporter_first_name=format_str(row.get("ชื่อผู้แจ้ง")),
@@ -527,20 +537,21 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
                     reporter_identification_number=format_str(
                         row.get("หมายเลขบัตรประชาชนผู้แจ้ง")
                     ),
-                    reporter_country=format_str(row.get("ประเทศผู้แจ้ง")) or "ไทย",
-                    reporter_province=format_str(row.get("จังหวัดผู้แจ้ง")),
-                    reporter_district=format_str(row.get("อำเภอผู้แจ้ง")),
-                    reporter_sub_district=format_str(row.get("ตำบลผู้แจ้ง")),
-                    reporter_address=format_str(row.get("ที่อยู่บ้านเลขที่ผู้แจ้ง")),
-                    reporter_phone=reporter_phone,
+                    reporter_country=format_str(row.get("ประเทศผู้แจ้ง")) or "Thailand",
+                    reporter_province_info=format_str(row.get("จังหวัดผู้แจ้ง")),
+                    reporter_district_info=format_str(row.get("อำเภอผู้แจ้ง")),
+                    reporter_subdistrict_info=format_str(row.get("ตำบลผู้แจ้ง")),
+                    reporter_address_info=format_str(row.get("ที่อยู่บ้านเลขที่ผู้แจ้ง")),
+                    reporter_phone_number=reporter_phone,
                     code=format_str(row.get("CODE")),
                     metadata={
                         "imported_from_excel_file": True,
                         "sheet_name": sheet_name,
                     },
-                    created_by=current_user,
+                    status="active",
                     created_by=current_user,
                     created_date=datetime.datetime.now(),
+                    updated_by=current_user,
                     updated_date=datetime.datetime.now(),
                 )
 

@@ -1,0 +1,253 @@
+{% import "base/html_renderer.html" as renderer %}
+
+<dialog id="{{ modal_id }}" class="modal modal-open">
+<div class="modal-box w-11/12 max-w-2xl !max-h-[85vh]">
+    <h3 class="text-lg">นำเข้าข้อมูลผู้สูญหาย - เสียชีวิต</h3>
+    <span class="text-sm text-gray-600">กรุณาอัปโหลดไฟล์ Excel ที่ต้องการนำเข้าข้อมูล</span>
+    <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 outline-none"
+    onclick="document.getElementById('{{ modal_id }}').classList.remove('modal-open')">✕</button>
+    
+    {# แสดง flash messages #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="mt-4 space-y-2">
+        {% for category, message in messages %}
+            <div class="alert alert-{{ 'success' if category == 'success' else 'error' if category == 'error' else 'info' }}">
+            <span>{{ message }}</span>
+            </div>
+        {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+    
+    <form id="import-missing-person-form" method="POST" action="{{ url_for('missing_persons.import_missing_person_modal') }}" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="flex flex-col mt-4">
+        
+        {# ดาวน์โหลด Template #}
+        <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div class="flex items-center gap-2 mb-2">
+            <i class="ph ph-info text-blue-600"></i>
+            <span class="text-sm font-medium text-blue-900">ขั้นตอนที่ 1: ดาวน์โหลด Template</span>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm btn-primary" onclick="downloadMissingPersonTemplate()">
+            <i class="ph ph-download"></i> ดาวน์โหลด Template Excel
+        </button>
+        <p class="text-xs text-gray-600 mt-2">
+            แนะนำให้ดาวน์โหลด Template และกรอกข้อมูลตามตัวอย่างที่กำหนด<br>
+            <span class="font-semibold">รองรับหลาย Sheet:</span> สามารถสร้างหลาย Sheet ในไฟล์เดียวกันได้ (ยกเว้น Sheet ที่ขึ้นต้นด้วย "Choices_")
+        </p>
+        </div>
+
+        {# อัปโหลดไฟล์ #}
+        <div class="mt-4">
+        <div class="flex items-center gap-2 mb-2">
+            <i class="ph ph-info text-blue-600"></i>
+            <span class="text-sm font-medium text-blue-900">ขั้นตอนที่ 2: อัปโหลดไฟล์</span>
+        </div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+            {{ form.file.label.text }}
+        </label>
+        {{ form.file(class="file-input file-input-bordered w-full", id="missing_person_file") }}
+        {% if form.file.description %}
+        <span class="text-xs text-gray-500 mt-1 block">{{ form.file.description }}</span>
+        {% endif %}
+        {% if form.file.errors %}
+        <span class="text-error text-sm mt-1 block">{{ form.file.errors[0] }}</span>
+        {% endif %}
+        </div>
+
+        {# แหล่งที่มาของข้อมูล #}
+        <div class="mt-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+            {{ form.source.label.text }}
+            <span class="text-gray-400 text-xs font-normal">(ไม่บังคับ)</span>
+        </label>
+        {{ form.source(class="textarea textarea-bordered w-full h-20", 
+                        id="missing_person_source", 
+                        placeholder="เช่น ข้อมูลจากหน่วยงาน XXX, พื้นที่ YYY, ฯลฯ") }}
+        {% if form.source.description %}
+        <span class="text-xs text-gray-500 mt-1 block">{{ form.source.description }}</span>
+        {% endif %}
+        {% if form.source.errors %}
+        <span class="text-error text-sm mt-1 block">{{ form.source.errors[0] }}</span>
+        {% endif %}
+        </div>
+
+        {# พื้นที่สำหรับแสดง Error ข้อความแจ้งเตือน #}
+        <span id="import-missing-person-error-msg" class="text-error text-sm mt-2 hidden">
+        * กรุณาเลือกไฟล์ Excel ก่อนกดยืนยัน
+        </span>
+        
+        <span class="text-sm text-gray-500 mt-2">
+        หมายเหตุ: หลังจากกดยืนยัน ระบบจะเริ่มดำเนินการนำเข้าข้อมูล
+        ซึ่งอาจใช้เวลาสักครู่ ขึ้นอยู่กับจำนวนข้อมูลในไฟล์และจำนวน Sheet
+        </span>
+    </div>
+
+    <div class="modal-action justify-end">
+        <button type="button" class="btn btn-ghost" onclick="openMissingPersonImportLogsModal()">
+        <i class="ph ph-list-bullets"></i> ดูประวัติการนำเข้า
+        </button>
+        
+        <button type="button" class="btn"
+        onclick="document.getElementById('{{ modal_id }}').classList.remove('modal-open')">
+        ปิด
+        </button>
+
+        <button type="submit" class="btn btn-primary">
+        ยืนยัน
+        </button>
+    </div>
+    </form>
+</div>
+</dialog>
+
+{# Modal สำหรับแสดง Import Logs #}
+<dialog id="missing-person-import-logs-modal" class="modal">
+<div class="modal-box w-11/12 max-w-5xl !max-h-[85vh]">
+    <h3 class="text-lg font-bold mb-4">ประวัติการนำเข้าข้อมูลผู้สูญหาย - เสียชีวิต</h3>
+    <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+    onclick="document.getElementById('missing-person-import-logs-modal').close()">✕</button>
+    
+    <div class="overflow-x-auto">
+    <table class="table table-zebra w-full">
+        <thead>
+        <tr>
+            <th>วันที่นำเข้า</th>
+            <th>ชื่อไฟล์</th>
+            <th>แหล่งที่มา</th>
+            <th>จำนวน Sheet</th>
+            <th>จำนวนข้อมูล</th>
+            <th>สถานะ</th>
+            <th>ผู้นำเข้า</th>
+            <th>รายละเอียด</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if import_logs %}
+            {% for log in import_logs %}
+            <tr>
+                <td>{{ log.uploaded_date.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>{{ log.file_name }}</td>
+                <td>{{ log.source or "-" }}</td>
+                <td>{{ log.metadata.total_sheets if log.metadata and log.metadata.total_sheets else "-" }}</td>
+                <td>{{ log.record_count }}</td>
+                <td>
+                {% if log.upload_status == 'completed' %}
+                    <span class="badge badge-success">สำเร็จ</span>
+                {% elif log.upload_status == 'failed' %}
+                    <span class="badge badge-error text-white">ล้มเหลว</span>
+                {% elif log.upload_status == 'processing' %}
+                    <span class="badge badge-warning">กำลังประมวลผล</span>
+                {% elif log.upload_status == 'validating' %}
+                    <span class="badge badge-info">กำลังตรวจสอบ</span>
+                {% else %}
+                    <span class="badge badge-info">รอดำเนินการ</span>
+                {% endif %}
+                </td>
+                <td>{{ log.created_by.first_name }} {{ log.created_by.last_name }}</td>
+                <td>
+                {% if log.error_messages %}
+                    <button class="btn btn-ghost btn-xs" onclick="showMissingPersonErrorDetails('{{ log.id }}')">
+                    <i class="ph ph-warning"></i> ดูข้อผิดพลาด ({{ log.error_messages|length }})
+                    </button>
+                {% else %}
+                    <span class="text-success">-</span>
+                {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+            <td colspan="8" class="text-center text-gray-500">ไม่มีประวัติการนำเข้าข้อมูล</td>
+            </tr>
+        {% endif %}
+        </tbody>
+    </table>
+    </div>
+
+    <div class="modal-action">
+    <button type="button" class="btn" onclick="document.getElementById('missing-person-import-logs-modal').close()">
+        ปิด
+    </button>
+    </div>
+</div>
+</dialog>
+
+{# Modal สำหรับแสดง Error Details #}
+<dialog id="missing-person-error-details-modal" class="modal">
+<div class="modal-box w-11/12 max-w-3xl">
+    <h3 class="text-lg font-bold mb-4">รายละเอียดข้อผิดพลาด</h3>
+    <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+    onclick="document.getElementById('missing-person-error-details-modal').close()">✕</button>
+    
+    <div id="missing-person-error-content" class="bg-base-200 p-4 rounded-lg max-h-96 overflow-y-auto">
+    <!-- Error messages will be populated here -->
+    </div>
+
+    <div class="modal-action">
+    <button type="button" class="btn" onclick="document.getElementById('missing-person-error-details-modal').close()">
+        ปิด
+    </button>
+    </div>
+</div>
+</dialog>
+
+<script>
+function downloadMissingPersonTemplate() {
+const url = "{{ url_for('missing_persons.download_template') }}";
+const link = document.createElement('a');
+link.href = url;
+link.download = 'missing_person_import_template.xlsx';
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+}
+
+function openMissingPersonImportLogsModal() {
+// ปิด import modal
+document.getElementById('{{ modal_id }}').classList.remove('modal-open');
+
+// เปิด logs modal
+document.getElementById('missing-person-import-logs-modal').showModal();
+}
+
+function showMissingPersonErrorDetails(logId) {
+// Fetch error details via AJAX
+fetch(`/missing_persons/import_logs/${logId}/errors`)
+    .then(response => response.json())
+    .then(data => {
+    const errorContent = document.getElementById('missing-person-error-content');
+    if (data.errors && data.errors.length > 0) {
+        errorContent.innerHTML = data.errors.map(error => 
+        `<div class="mb-2 p-2 bg-error/10 rounded">
+            <span class="text-sm">${error}</span>
+        </div>`
+        ).join('');
+    } else {
+        errorContent.innerHTML = '<p class="text-gray-500">ไม่มีข้อผิดพลาด</p>';
+    }
+    document.getElementById('missing-person-error-details-modal').showModal();
+    })
+    .catch(error => {
+    console.error('Error fetching error details:', error);
+    alert('เกิดข้อผิดพลาดในการดึงข้อมูล');
+    });
+}
+
+// Validation ก่อน submit
+document.getElementById('import-missing-person-form').addEventListener('submit', function(e) {
+const fileInput = document.getElementById('missing_person_file');
+const errorMsg = document.getElementById('import-missing-person-error-msg');
+
+if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+    e.preventDefault();
+    if (errorMsg) errorMsg.classList.remove('hidden');
+    if (fileInput) fileInput.focus();
+    return false;
+}
+
+if (errorMsg) errorMsg.classList.add('hidden');
+});
+</script>

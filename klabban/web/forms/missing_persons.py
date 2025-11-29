@@ -58,6 +58,7 @@ class MissingPersonImportForm(FlaskForm):
             FileAllowed(["xlsx"], "เฉพาะไฟล์ .xlsx เท่านั้น"),
         ],
     )
+    source = StringField("แหล่งที่มา / Source", description="เช่น ชื่อองค์กรที่ส่งข้อมูลมา")
 
 
 class MissingPersonSearchForm(FlaskForm):

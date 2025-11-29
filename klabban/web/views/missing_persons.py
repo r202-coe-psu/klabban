@@ -116,18 +116,85 @@ def delete_missing_person(missing_person_id):
     return redirect(url_for("missing_persons.index"))
 
 
-@login_required
+@module.route("/import_missing_persons", methods=["GET", "POST"])
 @roles_required(["officer"])
-@module.route("/import_missing_person_modal", methods=["GET"])
 def import_missing_person_modal():
     form = forms.missing_persons.MissingPersonImportForm()
-    return render_template(
-        "/missing_persons/modals/import_missing_person_modal.html", form=form
+    modal_id = uuid4()
+
+    # ดึง import logs
+    import_logs = (
+        models.ImportMissingPersonFile.objects().order_by("-uploaded_date").limit(20)
+    )
+
+    if not form.validate_on_submit():
+        return render_template(
+            "/components/missing_person/import_missing_person_modal.html",
+            modal_id=modal_id,
+            form=form,
+            import_logs=import_logs,
+        )
+
+    file = form.file.data
+
+    if file:
+        import_missing_person_file = models.ImportMissingPersonFile(
+            file_name=file.filename,
+            source=form.source.data if form.source.data else None,
+            created_by=current_user._get_current_object(),
+            upload_status="pending",
+        )
+        file.seek(0)
+        import_missing_person_file.file.put(
+            file,
+            filename=file.filename,
+            content_type=file.content_type,
+        )
+        import_missing_person_file.save()
+
+        redis_rq.redis_queue.queue.enqueue(
+            utils.missing_person_excel.process_import_missing_person_file,
+            args=(
+                import_missing_person_file,
+                current_user._get_current_object(),
+            ),
+            timeout=3600,
+            job_timeout=1200,
+        )
+
+        flash("ระบบกำลังประมวลผลไฟล์ที่อัปโหลด กรุณารอสักครู่", "info")
+    else:
+        flash("กรุณาเลือกไฟล์ที่จะอัปโหลด", "error")
+
+    return redirect(url_for("missing_persons.index"))
+
+
+@module.route("/download_template")
+@roles_required(["officer"])
+def download_template():
+    output = utils.missing_person_excel.get_template()
+    output.seek(0)
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="ข้อมูลผู้สูญหาย.xlsx",
     )
 
 
-@login_required
+@module.route("/import_logs/<import_id>/errors")
 @roles_required(["officer"])
+def get_import_errors(import_id):
+    try:
+        import_log = models.ImportMissingPersonFile.objects.get(id=import_id)
+        return {
+            "errors": import_log.error_messages,
+            "file_name": import_log.file_name,
+            "status": import_log.upload_status,
+        }
+    except Exception as e:
+        return {"errors": [str(e)]}, 404
+
+
 @module.route("/export_missing_person_modal", methods=["GET"])
 def export_missing_person_modal():
     form = forms.missing_persons.MissingPersonExportForm()

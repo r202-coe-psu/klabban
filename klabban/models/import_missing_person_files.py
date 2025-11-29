@@ -1,6 +1,8 @@
 import datetime
 import mongoengine as me
 
+STATUS = ["pending", "processing", "completed", "failed"]
+
 
 class ImportMissingPersonFile(me.Document):
     meta = {
@@ -16,3 +18,4 @@ class ImportMissingPersonFile(me.Document):
     uploaded_date = me.DateTimeField(default=datetime.datetime.now)
     created_date = me.DateTimeField(default=datetime.datetime.now)
     created_by = me.ReferenceField("User", required=True)
+    upload_status = me.StringField(choices=STATUS, default="pending")
