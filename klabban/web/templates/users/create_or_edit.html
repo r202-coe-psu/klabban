@@ -28,7 +28,7 @@
     {{ renderer.base_render(form.first_name) }}
     {{ renderer.base_render(form.last_name) }}
     {{ renderer.base_render(form.refugee_camp) }}
-    {{ renderer.base_render(form.role) }}
+    {{ renderer.render_search_multi_select_field(form.roles) }}
   </div>
   <div class="flex justify-end gap-4">
     <a href="{{ url_for('users.index') }}"

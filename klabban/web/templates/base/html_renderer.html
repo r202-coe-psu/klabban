@@ -1157,3 +1157,139 @@ items-center justify-center cursor-pointer mx-auto h-40 bg-white hover:bg-gray-1
   }
 </script>
 {% endmacro%}
+
+{% macro render_search_multi_select_field(field, id_prefix='', placeholder="", disabled=false) %}
+{% set field_id = id_prefix + field.id %}
+{% set list_of_tuples = field.choices %}
+{% set selected_values = field.data if field.data else [] %}
+{% set unique_choices = dict(field.choices) %}
+{% if not placeholder %}
+{% set placeholder = "เลือก" + field.label.text %}
+{% endif %}
+
+<fieldset class="w-full fieldset" id="field-{{ field.id }}">
+  <legend class="fieldset-legend">
+    {{ field.label.text }}
+    {% if field.flags.required %}
+    <span class="text-error">*</span>
+    {% endif %}
+  </legend>
+
+  <div class="relative w-full" id="{{ field_id }}-dropdown-container">
+    <button {% if disabled %} disabled {% endif %} type="button" id="{{ field_id }}-btn"
+      data-field-name="{{ field.name }}" tabindex="0"
+      class="w-full select text-left {% if field.errors %}select-error{% endif %}"
+      onclick="toggleMultiDropdown('{{ field_id }}')">
+      {{ placeholder }}
+    </button>
+
+    {# Hidden inputs for selected values #}
+    {% for val in selected_values %}
+    <input type="hidden" name="{{ field.name }}" value="{{ val }}" id="{{ field_id }}-hidden-{{ val }}">
+    {% endfor %}
+
+    <ul id="{{ field_id }}-dropdown"
+      class="absolute top-full left-0 menu bg-white z-10 w-full p-2 shadow-lg border rounded-box overflow-auto max-h-48" style="display: none;">
+      {% for value, label in list_of_tuples %}
+      <li>
+        <p class="break-words cursor-pointer flex justify-between items-center" data-value="{{ value }}"
+          onclick="selectMultiDropdownValue('{{ field_id }}', '{{ value }}', '{{ label }}', event)">
+          <span>{{ label }}</span>
+          <span class="text-primary {{ 'hidden' if value not in selected_values }}" id="{{ field_id }}-check-{{ value }}">✓</span>
+        </p>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="flex flex-wrap gap-1 mb-1" id="{{ field_id }}-selected-tags">
+    {% for val in selected_values %}
+    <span class="badge badge-primary flex items-center gap-1" id="{{ field_id }}-tag-{{ val }}">
+      {{ unique_choices.get(val, val) }}
+      {% if not disabled %}
+      <button type="button" onclick="removeSelectedValue('{{ field_id }}', '{{ val }}')">✕</button>
+      {% endif %}
+    </span>
+    {% endfor %}
+  </div>
+  <p class="validator-hint text-error">
+    {% for error in field.errors %}
+    {{ error }}{% if not loop.last %}<br>{% endif %}
+    {% endfor %}
+  </p>
+</fieldset>
+
+<script>
+  function toggleMultiDropdown(fieldId) {
+    const dropdown = document.getElementById(fieldId + "-dropdown");
+    if (dropdown.style.display === "block") {
+      dropdown.style.display = "none";
+    } else {
+      dropdown.style.display = "block";
+    }
+  }
+
+  function hideMultiDropdown(fieldId) {
+    document.getElementById(fieldId + "-dropdown").style.display = "none";
+  }
+
+  function selectMultiDropdownValue(fieldId, value, label, event) {
+    if (event) event.stopPropagation();
+
+    // Toggle: if already selected, remove it
+    if (document.getElementById(fieldId + "-hidden-" + value)) {
+      removeSelectedValue(fieldId, value);
+      return;
+    }
+
+    const tag = document.createElement("span");
+    tag.className = "badge badge-primary flex items-center gap-1";
+    tag.id = fieldId + "-tag-" + value;
+    tag.innerHTML = `${label} <button type="button" onclick="removeSelectedValue('${fieldId}', '${value}')">✕</button>`;
+
+    const tagContainer = document.getElementById(fieldId + "-selected-tags");
+    tagContainer.appendChild(tag);
+
+    const hidden = document.createElement("input");
+    hidden.type = "hidden";
+    const fieldName = document.getElementById(fieldId + "-btn").dataset.fieldName;
+    hidden.name = fieldName;
+    hidden.value = value;
+    hidden.id = fieldId + "-hidden-" + value;
+    tagContainer.parentElement.insertBefore(hidden, tagContainer);
+
+    // Show checkmark
+    const checkmark = document.getElementById(fieldId + "-check-" + value);
+    if (checkmark) checkmark.classList.remove("hidden");
+  }
+
+  function removeSelectedValue(fieldId, value) {
+    const tag = document.getElementById(fieldId + "-tag-" + value);
+    const hidden = document.getElementById(fieldId + "-hidden-" + value);
+    if (tag) tag.remove();
+    if (hidden) hidden.remove();
+
+    // Hide checkmark
+    const checkmark = document.getElementById(fieldId + "-check-" + value);
+    if (checkmark) checkmark.classList.add("hidden");
+  }
+
+  function clearAllSelected(fieldId) {
+    const tagContainer = document.getElementById(fieldId + "-selected-tags");
+    tagContainer.innerHTML = "";
+
+    const hiddenInputs = document.querySelectorAll(`input[id^="${fieldId}-hidden-"]`);
+    hiddenInputs.forEach(input => input.remove());
+  }
+
+  document.addEventListener("click", function (event) {
+    const allDropdownContainers = document.querySelectorAll("[id$='-dropdown-container']");
+    allDropdownContainers.forEach(container => {
+      if (!container.contains(event.target)) {
+        const fieldId = container.id.replace("-dropdown-container", "");
+        hideMultiDropdown(fieldId);
+      }
+    });
+  });
+</script>
+{% endmacro %}
