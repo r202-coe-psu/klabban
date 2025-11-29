@@ -26,7 +26,7 @@
 
   <!-- ขั้นตอนแจ้งข้อมูล -->
   <div tabindex="0" class="collapse collapse-arrow bg-white border-base-300 border">
-    <div class="collapse-title font-semibold">หาข้อมูลไม่เจอ หรือยืนยันชื่อตัวเองไม่ได้?</div>
+    <div class="collapse-title font-semibold">แจ้งยืนยันกลับบ้าน ชื่อตัวเองไม่ได้?</div>
     <div class="collapse-content text-sm w-full flex justify-center">
       <img 
         src="{{ url_for('static', filename='images/manual/unable-to-confirm.png') }}"
@@ -34,6 +34,17 @@
         class="max-h-[800px] w-auto rounded-lg shadow-md"
       />
     </div>
+  </div>
+  <div tabindex="0" class="collapse collapse-arrow bg-white border-base-300 border">
+    <div class="collapse-title font-semibold">หาชื่อผู้อพยพไม่เจอ?</div>
+    <div class="collapse-content text-sm w-full flex justify-center">
+      <img 
+        src="{{ url_for('static', filename='images/manual/not-found-name.png') }}"
+        alt="ขั้นตอนแจ้งข้อมูล (ภาษาอังกฤษ)"
+        class="max-h-[800px] w-auto rounded-lg shadow-md"
+      />
+    </div>
+
   </div>
 
 </div>
