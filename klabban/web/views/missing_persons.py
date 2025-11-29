@@ -19,7 +19,10 @@ from klabban import models
 from klabban.web import forms, utils, redis_rq
 from klabban.web.utils.acl import roles_required
 from flask_mongoengine import Pagination
-from klabban.models.missing_persons import TITLE_NAME_CHOICES
+from klabban.models.missing_persons import (
+    TITLE_NAME_CHOICES,
+    MISSING_PERSON_STATUS_CHOICES,
+)
 from bson import ObjectId
 
 module = Blueprint("missing_persons", __name__, url_prefix="/missing_persons")
@@ -38,7 +41,7 @@ def index():
     search = search_form.search.data
     status = search_form.status.data
 
-    query = models.MissingPerson.objects(id=None)
+    query = models.MissingPerson.objects()
 
     if search:
         query &= Q(
@@ -73,39 +76,42 @@ def create_or_edit(missing_person_id=None):
         missing_person = models.MissingPerson.objects.get(id=missing_person_id)
         form = forms.missing_persons.MissingPersonForm(obj=missing_person)
 
-    if form.validate_on_submit():
-        form.populate_obj(missing_person)
-        missing_person.updated_date = datetime.datetime.now()
-        missing_person.updater = current_user._get_current_object()
-        if not missing_person_id:
-            missing_person.created_date = datetime.datetime.now()
-            missing_person.creator = current_user._get_current_object()
-        missing_person.save()
+    form.title_name.choices = TITLE_NAME_CHOICES
+    form.reporter_title_name.choices = TITLE_NAME_CHOICES
+    form.missing_person_status.choices = MISSING_PERSON_STATUS_CHOICES
 
-        flash("บันทึกข้อมูลบุคคลสูญหายเรียบร้อยแล้ว", "success")
-        return redirect(url_for("missing_persons.index"))
+    if not form.validate_on_submit() or request.method == "GET":
+        return render_template(
+            "/missing_persons/create_or_edit.html",
+            form=form,
+            missing_person=missing_person,
+        )
 
-    return render_template(
-        "/missing_persons/create_or_edit.html",
-        form=form,
-        missing_person=missing_person,
-    )
+    form.populate_obj(missing_person)
+    missing_person.updated_date = datetime.datetime.now()
+    missing_person.updated_by = current_user._get_current_object()
+    if not missing_person_id:
+        missing_person.created_date = datetime.datetime.now()
+        missing_person.created_by = current_user._get_current_object()
+
+    missing_person.save()
+
+    flash("บันทึกข้อมูลบุคคลสูญหายเรียบร้อยแล้ว", "success")
+    return redirect(url_for("missing_persons.index"))
 
 
 @login_required
 @roles_required(["officer"])
 @module.route("/<missing_person_id>/view", methods=["GET"])
-def view_missing_person(missing_person_id):
+def view(missing_person_id):
     missing_person = models.MissingPerson.objects.get(id=missing_person_id)
-    return render_template(
-        "/missing_persons/view_missing_person.html", missing_person=missing_person
-    )
+    return render_template("/missing_persons/view.html", missing_person=missing_person)
 
 
 @login_required
 @roles_required(["officer"])
 @module.route("/<missing_person_id>/delete", methods=["POST"])
-def delete_missing_person(missing_person_id):
+def delete(missing_person_id):
     missing_person = models.MissingPerson.objects.get(id=missing_person_id)
     missing_person.status = "deactive"
     missing_person.updated_date = datetime.datetime.now()

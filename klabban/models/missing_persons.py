@@ -10,6 +10,11 @@ TITLE_NAME_CHOICES = (
     ("Miss", "เด็กหญิง"),
 )
 
+MISSING_PERSON_STATUS_CHOICES = (
+    ("missing", "สูญหาย"),
+    ("death", "เสียชีวิต"),
+)
+
 
 class MissingPerson(me.Document):
     meta = {
@@ -22,13 +27,15 @@ class MissingPerson(me.Document):
     last_name = me.StringField(required=True, max_length=255)  # นามสกุลคนหาย/เสียชีวิต
     age = me.IntField()  # อายุคนหาย/เสียชีวิต
     identification_number = me.StringField(max_length=100)  # หมายเลขบัตรประชาชน
-    country = me.StringField(default="Thailand")  # ประเทศของคนหาย/เสียชีวิต
+    country = me.StringField(
+        default="Thailand", max_length=100
+    )  # ประเทศของคนหาย/เสียชีวิต
     province_info = me.StringField(max_length=255)  # จังหวัดของคนหาย/เสียชีวิต
     district_info = me.StringField(max_length=255)  # อําเภอของคนหาย/เสียชีวิต
     subdistrict_info = me.StringField(max_length=255)  # ตําบลของคนหาย/เสียชีวิต
     address_info = me.StringField(max_length=512)  # ที่อยู่บ้านเลขที่ของคนหาย/เสียชีวิต
     missing_person_status = me.StringField(
-        choices=("missing", "death"), default="missing"
+        choices=MISSING_PERSON_STATUS_CHOICES, default="missing"
     )  # สถานะคนหาย/เสียชีวิต
     # section: additional information
     physical_mark = me.StringField()  # ลักษณะรูปพรรณของคนหาย/เสียชีวิต

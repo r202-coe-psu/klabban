@@ -111,9 +111,7 @@
       {{ renderer.base_render(form.reporter_phone_number) }}
     </div>
   </div>
-  {% if duplicated_refugee %}
-    <input type="hidden" id="is-confirm-duplicate" name="is_confirm" value="no" />
-  {% endif %}
+
   <div class="modal-action justify-end">
     <a class="btn" href="{{ url_for('missing_persons.index') }}">
       ยกเลิก / Cancel

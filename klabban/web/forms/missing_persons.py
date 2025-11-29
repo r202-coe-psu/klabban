@@ -14,27 +14,27 @@ BaseMissingPersonForm = model_form(
         "last_name": {"label": "นามสกุล"},
         "age": {"label": "อายุ"},
         "identification_number": {"label": "หมายเลขบัตรประชาชน"},
-        "country": {"label": "ประเทศของ"},
-        "province_info": {"label": "จังหวัดของ"},
-        "district_info": {"label": "อําเภอของ"},
-        "subdistrict_info": {"label": "ตําบลของ"},
-        "address_info": {"label": "ที่อยู่บ้านเลขที่ของ"},
+        "country": {"label": "ประเทศ"},
+        "province_info": {"label": "จังหวัด"},
+        "district_info": {"label": "อําเภอ"},
+        "subdistrict_info": {"label": "ตําบล"},
+        "address_info": {"label": "ที่อยู่บ้านเลขที่"},
         "missing_person_status": {"label": "สถานะ"},
-        "physical_mark": {"label": "ลักษณะรูปพรรณของ"},
+        "physical_mark": {"label": "ลักษณะรูปพรรณ"},
         "statement": {"label": "สอบปากคําจากผู้แจ้ง/คําให้การ"},
         "body_received_date": {"label": "วันที่รับศพ"},
         "deceased_relationship": {"label": "ความสัมพันธ์กับผู้หาย/เสียชีวิต"},
-        "reporter_title_name": {"label": "คำนำหน้าชื่อผู้แจ้ง"},
-        "reporter_first_name": {"label": "ชื่อผู้แจ้ง"},
-        "reporter_last_name": {"label": "นามสกุลผู้แจ้ง"},
-        "reporter_age": {"label": "อายุผู้แจ้ง"},
-        "reporter_identification_number": {"label": "หมายเลขบัตรประชาชนผู้แจ้ง"},
-        "reporter_country": {"label": "ประเทศของผู้แจ้ง"},
-        "reporter_province_info": {"label": "จังหวัดของผู้แจ้ง"},
-        "reporter_district_info": {"label": "อําเภอของผู้แจ้ง"},
-        "reporter_subdistrict_info": {"label": "ตําบลของผู้แจ้ง"},
-        "reporter_address_info": {"label": "ที่อยู่บ้านเลขที่ของผู้แจ้ง"},
-        "reporter_phone_number": {"label": "เบอร์โทรศัพท์ผู้แจ้ง"},
+        "reporter_title_name": {"label": "คำนำหน้าชื่อ"},
+        "reporter_first_name": {"label": "ชื่อ"},
+        "reporter_last_name": {"label": "นามสกุล"},
+        "reporter_age": {"label": "อายุ"},
+        "reporter_identification_number": {"label": "หมายเลขบัตรประชาชน"},
+        "reporter_country": {"label": "ประเทศ"},
+        "reporter_province_info": {"label": "จังหวัด"},
+        "reporter_district_info": {"label": "อําเภอ"},
+        "reporter_subdistrict_info": {"label": "ตําบล"},
+        "reporter_address_info": {"label": "ที่อยู่บ้านเลขที่"},
+        "reporter_phone_number": {"label": "เบอร์โทรศัพท์"},
         "code": {"label": "Code"},
     },
     exclude=[
@@ -48,16 +48,14 @@ BaseMissingPersonForm = model_form(
 
 
 class MissingPersonForm(BaseMissingPersonForm):
-    title_name = SelectField("คำนำหน้าชื่อ", choices=[])
-    country = SelectField("ประเทศของ", choices=[])
-    reporter_country = SelectField("ประเทศของผู้แจ้ง", choices=[])
+    title_name = SelectField("คำนำหน้า", choices=[])
+    missing_person_status = SelectField("สถานะ", choices=[])
     body_received_date = DateTimeLocalField(
         "วันที่รับศพ",
         default=datetime.now,
         format="%Y-%m-%dT%H:%M",
         render_kw={"placeholder": "เลือกวันที่และเวลา / Select Date and Time"},
     )
-    reporter_country = SelectField("ประเทศของผู้แจ้ง", choices=[])
 
 
 class MissingPersonImportForm(FlaskForm):
