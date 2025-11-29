@@ -112,7 +112,7 @@
                     id="%s-disactive-dialog" | format(refugee.id),
                     title="ยืนยันการลบรายการผู้อพยพ",
                     body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                    url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
+                    url=url_for("refugees.delete_refugee", refugee_id=refugee.id, next=request.full_path)
                 )}}
               </div>
               {% endif %}
@@ -178,7 +178,7 @@
               id="%s-disactive-dialog" | format(refugee.id),
               title="ยืนยันการลบรายการผู้อพยพ",
               body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-              url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
+              url=url_for("refugees.delete_refugee", refugee_id=refugee.id, next=request.full_path)
             )}}
           </div>
         </div>
@@ -213,7 +213,7 @@
                 body="คุณต้องการที่จะเปลี่ยนศูนย์พักพิงผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
                 refugee_name=refugee.name,
                 refugee_id=refugee.id,
-                form_action=url_for("refugees.change_camp", refugee_id=refugee.id, camp_id=change_camp_form.refugee_camp.data, **request.args),
+                form_action=url_for("refugees.change_camp", refugee_id=refugee.id, camp_id=change_camp_form.refugee_camp.data, next=request.full_path, **request.args),
                 change_camp_form=change_camp_form,
                 current_camp_id=refugee.refugee_camp.id
               )}}
@@ -370,7 +370,7 @@
           id="%s-disactive-dialog-desktop" | format(refugee.id),
           title="ยืนยันการลบรายการผู้อพยพ",
           body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-          url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
+          url=url_for("refugees.delete_refugee", refugee_id=refugee.id, next=request.full_path)
         )}}
         {{ dialog.ChangeRefugeeCampDialog(
           id="%s_change_camp_dialog_desktop" | format(refugee.id),
@@ -378,7 +378,7 @@
           body="คุณต้องการที่จะเปลี่ยนศูนย์พักพิงผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
           refugee_name=refugee.name,
           refugee_id=refugee.id,
-          form_action=url_for("refugees.change_camp", refugee_id=refugee.id, camp_id=change_camp_form.refugee_camp.data, **request.args),
+          form_action=url_for("refugees.change_camp", refugee_id=refugee.id, camp_id=change_camp_form.refugee_camp.data, next=request.full_path, **request.args),
           change_camp_form=change_camp_form,
           current_camp_id=refugee.refugee_camp.id
         )}}
@@ -464,7 +464,7 @@
   class="size-8 btn btn-outline btn-sm border-gray-300 text-green-600 hover:bg-green-100">
   <span class="material-symbols-outlined">visibility</span>
 </a>
-<a href="{{ url_for('refugees.create_or_edit', refugee_id=refugee.id) }}"
+<a href="{{ url_for('refugees.create_or_edit', refugee_id=refugee.id, next=request.full_path) }}"
   class="size-8 btn btn-outline btn-sm text-gray-600 border-gray-300">
   <span class="material-symbols-outlined">edit_square</span>
 </a>
