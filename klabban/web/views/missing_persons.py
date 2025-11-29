@@ -44,14 +44,14 @@ def index():
     query = models.MissingPerson.objects(status__ne="inactive")
 
     if search:
-        query &= Q(
+        query = query.filter(
             Q(title_name__icontains=search)
             | Q(first_name__icontains=search)
             | Q(last_name__icontains=search)
             | Q(identification_number__icontains=search)
         )
     if status:
-        query &= Q(missing_person_status=status)
+        query = query.filter(missing_person_status=status)
 
     try:
         missing_persons_pagination = Pagination(query, page=page, per_page=per_page)
