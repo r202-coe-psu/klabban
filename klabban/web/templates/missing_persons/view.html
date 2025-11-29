@@ -1,0 +1,153 @@
+{% extends "/base/default_page.html" %}
+{% import "base/html_renderer.html" as renderer %}
+{% import "/components/dialogs.html" as dialog %}
+{% import "/components/paginations.html" as paginations %}
+
+{% set title_page="รายละเอียดผู้สูญหาย/เสียชีวิต" %}
+{% block content %}
+
+<div class="mb-4">
+    <a href="{{ url_for('missing_persons.index', **request.args) }}">
+        <i class="ph ph-arrow-left text-lg"></i>
+        กลับไปรายการผู้สูญหาย/เสียชีวิต
+    </a>
+</div>
+
+<div class="bg-white rounded-3xl border border-gray-300">
+    <h1 class="text-2xl font-semibold px-6 pt-6 pb-4 border-b border-gray-300">
+        รายละเอียดผู้สูญหาย/เสียชีวิต
+    </h1>
+    <div class="p-4">
+        <h2 class="text-lg font-medium mb-4">ข้อมูลผู้สูญหาย/เสียชีวิต</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+                <p class="text-gray-400 text-sm font-light">คำนำหน้าชื่อ:</p>
+                <p>{{ missing_person.title_name or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">ชื่อ:</p>
+                <p>{{ missing_person.first_name or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">นามสกุล:</p>
+                <p>{{ missing_person.last_name or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">อายุ:</p>
+                <p>{{ missing_person.age or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">เลขบัตรประชาชน:</p>
+                <p>{{ missing_person.identification_number or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">ประเทศ:</p>
+                <p>{{ missing_person.country or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">จังหวัด:</p>
+                <p>{{ missing_person.province_info or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">อำเภอ:</p>
+                <p>{{ missing_person.district_info or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">ตำบล:</p>
+                <p>{{ missing_person.subdistrict_info or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">ที่อยู่:</p>
+                <p>{{ missing_person.address_info or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">สถานะผู้สูญหาย:</p>
+                {{ render_missing_person_status(missing_person.missing_person_status) }}
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">รหัส:</p>
+                <p>{{ missing_person.code or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">วันที่รับศพ:</p>
+                <p>{{ missing_person.body_received_date.strftime("%d %B %Y") if missing_person.body_received_date else "-" }}</p>
+            </div>
+        </div>
+
+        <h2 class="text-lg font-medium mb-4 mt-6">ข้อมูลเพิ่มเติม</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="col-span-full">
+                <p class="text-gray-400 text-sm font-light">ลักษณะรูปพรรณของคนหาย/เสียชีวิต:</p>
+                <p>{{ missing_person.physical_mark or "-" }}</p>
+            </div>
+            <div class="col-span-full">
+                <p class="text-gray-400 text-sm font-light">คำให้การ:</p>
+                <p>{{ missing_person.statement or "-" }}</p>
+            </div>
+        </div>
+
+        <h2 class="text-lg font-medium mb-4 mt-6">ข้อมูลผู้แจ้ง</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+                <p class="text-gray-400 text-sm font-light">คำนำหน้าชื่อ:</p>
+                <p>{{ missing_person.reporter_title_name or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">ชื่อ:</p>
+                <p>{{ missing_person.reporter_first_name or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">นามสกุล:</p>
+                <p>{{ missing_person.reporter_last_name or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">อายุ:</p>
+                <p>{{ missing_person.reporter_age or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">เลขบัตรประชาชน:</p>
+                <p>{{ missing_person.reporter_identification_number or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">ประเทศ:</p>
+                <p>{{ missing_person.reporter_country or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">จังหวัด:</p>
+                <p>{{ missing_person.reporter_province_info or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">อำเภอ:</p>
+                <p>{{ missing_person.reporter_district_info or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">ตำบล:</p>
+                <p>{{ missing_person.reporter_subdistrict_info or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">ที่อยู่:</p>
+                <p>{{ missing_person.reporter_address_info or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">เบอร์โทรศัพท์:</p>
+                <p>{{ missing_person.reporter_phone_number or "-" }}</p>
+            </div>
+            <div >
+                <p class="text-gray-400 text-sm font-light">ความสัมพันธ์กับผู้เสียชีวิต:</p>
+                <p>{{ missing_person.deceased_relationship or "-" }}</p>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% macro render_missing_person_status(status) %}
+<div class="border rounded-lg py-1 px-2 text-xs md:text-sm font-medium whitespace-nowrap w-fit 
+    {{ 'text-orange-500 border-orange-500 bg-orange-50' if status == 'missing' else '' }}
+    {{ 'text-red-500 border-red-500 bg-red-50' if status == 'death' else '' }}">
+  {{ 'สูญหาย' if status == 'missing' else '' }}
+  {{ 'เสียชีวิต' if status == 'death' else '' }}
+</div>
+{% endmacro %}

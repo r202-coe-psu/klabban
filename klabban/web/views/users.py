@@ -52,6 +52,7 @@ def create_or_edit_user(user_id):
         ("user", "ผู้ใช้งานทั่วไป"),
         ("admin", "ผู้ดูแลระบบ"),
         ("refugee_camp_staff", "เจ้าหน้าที่ศูนย์พักพิง"),
+        ("officer", "เจ้าหน้าที่"),
     ]
     if user_id:
         user = models.User.objects.get(id=user_id)

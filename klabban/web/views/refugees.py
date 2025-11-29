@@ -46,7 +46,9 @@ def index():
     change_camp_form.refugee_camp.choices = camp_choice
     change_camp_form.refugee_camp.data = ""
 
-    query = models.Refugee.objects(status__nin=["inactive", "deactive", "disactive"])
+    query = models.Refugee.objects(
+        status__nin=["inactive", "deactive", "disactive"]
+    ).order_by("name")
 
     if search:
         query = query.filter(
@@ -63,8 +65,6 @@ def index():
         query = query.filter(status=status)
     if exclude_thai:
         query = query.filter(country__ne="Thailand")
-
-    query = query.order_by("name")
 
     try:
         refugees_pagination = Pagination(query, page=page, per_page=per_page)

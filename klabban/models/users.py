@@ -8,6 +8,7 @@ USER_ROLES = [
     ("user", "ผู้ใช้งานทั่วไป"),
     ("admin", "ผู้ดูแลระบบ"),
     ("refugee_camp_staff", "เจ้าหน้าที่ศูนย์พักพิง"),
+    ("officer", "เจ้าหน้าที่"),
 ]
 
 STATUS_CHOICES = [
@@ -91,3 +92,6 @@ class User(me.Document, UserMixin):
 
     def is_refugee_camp_staff(self):
         return "refugee_camp_staff" in self.roles
+
+    def is_officer(self):
+        return "officer" in self.roles
