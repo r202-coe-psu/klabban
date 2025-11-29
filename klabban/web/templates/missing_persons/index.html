@@ -272,7 +272,7 @@
                   </div>
                 </div>
                 <div class="tooltip tooltip-left">
-                  {{ person.updated_date.strftime("%d %b %Y") }}, 
+                  {{ person.updated_date.strftime("%d %b %Y") }} 
                 </div>
               </div>
               {% else %}
@@ -328,6 +328,10 @@
 {% endblock %}
 
 {% macro render_person_toolbar(person, suffix='') %}
+<a href="{{ url_for('missing_persons.view', missing_person_id=person.id, **request.args) }}"
+  class="size-8 btn btn-outline btn-sm border-gray-300 text-green-600 hover:bg-green-100">
+  <span class="material-symbols-outlined">visibility</span>
+</a>
 
 <a href="{{ url_for('missing_persons.create_or_edit', missing_person_id=person.id) }}"
   class="size-8 btn btn-outline btn-sm text-gray-600 border-gray-300">

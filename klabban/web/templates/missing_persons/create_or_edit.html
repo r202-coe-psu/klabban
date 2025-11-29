@@ -64,9 +64,6 @@
   </div>
   <div>
     <div class="col-span-3">
-      {{ renderer.render_text_area_field(form.deceased_relationship)}}
-    </div>
-    <div class="col-span-3">
       {{ renderer.render_text_area_field(form.physical_mark) }}
     </div>
     <div class="col-span-3">
@@ -109,6 +106,9 @@
     </div>
     <div class="col-span-3">
       {{ renderer.base_render(form.reporter_phone_number) }}
+    </div>
+    <div class="col-span-5">
+      {{ renderer.base_render(form.deceased_relationship)}}
     </div>
   </div>
 

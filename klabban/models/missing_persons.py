@@ -41,7 +41,7 @@ class MissingPerson(me.Document):
     physical_mark = me.StringField()  # ลักษณะรูปพรรณของคนหาย/เสียชีวิต
     statement = me.StringField()  # สอบปากคําจากผู้แจ้ง/คําให้การ
     body_received_date = me.DateTimeField()  # วันที่รับศพ
-    deceased_relationship = me.StringField()  # ความสัมพันธ์กับผู้หาย/เสียชีวิต
+    deceased_relationship = me.StringField(max_length=255)  # ความสัมพันธ์กับผู้หาย/เสียชีวิต
 
     # section: reporter information
     reporter_title_name = me.StringField(choices=TITLE_NAME_CHOICES)  # คำนำหน้าชื่อผู้แจ้ง
