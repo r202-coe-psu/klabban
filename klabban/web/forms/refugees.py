@@ -11,9 +11,6 @@ BaseRefugeeForm = model_form(
     field_args={
         "nick_name": {"label": "ชื่อเล่น / Migrant Nickname"},
         "name": {"label": "ชื่อ-นามสกุล / Migrant Full Name"},
-        "identification_number": {
-            "label": "เลขบัตรประจำตัวประชาชน / Identification Number"
-        },
         "nationality": {"label": "สัญชาติ / Nationality", "default": "ไทย"},
         "ethnicity": {"label": "เชื้อชาติ / Ethnicity", "default": "ไทย"},
         "country": {"label": "ประเทศ / Country", "default": "Thailand"},
@@ -40,7 +37,6 @@ BaseRefugeeForm = model_form(
         "created_date",
         "updated_date",
         "camps_log",
-        "source",
     ],
 )
 

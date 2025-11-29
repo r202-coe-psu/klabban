@@ -61,10 +61,11 @@ class MissingPersonImportForm(FlaskForm):
 
 
 class MissingPersonSearchForm(FlaskForm):
-    first_name = StringField("ชื่อคนหาย/เสียชีวิต")
-    last_name = StringField("นามสกุลคนหาย/เสียชีวิต")
-    identification_number = StringField("หมายเลขบัตรประชาชน")
-    missing_person_status = SelectField(
+    search = StringField(
+        "ค้นหา / Search",
+        render_kw={"placeholder": "ค้นหาจาก ชื่อ นามสกุล หรือ หมายเลขบัตรประชาชน"},
+    )
+    status = SelectField(
         "สถานะคนหาย/เสียชีวิต",
         choices=[
             ("", "ทั้งหมด"),

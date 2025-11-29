@@ -3,6 +3,7 @@ from . import users
 from . import refugee_camps
 from . import refugees
 from . import dashboard
+from . import missing_persons
 
 __all__ = [
     "accounts",
@@ -10,4 +11,5 @@ __all__ = [
     "refugee_camps",
     "refugees",
     "dashboard",
+    "missing_persons",
 ]
