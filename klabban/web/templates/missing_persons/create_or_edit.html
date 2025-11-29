@@ -11,51 +11,53 @@
 {% endif %}
 
 {% block content %}
-{% if duplicated_refugee %}
-  {{ dialog.Dialog(
-    init_show=True,
-    id="%s-disactive-dialog" | format(duplicated_refugee.id),
-    title="มีผู้อพยพซ้ำ / Duplicate Migrant",
-    body="มีผู้อพยพชื่อ <b>%s</b> อยู่แล้วในระบบ คุณต้องการที่จะบันทึกข้อมูลนี้เข้าไปในระบบใช่หรือไม่?" | format(form.name.data),
-    action_button_text="ยืนยันการบันทึก / Confirm Save",
-    action_button_onclick="{ 
-      document.getElementById('is-confirm-duplicate').value = 'yes';
-      document.getElementById('submit-refugee-button').click();
-    }"
-  )}}
-{% endif %}
 <form class="bg-white rounded-lg p-4" method="POST"
-  action="{{ url_for('refugees.create_or_edit', refugee_id=refugee_id) }}">
+  action="{{ url_for('missing_persons.create_or_edit', missing_person_id=missing_person.id) }}">
   {{ form.csrf_token }}
-  {{ renderer.base_render(form.refugee_camp) }}
   <div class="grid grid-cols-2 gap-x-4">
-    {{ renderer.base_render(form.nick_name) }}
-    {{ renderer.base_render(form.name) }}
-    {{ renderer.base_render(form.identification_number) }}
-    {{ renderer.base_render(form.address) }}
-    {{ renderer.base_render(form.phone) }}
-    {{ renderer.base_render(form.nationality) }}
-    {{ renderer.base_render(form.ethnicity) }}
-    {{ SelectCountryDialog(form.country) }}
+    {# section: missing person information #}
+    {{ renderer.base_render(form.title_name) }}
+    {{ renderer.base_render(form.first_name) }}
+    {{ renderer.base_render(form.last_name) }}
     {{ renderer.base_render(form.age) }}
-    {{ renderer.base_render(form.gender) }}
-    {{ renderer.base_render(form.congenital_disease) }}
-    {{ renderer.base_render(form.people_count) }}
-    {{ renderer.base_render(form.pets) }}
-    {{ renderer.base_render(form.expected_days) }}
-    {{ renderer.base_render(form.emergency_contact) }}
+    {{ renderer.base_render(form.identification_number) }}
+    {{ SelectCountryDialog(form.country) }}
+    {{ renderer.base_render(form.province_info) }}
+    {{ renderer.base_render(form.district_info) }}
+    {{ renderer.base_render(form.subdistrict_info) }}
+    {{ renderer.base_render(form.address_info) }}
+    {{ renderer.base_render(form.missing_person_status) }}
+
+    {# section: additional information #}
+    {{ renderer.render_text_area_field(form.physical_mark) }}
+    {{ renderer.render_text_area_field(form.statement)}}
+    {{ renderer.base_render(form.body_received_date) }}
+    {{ renderer.base_render(form.deceased_relationship)}}
+
+    {# section: reporter #}
+    {{ renderer.base_render(form.reporter_first_name) }}
+    {{ renderer.base_render(form.reporter_last_name) }}
+    {{ renderer.base_render(form.reporter_age) }}
+    {{ renderer.base_render(form.reporter_identification_number) }}
+    {{ SelectCountryDialog(form.reporter_country) }}
+    {{ renderer.base_render(form.reporter_province_info) }}
+    {{ renderer.base_render(form.reporter_district_info) }}
+    {{ renderer.base_render(form.reporter_subdistrict_info) }}
+    {{ renderer.base_render(form.reporter_address_info) }}
+    {{ renderer.base_render(form.reporter_phone_number) }}
+    {{ renderer.base_render(form.code) }}
+
+    {#
     <div class="col-span-2">
       {{ renderer.render_text_area_field(form.remark) }}
     </div>
-    {{ renderer.base_render(form.registration_date) }}
-    {{ renderer.base_render(form.back_home_date) }}
+    #}
   </div>
-  {{ renderer.base_render(form.status) }}
   {% if duplicated_refugee %}
     <input type="hidden" id="is-confirm-duplicate" name="is_confirm" value="no" />
   {% endif %}
   <div class="modal-action justify-end">
-    <a class="btn" href="{{ url_for('refugees.index') }}">
+    <a class="btn" href="{{ url_for('missing_persons.index') }}">
       ยกเลิก / Cancel
     </a>
     <button class="btn btn-primary" type="submit" id="submit-refugee-button">

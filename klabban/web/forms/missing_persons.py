@@ -1,7 +1,8 @@
+from datetime import datetime
 from flask_wtf import FlaskForm
 from flask_mongoengine.wtf import model_form
 from klabban.web import models
-from wtforms import SelectField, FileField, StringField
+from wtforms import DateTimeLocalField, SelectField, FileField, StringField
 from flask_wtf.file import FileAllowed, FileRequired
 
 BaseMissingPersonForm = model_form(
@@ -29,7 +30,7 @@ BaseMissingPersonForm = model_form(
         "reporter_age": {"label": "อายุผู้แจ้ง"},
         "reporter_identification_number": {"label": "หมายเลขบัตรประชาชนผู้แจ้ง"},
         "reporter_country": {"label": "ประเทศของผู้แจ้ง"},
-        "reporter_proince_info": {"label": "จังหวัดของผู้แจ้ง"},
+        "reporter_province_info": {"label": "จังหวัดของผู้แจ้ง"},
         "reporter_district_info": {"label": "อําเภอของผู้แจ้ง"},
         "reporter_subdistrict_info": {"label": "ตําบลของผู้แจ้ง"},
         "reporter_address_info": {"label": "ที่อยู่บ้านเลขที่ของผู้แจ้ง"},
@@ -47,7 +48,16 @@ BaseMissingPersonForm = model_form(
 
 
 class MissingPersonForm(BaseMissingPersonForm):
-    pass
+    title_name = SelectField("คำนำหน้าชื่อคนหาย/เสียชีวิต", choices=[])
+    country = SelectField("ประเทศของคนหาย/เสียชีวิต", choices=[])
+    reporter_country = SelectField("ประเทศของผู้แจ้ง", choices=[])
+    body_received_date = DateTimeLocalField(
+        "วันที่รับศพ",
+        default=datetime.now,
+        format="%Y-%m-%dT%H:%M",
+        render_kw={"placeholder": "เลือกวันที่และเวลา / Select Date and Time"},
+    )
+    reporter_country = SelectField("ประเทศของผู้แจ้ง", choices=[])
 
 
 class MissingPersonImportForm(FlaskForm):

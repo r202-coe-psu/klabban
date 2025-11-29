@@ -1,6 +1,15 @@
 import datetime
 import mongoengine as me
 
+TITLE_NAME_CHOICES = (
+    ("", "-"),
+    ("Mr.", "นาย"),
+    ("Mrs.", "นาง"),
+    ("Ms.", "นางสาว"),
+    ("Master", "เด็กชาย"),
+    ("Miss", "เด็กหญิง"),
+)
+
 
 class MissingPerson(me.Document):
     meta = {

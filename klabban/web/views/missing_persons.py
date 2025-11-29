@@ -65,7 +65,7 @@ def index():
 @login_required
 @roles_required(["officer"])
 @module.route("/create", methods=["GET", "POST"], defaults={"missing_person_id": None})
-def create_or_edit_missing_person(missing_person_id=None):
+def create_or_edit(missing_person_id=None):
     form = forms.missing_persons.MissingPersonForm()
     missing_person = models.MissingPerson()
 
@@ -86,7 +86,7 @@ def create_or_edit_missing_person(missing_person_id=None):
         return redirect(url_for("missing_persons.index"))
 
     return render_template(
-        "/missing_persons/create_or_edit_missing_person.html",
+        "/missing_persons/create_or_edit.html",
         form=form,
         missing_person=missing_person,
     )

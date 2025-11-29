@@ -37,7 +37,7 @@
           </button>
         </div>
       </form>
-      {% if 'admin' in current_user.roles or 'refugee_camp_staff' in current_user.roles %}
+      {% if 'officer' in current_user.roles %}
       <div class="justify-end flex flex-col gap-2 w-fit">
         <button hx-get="{{ url_for('missing_persons.import_missing_person_modal') }}" hx-target="#import-refugee-modal-container"
           hx-trigger="click" hx-swap="innerHTML" class="btn bg-green-400 text-white">
@@ -49,7 +49,7 @@
           <span class="ph ph-file-xls text-lg"></span>
           ส่งออกข้อมูลผู้สูญหาย - เสียชีวิต 
         </button>
-        <a class="btn btn-primary text-white mb-1" href="{{ url_for('missing_persons.create_or_edit_missing_person', **request.args) }}">
+        <a class="btn btn-primary text-white mb-1" href="{{ url_for('missing_persons.create_or_edit', **request.args) }}">
           <span class="material-symbols-outlined text-sm">add</span>
           เพิ่มผู้สูญหาย - เสียชีวิต 
         </a>
@@ -86,8 +86,7 @@
               <p class="text-sm text-gray-500 italic">รวมจำนวนคน {{ refugee.people_count }} คน</p>
             {% endif %}
               </div>              
-              {% if "admin" in current_user.roles or ("refugee_camp_staff" in current_user.roles and
-              refugee.refugee_camp.id == current_user.refugee_camp.id) %}
+              {% if "officer" in current_user.roles %}
 
               <div class="card-actions flex-nowrap items-start justify-end">
                 {{ render_refugee_toolbar(refugee) }}
@@ -100,43 +99,9 @@
               </div>
               {% endif %}
             </h2>
-            <div>
-              <p class="text-gray-500 font-light">ศูนย์พักพิง / Migrant Camp</p>
-              {% set camp_args = request.args.to_dict() %}
-              {% set _ = camp_args.pop('refugee_camp', None) %}
-              <a class="underline text-black cursor-pointer"
-                href="{{ url_for('missing_persons.index', refugee_camp=refugee.refugee_camp.id, **camp_args) }}">{{ refugee.refugee_camp.name }}</a>
-              {# Change Camp Dialog #}
-              {% if ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles) %}
-                <button onclick="$('#{{refugee.id}}_change_camp_dialog')[0].showModal()">
-                  <i class="ph ph-arrows-clockwise"></i>
-                <missing_persons/button>
-                {{ dialog.ChangeRefugeeCampDialog(
-                  id="%s_change_camp_dialog" | format(refugee.id),
-                  title="ยืนยันการเปลี่ยนศูนย์พักพิงผู้สูญหาย - เสียชีวิต",
-                  body="คุณต้องการที่จะเปลี่ยนศูนย์พักพิงผู้สูญหาย - เสียชีวิตชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                  refugee_name=refugee.name,
-                  refugee_id=refugee.id,
-                  form_action=url_for("missing_persons.change_camp", refugee_id=refugee.id, camp_id=change_camp_form.refugee_camp.data, **request.args),
-                  change_camp_form=change_camp_form,
-                  current_camp_id=refugee.refugee_camp.id
-                )}}
-              {% endif %}
-            </div>
+           
             <div class="flex items-center gap-2">
               {{ render_refugee_status(refugee.status) }}
-              <button onclick="$('#{{refugee.id}}-change_status-dialog-mobile-grid')[0].showModal()" class="text-blue-500">
-                <i class="ph ph-arrows-clockwise"></i>
-              </button>
-            {{ dialog.ChangeStatusDialog(
-                id="%s-change_status-dialog-mobile-grid" | format(refugee.id),
-                title="ยืนยันการเปลี่ยนสถานะผู้สูญหาย - เสียชีวิต",
-                body="คุณต้องการที่จะเปลี่ยนสถานะผู้สูญหาย - เสียชีวิตชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                action_button_href=url_for("missing_persons.change_status", refugee_id=refugee.id, **request.args),
-                refugee_name=refugee.name,
-                bypass=(current_user.roles[0] in ["refugee_camp_staff", "admin"]) if current_user.is_authenticated else false,
-                refugee_id=refugee.id
-              )}}
             </div>
           </div>
         </div>
