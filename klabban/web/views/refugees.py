@@ -359,6 +359,7 @@ def view_description():
 
     query = query.filter(
         description__ne="",
+        description__exists=True,
         status__ne="back_home",
     )
 
