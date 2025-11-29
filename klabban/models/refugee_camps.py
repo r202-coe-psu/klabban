@@ -12,7 +12,7 @@ class RefugeeCamp(me.Document):
     line_id = me.StringField(max_length=128)
     other_link = me.StringField(max_length=2048)
 
-    status = me.StringField(choices=("deactive", "active"), default="active")
+    status = me.StringField(choices=("inactive", "active", "closed"), default="active")
 
     created_by = me.ReferenceField(
         "User",

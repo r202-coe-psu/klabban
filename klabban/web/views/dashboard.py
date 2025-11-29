@@ -88,7 +88,7 @@ def admin_dashboard():
     total_refugees = models.Refugee.objects(status__ne="deactive").sum("people_count")
     active_refugees = models.Refugee.objects(status="active").sum("people_count")
     returned_refugees = models.Refugee.objects(status="back_home").sum("people_count")
-    active_camps = models.RefugeeCamp.objects(status="active").count()
+    active_camps = models.RefugeeCamp.objects(status__ne="inactive").count()
 
     recent_refugees = (
         models.Refugee.objects(status__ne="deactive")
@@ -100,7 +100,7 @@ def admin_dashboard():
     ).sum("people_count")
 
     camp_stats = []
-    for camp in models.RefugeeCamp.objects(status="active"):
+    for camp in models.RefugeeCamp.objects(status__ne="inactive"):
         refugee_count = models.Refugee.objects(
             refugee_camp=camp.id, status__ne="deactive"
         ).sum("people_count")
@@ -140,7 +140,7 @@ def refugee_camp_dashboard():
         # ถ้าไม่ได้เป็นแอดมิน ให้เลือกศูนย์พักพิงของตัวเองโดยอัตโนมัติ
         refugee_camp = current_user.refugee_camp
     else:
-        refugee_camps = models.RefugeeCamp.objects(status__ne="deactive")
+        refugee_camps = models.RefugeeCamp.objects(status__ne="inactive")
         form.refugee_camp.choices = [
             (str(camp.id), camp.name) for camp in refugee_camps
         ]

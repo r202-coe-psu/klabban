@@ -24,7 +24,7 @@ module = Blueprint("refugee_camps", __name__, url_prefix="/refugee_camps")
 
 @module.route("/")
 def index():
-    refugee_camps = models.RefugeeCamp.objects(status="active").order_by("name")
+    refugee_camps = models.RefugeeCamp.objects(status__ne="inactive").order_by("name")
     return render_template("/refugee_camps/index.html", refugee_camps=refugee_camps)
 
 
@@ -103,7 +103,9 @@ def export_refugee_modal():
         if current_user.refugee_camp:
             refugee_camps = models.RefugeeCamp.objects(id=current_user.refugee_camp.id)
     if not refugee_camps:
-        refugee_camps = models.RefugeeCamp.objects(status="active").order_by("name")
+        refugee_camps = models.RefugeeCamp.objects(status__ne="inactive").order_by(
+            "name"
+        )
 
     form.refugee_camp_export.choices = [(str(rc.id), rc.name) for rc in refugee_camps]
     all_exported_files = []
@@ -141,28 +143,6 @@ def download_exported_file(refugee_camp_id):
     )
 
 
-# @module.route("/import_refugee_modal")
-# @roles_required(["admin", "refugee_camp_staff"])
-# def import_refugee_modal():
-#     modal_id = uuid4()
-#     form = forms.refugee_camps.ImportRefugeeDataForm()
-
-#     refugee_camps = []
-#     if "refugee_camp_staff" in current_user.roles:
-#         if current_user.refugee_camp:
-#             refugee_camps = models.RefugeeCamp.objects(id=current_user.refugee_camp.id)
-#     if not refugee_camps:
-#         refugee_camps = models.RefugeeCamp.objects(status="active").order_by("name")
-
-#     form.refugee_camp.choices = [(str(rc.id), rc.name) for rc in refugee_camps]
-
-#     return render_template(
-#         "/components/refugee_camps/import_refugee_modal.html",
-#         modal_id=modal_id,
-#         form=form,
-#     )
-
-
 @module.route("/download_template")
 @roles_required(["admin", "refugee_camp_staff"])
 def download_template():
@@ -186,7 +166,9 @@ def import_refugee_modal():
         if current_user.refugee_camp:
             refugee_camps = models.RefugeeCamp.objects(id=current_user.refugee_camp.id)
     if not refugee_camps:
-        refugee_camps = models.RefugeeCamp.objects(status="active").order_by("name")
+        refugee_camps = models.RefugeeCamp.objects(status__ne="inactive").order_by(
+            "name"
+        )
 
     form.refugee_camp.choices = [(str(rc.id), rc.name) for rc in refugee_camps]
 

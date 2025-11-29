@@ -10,12 +10,12 @@ module = Blueprint("index", __name__)
 
 @module.route("/")
 def index():
-    refugee_camps = models.RefugeeCamp.objects(status="active")
+    refugee_camps = models.RefugeeCamp.objects(status__ne="inactive")
 
     # Count refugees for each camp (only active refugees) and attach to camp object
     for camp in refugee_camps:
         camp.refugee_count = models.Refugee.objects(
-            refugee_camp=camp.id, status="active"
+            refugee_camp=camp.id, status__ne="inactive"
         ).sum("people_count")
 
     # Sort camps by refugee count in descending order (highest first)
