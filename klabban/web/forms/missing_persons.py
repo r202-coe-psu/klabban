@@ -2,13 +2,7 @@ from datetime import datetime
 from flask_wtf import FlaskForm
 from flask_mongoengine.wtf import model_form
 from klabban.web import models
-from wtforms import (
-    DateTimeLocalField,
-    SelectField,
-    FileField,
-    StringField,
-    BooleanField,
-)
+from wtforms import DateTimeLocalField, SelectField, FileField, StringField
 from flask_wtf.file import FileAllowed, FileRequired
 from klabban.models.missing_persons import MISSING_PERSON_STATUS_CHOICES
 
