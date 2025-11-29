@@ -1,0 +1,42 @@
+{% extends "/base/default_page.html" %}
+{% set title_page="คู่มือ / Manuals" %}
+
+{% block content %}
+{% if not current_user.is_authenticated %}
+<div class="mb-4">
+  <a href="{{ url_for('index.index') }}">
+    <i class="ph ph-arrow-left text-lg"></i>
+    กลับไปหน้าหลัก / Back to Home
+  </a>
+</div>
+{% endif %}
+<div class="space-y-2">
+
+  <!-- ขั้นตอนออกจากศูนย์อพยพ -->
+  <div tabindex="0" class="collapse collapse-arrow bg-white border-base-300 border">
+    <div class="collapse-title font-semibold">ขั้นตอนการออกจากศูนย์อพยพ</div>
+    <div class="collapse-content text-sm w-full flex justify-center">
+        <img 
+          src="{{ url_for('static', filename='images/manual/manual-leaving-shelter.png') }}"
+          alt="manual-leaving-shelter"
+          class="max-h-[800px] w-auto rounded-lg shadow-md"
+        />
+    </div>
+  </div>
+
+  <!-- ขั้นตอนแจ้งข้อมูล -->
+  <div tabindex="0" class="collapse collapse-arrow bg-white border-base-300 border">
+    <div class="collapse-title font-semibold">หาข้อมูลไม่เจอ หรือยืนยันชื่อตัวเองไม่ได้?</div>
+    <div class="collapse-content text-sm w-full flex justify-center">
+      <img 
+        src="{{ url_for('static', filename='images/manual/unable-to-confirm.png') }}"
+        alt="ขั้นตอนแจ้งข้อมูล"
+        class="max-h-[800px] w-auto rounded-lg shadow-md"
+      />
+    </div>
+  </div>
+
+</div>
+
+
+{% endblock content %}

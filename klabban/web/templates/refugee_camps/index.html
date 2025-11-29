@@ -25,6 +25,7 @@
                 <th>ลำดับ</th>
                 <th>ชื่อศูนย์พักพิง</th>
                 <th>ตำแหน่ง</th>
+                <th>สถานะ</th>
                 {% if "admin" in current_user.roles %}
                 <th class="text-right">จัดการ</th>
                 {% endif %}
@@ -43,6 +44,9 @@
                         -
                         {% endif %}
                     </td>
+
+                    <td class=" {{ 'text-green-600 font-bold' if refugee_camp.status == 'active' else 'text-red-600 font-bold' }} "
+                    >{{ refugee_camp.status | capitalize }}</td>
                     {% if "admin" in current_user.roles %}
 
                     <td class="flex gap-2 justify-end">

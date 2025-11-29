@@ -2,7 +2,7 @@
 {% import "base/html_renderer.html" as renderer %}
 
 
-{% set title_page="แจ้งปัญหาการเปลี่ยนสถานะผู้อพยพ / Immigration status change" %}
+{% set title_page="ปัญหาที่รับการรายงาน / Immigration Issue Reported" %}
 
 
 {% block content %}
@@ -21,11 +21,19 @@
         {{ form.csrf_token}}
         
         <div class="text-xl font-medium text-gray-700 flex justify-between items-center w-full">
-          <p>แจ้งปัญหาการเปลี่ยนสถานะผู้อพยพ / Immigration status change</p>
+          <p>ปัญหาที่รับการรายงาน / Immigration Issue Reported</p>
         </div>
-
         <div>
-          {{ renderer.render_text_area_field(form.description, placeholder="โปรดระบุชื่อ–นามสกุล หมายเลขโทรศัพท์ และรายละเอียดปัญหาที่พบ เช่น “นายทดสอบ ระบบ โทร. 012-345-6789 ตรวจสอบสถานะให้ด้วยครับ") }}
+          {{ report.title }}
+        </div>
+        <div>
+          รายละเอียด: {{ report.description }}
+        </div>
+        <div>
+          ติดต่อ: {{ report.phone_number }}
+        </div>
+        <div>
+          ประเภทการรายงาน: {{ report.get_report_type_display() }}
         </div>
         <div>
           {{ renderer.render_text_area_field(form.staff_note) }}

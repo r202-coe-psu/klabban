@@ -12,6 +12,9 @@
       <div class="flex flex-col">
         {{ renderer.base_render(form.name) }}
       </div>
+      <div>
+        {{ renderer.render_select_field(form.status) }}
+      </div>
       <div class="flex flex-col">
         {{ renderer.base_render(form.location_url) }}
       </div>

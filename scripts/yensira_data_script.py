@@ -169,8 +169,10 @@ def main():
 
         sheet_data = []
         for i, row in df.iterrows():
-            if not row.get("name") or not str(row.get("name")).strip():
+            name = row.get("name", "").strip()
+            if not name:
                 continue
+            row["name"] = name
             sheet_data.append(row)
 
         all_data_to_save.extend(sheet_data)

@@ -23,19 +23,34 @@
     <form id="import-form" method="POST" action="{{ url_for('refugee_camps.import_refugee_modal') }}" enctype="multipart/form-data">
       {{ form.hidden_tag() }}
       <div class="flex flex-col mt-4">
-        {# เลือกศูนย์พักพิง #}
-        {{ renderer.render_select_field(form.refugee_camp, id="refugee_camp_select") }}
-
-        {# ดาวน์โหลด Template #}
-        <div class="mt-4">
-          <button type="button" class="btn btn-outline btn-sm" onclick="downloadTemplate()">
+        
+        {# ดาวน์โหลด Template - ย้ายขึ้นมาก่อน #}
+        <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="ph ph-info text-blue-600"></i>
+            <span class="text-sm font-medium text-blue-900">ขั้นตอนที่ 1: ดาวน์โหลด Template</span>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm btn-primary" onclick="downloadTemplate()">
             <i class="ph ph-download"></i> ดาวน์โหลด Template Excel
           </button>
-          <span class="text-xs text-gray-500 ml-2">แนะนำให้ดาวน์โหลด Template ก่อนนำเข้าข้อมูล</span>
+          <p class="text-xs text-gray-600 mt-2">แนะนำให้ดาวน์โหลด Template และกรอกข้อมูลตามตัวอย่างที่กำหนด</p>
+        </div>
+
+        {# เลือกศูนย์พักพิง #}
+        <div class="mb-4">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="ph ph-info text-blue-600"></i>
+            <span class="text-sm font-medium text-blue-900">ขั้นตอนที่ 2: เลือกศูนย์พักพิง</span>
+          </div>
+          {{ renderer.render_select_field(form.refugee_camp, id="refugee_camp_select") }}
         </div>
 
         {# อัปโหลดไฟล์ #}
         <div class="mt-4">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="ph ph-info text-blue-600"></i>
+            <span class="text-sm font-medium text-blue-900">ขั้นตอนที่ 3: อัปโหลดไฟล์</span>
+          </div>
           <label class="block text-sm font-medium text-gray-700 mb-2">
             {{ form.excel_file.label.text }}
           </label>
@@ -45,6 +60,23 @@
           {% endif %}
           {% if form.excel_file.errors %}
           <span class="text-error text-sm mt-1 block">{{ form.excel_file.errors[0] }}</span>
+          {% endif %}
+        </div>
+
+        {# แหล่งที่มาของข้อมูล #}
+        <div class="mt-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            {{ form.source.label.text }}
+            <span class="text-gray-400 text-xs font-normal">(ไม่บังคับ)</span>
+          </label>
+          {{ form.source(class="textarea textarea-bordered w-full h-20", 
+                        id="source", 
+                        placeholder="เช่น ข้อมูลจากหน่วยงาน XXX, รับจากพื้นที่ลุ่มน้ำ YYY, ฯลฯ") }}
+          {% if form.source.description %}
+          <span class="text-xs text-gray-500 mt-1 block">{{ form.source.description }}</span>
+          {% endif %}
+          {% if form.source.errors %}
+          <span class="text-error text-sm mt-1 block">{{ form.source.errors[0] }}</span>
           {% endif %}
         </div>
 
@@ -88,8 +120,8 @@
           <tr>
             <th>วันที่นำเข้า</th>
             <th>ชื่อไฟล์</th>
-            <th>จํานวนข้อมูล</th>
-            <th>ศูนย์พักพิง</th>
+            <th>แหล่งที่มา</th>
+            <th>จำนวนข้อมูล</th>
             <th>สถานะ</th>
             <th>ผู้นำเข้า</th>
             <th>รายละเอียด</th>
@@ -101,8 +133,8 @@
               <tr>
                 <td>{{ log.uploaded_date.strftime('%d/%m/%Y %H:%M') }}</td>
                 <td>{{ log.file_name }}</td>
+                <td>{{ log.source or "-" }}</td>
                 <td>{{ log.record_count }}</td>
-                <td>{{ log.refugee_camp.name }}</td>
                 <td>
                   {% if log.upload_status == 'completed' %}
                     <span class="badge badge-success">สำเร็จ</span>
@@ -128,7 +160,7 @@
             {% endfor %}
           {% else %}
             <tr>
-              <td colspan="6" class="text-center text-gray-500">ไม่มีประวัติการนำเข้าข้อมูล</td>
+              <td colspan="7" class="text-center text-gray-500">ไม่มีประวัติการนำเข้าข้อมูล</td>
             </tr>
           {% endif %}
         </tbody>

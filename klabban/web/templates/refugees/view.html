@@ -29,6 +29,10 @@
                 <p>{{ refugee.nick_name or "-" }}</p>
             </div>
             <div>
+                <p class="text-gray-400 text-sm font-light">เลขบัตรประชาชน / Identification Number:</p>
+                <p>{{ refugee.identification_number or "-" }}</p>
+            </div>
+            <div>
                 <p class="text-gray-400 text-sm font-light">เพศ / Gender:</p>
                 <p>{{ refugee.get_gender_display() if refugee.gender else "-" }}</p>
             </div>
@@ -59,6 +63,10 @@
             <div>
                 <p class="text-gray-400 text-sm font-light">ที่อยู่ / Address:</p>
                 <p>{{ refugee.address or "-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm font-light">นําเข้าข้อมูลมาจาก / Import From</p>
+                <p>{{ refugee.source or "-" }}</p>
             </div>
         </div>
         <h2 class="text-lg font-medium mb-4 mt-6">ข้อมูลการอพยพ</h2>

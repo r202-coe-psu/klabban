@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_mongoengine.wtf import model_form
 from klabban.web import models
-from wtforms import SelectField, FileField
+from wtforms import SelectField, FileField, StringField
 from flask_wtf.file import FileAllowed, FileRequired
 
 
@@ -37,3 +37,4 @@ class ImportRefugeeDataForm(FlaskForm):
         description="หมายเหตุ: ช่อง วันที่ ใช้เป็นรูปแบบ ปปปป-ดด-วว ชช:นน:วว",
     )
     refugee_camp = SelectField("เลือกศูนย์พักพิง / Migrant Camp", choices=[])
+    source = StringField("แหล่งที่มา / Source", description="เช่น ชื่อองค์กรที่ส่งข้อมูลมา")
