@@ -74,6 +74,14 @@
           </a>
         </li>
         {% endif %}
+        {% if "admin" in current_user.roles or "officer" in current_user.roles %}
+        <li>
+          <a class="{{ 'drawer-menu-active' if '/missing_persons' in request.path else '' }}" href="{{ url_for('missing_persons.index') }}">
+            <i class="ph ph-detective text-lg"></i>
+            บุคคลสูญหาย/เสียชีวิต
+          </a>
+        </li>
+        {% endif %}
         {% if "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles %}
         <li>
           <a class="{{ 'drawer-menu-active' if '/users' in request.path else '' }}" href="{{ url_for('users.index') }}">
@@ -102,5 +110,6 @@
         </li>
         {% endif %}
       </ul>
+      
     </div>
   </div>
