@@ -28,9 +28,9 @@ from bson import ObjectId
 module = Blueprint("missing_persons", __name__, url_prefix="/missing_persons")
 
 
+@module.route("/")
 @login_required
 @roles_required(["officer"])
-@module.route("/")
 def index():
     view_mode = request.args.get("view_mode", "list")
 
@@ -66,10 +66,10 @@ def index():
     )
 
 
-@login_required
-@roles_required(["officer"])
 @module.route("/create", methods=["GET", "POST"], defaults={"missing_person_id": None})
 @module.route("/<missing_person_id>/edit", methods=["GET", "POST"])
+@login_required
+@roles_required(["officer"])
 def create_or_edit(missing_person_id=None):
     form = forms.missing_persons.MissingPersonForm()
     missing_person = models.MissingPerson()
@@ -102,17 +102,17 @@ def create_or_edit(missing_person_id=None):
     return redirect(url_for("missing_persons.index"))
 
 
+@module.route("/<missing_person_id>/view", methods=["GET"])
 @login_required
 @roles_required(["officer"])
-@module.route("/<missing_person_id>/view", methods=["GET"])
 def view(missing_person_id):
     missing_person = models.MissingPerson.objects.get(id=missing_person_id)
     return render_template("/missing_persons/view.html", missing_person=missing_person)
 
 
+@module.route("/<missing_person_id>/delete", methods=["POST"])
 @login_required
 @roles_required(["officer"])
-@module.route("/<missing_person_id>/delete", methods=["POST"])
 def delete(missing_person_id):
     missing_person = models.MissingPerson.objects.get(id=missing_person_id)
     missing_person.status = "deactive"
@@ -201,15 +201,3 @@ def get_import_errors(import_id):
         }
     except Exception as e:
         return {"errors": [str(e)]}, 404
-
-
-@module.route("/export_missing_person_modal", methods=["GET"])
-def export_missing_person_modal():
-    form = forms.missing_persons.MissingPersonExportForm()
-    refugee_camps = models.RefugeeCamp.objects(status="active").order_by("name")
-    form.refugee_camp_export.choices = [("", "ทั้งหมด")] + [
-        (str(camp.id), camp.name) for camp in refugee_camps
-    ]
-    return render_template(
-        "/missing_persons/modals/export_missing_person_modal.html", form=form
-    )
