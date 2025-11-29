@@ -14,7 +14,7 @@ REPORT_STATUS_CHOICES = [
 REPORT_TYPE_CHOICES = [
     ("cannot_back_home", "พบชื่อแต่ไม่สามารถเปลี่ยนสถานะกลับบ้านได้ (โปรดระบุชื่อผู้อพยพ)"),
     ("not_found", "ไม่พบชื่อผู้อพยพในระบบ"),
-    ("bug", "บั๊กในระบบ"),
+    ("bug", "ข้อผิดพลาดในระบบ"),
 ]
 
 class Report(me.Document):

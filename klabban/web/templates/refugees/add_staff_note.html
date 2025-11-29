@@ -27,10 +27,13 @@
           {{ report.title }}
         </div>
         <div>
-          {{ report.description }}
+          รายละเอียด: {{ report.description }}
         </div>
         <div>
-          {{ report.phone_number }}
+          ติดต่อ: {{ report.phone_number }}
+        </div>
+        <div>
+          ประเภทการรายงาน: {{ report.get_report_type_display() }}
         </div>
         <div>
           {{ renderer.render_text_area_field(form.staff_note) }}

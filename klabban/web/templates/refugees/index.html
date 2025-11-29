@@ -45,7 +45,7 @@
             <span class="ph ph-magnifying-glass text-lg"></span>
             ค้นหา / Search
           </button>
-          <a class="btn btn-primary text-white sm:mt-8 max-sm:mt-3" href="{{ url_for('refugees.create_description') }}">แจ้งปัญหาสำหรับผู้อพยพ</a>
+          <a class="btn btn-primary text-white sm:mt-8 max-sm:mt-3" href="{{ url_for('refugees.create_report') }}">แจ้งปัญหาสำหรับผู้อพยพ</a>
         </div>
       </form>
       {% if 'admin' in current_user.roles or 'refugee_camp_staff' in current_user.roles %}

@@ -284,8 +284,8 @@ def delete_refugee(refugee_id):
     return redirect(url_for("refugees.index"))
 
 
-@module.route("/description/create", methods=["GET", "POST"])
-def create_description():
+@module.route("/report/create", methods=["GET", "POST"])
+def create_report():
     form = forms.reports.ReportNoteForm()
 
     if not form.validate_on_submit():
@@ -309,9 +309,9 @@ def create_description():
     return redirect(url_for("refugees.index"))
 
 # หน้าแสดงผู้อพยพที่มีการส่ง description
-@module.route("/view_descriptions")
+@module.route("/view_reports")
 @roles_required(["admin", "refugee_camp_staff"])
-def view_description():
+def view_reports():
 
     page = request.args.get("page", 1, type=int)
     per_page = 50  # จำนวนรายการต่อหน้า
@@ -345,16 +345,16 @@ def view_description():
         reports_pagination = Pagination(query, page=1, per_page=per_page)
 
     return render_template(
-        "refugees/view_description.html",
+        "refugees/view_reports.html",
         reports_pagination=reports_pagination,
         search_form=search_form,
     )
 
 
 # เพิ่ม status ว่าอ่าน description ที่ผู้อพผลส่งมาหรือยัง
-@module.route("/change_status_description/<report_id>/", methods=["GET"])
+@module.route("/change_status_report/<report_id>/", methods=["GET"])
 @roles_required(["admin", "refugee_camp_staff"])
-def change_status_description(report_id):
+def change_status_report(report_id):
 
     report = models.Report.objects.get(id=report_id)
     if report:
@@ -366,7 +366,7 @@ def change_status_description(report_id):
 
         report.save()
 
-    return redirect(url_for("refugees.view_description"))
+    return redirect(url_for("refugees.view_reports"))
 
 
 # @module.route("/staff/note/create", methods=["GET", "POST"], defaults={"refugee_id": None})
@@ -387,4 +387,4 @@ def add_staff_note(report_id):
 
         flash(f"เพิ่ม note สำหรับ {report.title} สำเร็จ", "success")
 
-    return redirect(url_for("refugees.view_description"))
+    return redirect(url_for("refugees.view_reports"))
