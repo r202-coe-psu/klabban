@@ -1158,7 +1158,7 @@ items-center justify-center cursor-pointer mx-auto h-40 bg-white hover:bg-gray-1
 </script>
 {% endmacro%}
 
-{% macro render_search_multi_select_field(field, id_prefix='', placeholder="", disabled=false) %}
+{% macro render_multi_select_field(field, id_prefix='', placeholder="", disabled=false) %}
 {% set field_id = id_prefix + field.id %}
 {% set list_of_tuples = field.choices %}
 {% set selected_values = field.data if field.data else [] %}
