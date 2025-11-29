@@ -56,7 +56,7 @@ class Refugee(me.Document):
     nationality = me.StringField(max_length=128)
     identification_number = me.StringField(max_length=128)
     ethnicity = me.StringField(max_length=128)
-    country = me.StringField(max_length=128)
+    country = me.StringField(max_length=128, default="Thailand")
     age = me.IntField()
     address = me.StringField(max_length=512)
     pets = me.StringField(max_length=512)
