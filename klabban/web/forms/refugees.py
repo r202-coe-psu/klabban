@@ -78,14 +78,3 @@ class ChangeRefugeeCampForm(FlaskForm):
     refugee_camp = SelectField(
         "ศูนย์พักพิงใหม่ / New Migrant Camp", choices=[], validators=[DataRequired()]
     )
-
-
-class RefugeeNoteForm(FlaskForm):
-    description = StringField(
-        "รายละเอียดสำหรับแจ้งฝ่ายลงทะเบียน / Details for registration notification",
-        validators=[DataRequired()],
-    )
-
-    staff_note = StringField(
-        "รายละเอียดจากเจ้าหน้าที่ / Details from the staff",
-    )
