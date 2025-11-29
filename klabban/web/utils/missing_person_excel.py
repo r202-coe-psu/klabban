@@ -95,10 +95,10 @@ def get_template():
         date_format="dd/mm/yyyy",
         datetime_format="dd/mm/yyyy",
     ) as writer:
-        df.to_excel(writer, sheet_name="ข้อมูลผู้อพยพ", index=False)
+        df.to_excel(writer, sheet_name="ข้อมูลผู้สูญหาย-เสียชีวิต", index=False)
 
         workbook: xlsxwriter.Workbook = writer.book
-        worksheet: xlsxwriter.workbook.Worksheet = writer.sheets["ข้อมูลผู้อพยพ"]
+        worksheet: xlsxwriter.workbook.Worksheet = writer.sheets["ข้อมูลผู้สูญหาย-เสียชีวิต"]
 
         # เพิ่ม format สำหรับ header และตัวอย่าง
         header_format = workbook.add_format(
@@ -347,7 +347,7 @@ def validate_dataframe(df, sheet_name):
 
         # ตรวจสอบเลขบัตรประชาชน
         if pd.notna(row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต")):
-            id_number = str(row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต")).strip()
+            id_number = str(int(row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต"))).strip()
             if id_number and not id_number.isdigit():
                 row_errors.append("หมายเลขบัตรประชาชนคนหาย/เสียชีวิตต้องเป็นตัวเลขเท่านั้น")
             elif id_number and len(id_number) != 13:
