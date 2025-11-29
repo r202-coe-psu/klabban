@@ -75,7 +75,7 @@
             name="search" 
             id="search" 
             placeholder="ชื่อ - สกุล หรือ ชื่อเล่น / Name or Nickname"
-            class="input input-bordered w-full rounded-xl bg-gray-50 border-gray-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-base px-5 py-3" 
+            class="input input-bordered w-full rounded-sm bg-gray-50 border-gray-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-base px-5 py-3" 
           />
         </div>
 
@@ -83,34 +83,54 @@
         <div class="flex gap-2 md:w-auto shrink-0">
           <button 
             type="submit"
-            class="btn btn-primary rounded-xl px-6 py-3 w-full md:w-auto font-medium text-base shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+            class="btn btn-primary rounded-sm px-6 py-3 w-full md:w-auto font-medium text-base shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2"
           >
             <i class="ph ph-magnifying-glass text-xl"></i>
             <span>ค้นหา / Search</span>
           </button>
+          
         </div>
+        
       </form>
     </div>
   </div>
   
-    <div class="flex justify-center w-full max-w-5xl bg-white border border-gray-300 rounded-xl shadow-lg p-2 md:p-4 ">
-      <div class="flex flex-col md:flex-row items-center gap-2 md:gap-4">
-        <span class="flex-shrink-0 font-medium text-gray-800">
-          หากท่านได้ออกจากศูนย์พักพิง กรุณากดปุ่ม
-        </span>
-
-        <img 
-          src="{{ url_for('static', filename='images/manual/change_status.png') }}"
-          alt="change_status"
-          class="h-10 w-10 rounded-lg shadow-md flex-shrink-0"
-        />
-        
-        <span class="mt-2 md:mt-0 text-gray-700">
-          หลังสถานะผู้อพยพเพื่อยืนยันการออก หรือทำตามคู่มือได้ที่ 
-          <a href="{{ url_for('manuals.index') }}" class="text-blue-600 hover:underline">คู่มือ</a>
-        </span>
+  <div class="w-full max-w-5xl mb-6">
+    <div class="bg-white border border-gray-300 rounded-xl shadow-lg">
+      <div class="p-4 md:p-6">
+        <div class="flex flex-col items-center text-center gap-4">
+          <!-- Main message section -->
+          <div class="flex flex-col lg:flex-row items-center gap-3 lg:gap-4">
+            <div class="flex flex-row items-center gap-2">
+              <span class="font-medium text-gray-800 text-sm md:text-base">
+                หากท่านได้ออกจากศูนย์พักพิง กรุณากดปุ่ม
+              </span>
+              
+              <img 
+              src="{{ url_for('static', filename='images/manual/change_status.png') }}"
+              alt="change_status"
+              class="h-8 w-8 md:h-10 md:w-10 rounded-lg shadow-md flex-shrink-0"
+              />
+            </div>
+          
+          <span class="text-gray-700 text-sm md:text-base max-w-md lg:max-w-none">
+            หลังสถานะผู้อพยพเพื่อยืนยันการออก หรือทำตามคู่มือได้ที่ 
+            <a href="{{ url_for('manuals.index') }}" class="text-blue-600 hover:underline font-medium">คู่มือ</a>
+          </span>
+          </div>
+          
+          <!-- Button section -->
+          <div class="w-full max-w-sm">
+            <a class="btn btn-error text-white w-full text-sm md:text-base py-3 md:py-4 h-auto min-h-0 rounded-lg shadow-sm hover:shadow-md transition-all duration-200" 
+               href="{{ url_for('refugees.create_report', type='not_found') }}">
+              <i class="ph ph-flag text-lg md:text-xl"></i>
+              <span class="">แจ้งปัญหาระบบ</span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
 
   <!-- Section Header -->
   <div class="w-full max-w-5xl mb-6 mt-4 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -146,7 +166,9 @@
                     </h2>
                     <!-- Status Indicator -->
                     <span class="relative flex h-3 w-3 mt-1.5 shrink-0">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{'bg-green-400' if refugee_camp.status == 'active' else 'bg-red-400' }} opacity-75"></span>
+                      {% if refugee_camp.status == 'active' %}
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      {% endif %}
                       <span class="relative inline-flex rounded-full h-3 w-3 {{'bg-green-500' if refugee_camp.status == 'active' else 'bg-red-500' }}"></span>
                     </span>
                 </div>
