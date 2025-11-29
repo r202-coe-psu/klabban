@@ -47,8 +47,11 @@
           </button>
         </div>
       </form>
-      {% if 'admin' in current_user.roles or 'refugee_camp_staff' in current_user.roles %}
       <div class="justify-end flex flex-col gap-2 w-fit">
+        <a class="btn btn-error text-white sm:mt-8 max-sm:mt-3" href="{{ url_for('refugees.create_report', type='not_found') }}">
+          <i class="ph ph-flag text-lg"></i>
+          แจ้งปัญหาสำหรับผู้อพยพ</a>
+        {% if 'admin' in current_user.roles or 'refugee_camp_staff' in current_user.roles %}
         <button hx-get="{{ url_for('refugee_camps.import_refugee_modal') }}" hx-target="#import-refugee-modal-container"
           hx-trigger="click" hx-swap="innerHTML" class="btn bg-green-400 text-white">
           <span class="ph ph-file-xls text-lg"></span>
@@ -63,8 +66,8 @@
           <span class="material-symbols-outlined text-sm">add</span>
           เพิ่มผู้อพยพ / Add Migrant
         </a>
+        {% endif %}
       </div>
-      {% endif %}
     </div>
     {% if not search_form.search.data and ("refugee_camp_staff" not in current_user.roles and "admin" not in
     current_user.roles) %}
@@ -392,7 +395,7 @@
           id=change_status_dialog_id,
           title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
           body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-          action_button_href=url_for("refugees.change_status", refugee_id=refugee.id, **request.args),
+          action_button_href=url_for("refugees.change_status", refugee_id=refugee.id, next=request.full_path, **request.args),
           refugee_name=refugee.name,
           bypass=(current_user.roles[0] in ["refugee_camp_staff", "admin"]) if current_user.is_authenticated else false,
           refugee_id=refugee.id

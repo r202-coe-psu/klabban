@@ -25,7 +25,7 @@ module = Blueprint("refugee_camps", __name__, url_prefix="/refugee_camps")
 
 @module.route("/")
 def index():
-    refugee_camps = models.RefugeeCamp.objects(status="active").order_by("name")
+    refugee_camps = models.RefugeeCamp.objects(status__ne="inactive").order_by("name")
     return render_template("/refugee_camps/index.html", refugee_camps=refugee_camps)
 
 
@@ -104,7 +104,9 @@ def export_refugee_modal():
         if current_user.refugee_camp:
             refugee_camps = models.RefugeeCamp.objects(id=current_user.refugee_camp.id)
     if not refugee_camps:
-        refugee_camps = models.RefugeeCamp.objects(status="active").order_by("name")
+        refugee_camps = models.RefugeeCamp.objects(status__ne="inactive").order_by(
+            "name"
+        )
 
     form.refugee_camp_export.choices = [(str(rc.id), rc.name) for rc in refugee_camps]
     all_exported_files = []
@@ -165,7 +167,9 @@ def import_refugee_modal():
         if current_user.refugee_camp:
             refugee_camps = models.RefugeeCamp.objects(id=current_user.refugee_camp.id)
     if not refugee_camps:
-        refugee_camps = models.RefugeeCamp.objects(status="active").order_by("name")
+        refugee_camps = models.RefugeeCamp.objects(status__ne="inactive").order_by(
+            "name"
+        )
 
     form.refugee_camp.choices = [("all", "ทั้งหมด")] + [
         (str(rc.id), rc.name) for rc in refugee_camps

@@ -6,15 +6,19 @@ from klabban.models.refugees import (
     RefugeeStatusLog,
     RefugeeCampsLog,
     REFUGEE_STATUS_CHOICES,
-    RefugeeNoteLog,
 )
 from klabban.models.refugee_camps import RefugeeCamp
 from klabban.models.oauth2 import OAuth2Token
 from klabban.models.export_refugee_files import ExportRefugeeFile
 from klabban.models.import_refugee_files import ImportRefugeeFile
-from klabban.models.report import Report, STATUS_CHOICES
 from klabban.models.missing_persons import MissingPerson, TITLE_NAME_CHOICES
 from klabban.models.import_missing_person_files import ImportMissingPersonFile
+from klabban.models.reports import (
+    Report,
+    REPORT_STATUS_CHOICES,
+    REPORT_TYPE_CHOICES,
+    STATUS_CHOICES,
+)
 
 
 import mongoengine as me
@@ -30,6 +34,7 @@ __all__ = [
     "RefugeeNoteLog",
     "ImportRefugeeFile",
     "MissingPerson",
+    "Report",
 ]
 
 db = MongoEngine()
