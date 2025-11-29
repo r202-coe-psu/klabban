@@ -18,6 +18,7 @@ import datetime
 from klabban import models
 from klabban.web import forms, utils, redis_rq
 from klabban.web.utils.acl import roles_required
+from bson import ObjectId
 
 module = Blueprint("refugee_camps", __name__, url_prefix="/refugee_camps")
 
@@ -170,8 +171,10 @@ def import_refugee_modal():
             "name"
         )
 
-    form.refugee_camp.choices = [(str(rc.id), rc.name) for rc in refugee_camps]
-
+    form.refugee_camp.choices = [("all", "ทั้งหมด")] + [
+        (str(rc.id), rc.name) for rc in refugee_camps
+    ]
+    print(form.refugee_camp.choices)
     # ดึง import logs
     import_logs = (
         models.ImportRefugeeFile.objects().order_by("-uploaded_date").limit(20)
@@ -185,15 +188,18 @@ def import_refugee_modal():
             import_logs=import_logs,
         )
 
-    refugee_camp_id = form.refugee_camp.data
+    refugee_camp = form.refugee_camp.data
+
+    # ถ้าเลือกทั้งหมดในถ้าเป้น all จะส่ง string all ถ้าเลือกอย่างอื่น จะส่ง refugee_camp object
+    if refugee_camp != "all":
+        refugee_camp = models.RefugeeCamp.objects.get(id=ObjectId(refugee_camp))
+
     file = form.excel_file.data
 
-    refugee_camp_id = form.refugee_camp.data
-    file = form.excel_file.data
     if file:
         import_refugee_file = models.ImportRefugeeFile(
-            refugee_camp=models.RefugeeCamp.objects.get(id=refugee_camp_id),
             file_name=file.filename,
+            source=form.source.data if form.source.data else None,
             created_by=current_user._get_current_object(),
             upload_status="pending",
         )
@@ -210,7 +216,7 @@ def import_refugee_modal():
             args=(
                 import_refugee_file,
                 current_user._get_current_object(),
-                refugee_camp_id,
+                refugee_camp,
             ),
             timeout=3600,
             job_timeout=1200,

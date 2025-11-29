@@ -10,10 +10,10 @@ class ImportRefugeeFile(me.Document):
         "indexes": ["created_date"],
     }
 
-    refugee_camp = me.ReferenceField("RefugeeCamp", required=True)
     file = me.FileField()
     file_name = me.StringField(required=True)
     record_count = me.IntField(default=0)
+    source = me.StringField(max_length=255)
     error_messages = me.ListField(me.StringField())
     uploaded_date = me.DateTimeField(default=datetime.datetime.now)
     created_date = me.DateTimeField(default=datetime.datetime.now)

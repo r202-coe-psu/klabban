@@ -50,6 +50,7 @@ class Refugee(me.Document):
     congenital_disease = me.StringField(max_length=512)
     nick_name = me.StringField(max_length=255)
     nationality = me.StringField(max_length=128)
+    identification_number = me.StringField(max_length=128)
     ethnicity = me.StringField(max_length=128)
     country = me.StringField(max_length=128, default="Thailand")
     age = me.IntField()
@@ -63,6 +64,7 @@ class Refugee(me.Document):
     registration_date = me.DateTimeField(default=datetime.datetime.now)
     back_home_date = me.DateTimeField()
     is_public_searchable = me.BooleanField(default=True)
+    source = me.StringField(max_length=255)
 
 
     # universal field
