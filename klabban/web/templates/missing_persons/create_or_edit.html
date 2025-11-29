@@ -55,6 +55,14 @@
     <div class="col-span-2">
     {{ renderer.base_render(form.code) }}
     </div>
+    {# TODO: DNA field
+    <div class="">
+      {{ renderer.base_render(form.is_dna_collected) }}
+    </div>
+    #}
+    <div class="col-span-3">
+      {{ renderer.base_render(form.reporting_date) }}
+    </div>
     <div class="col-span-3">
       {{ renderer.base_render(form.body_received_date) }}
     </div>

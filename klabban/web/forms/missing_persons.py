@@ -36,9 +36,12 @@ BaseMissingPersonForm = model_form(
         "reporter_subdistrict_info": {"label": "ตําบล"},
         "reporter_address_info": {"label": "ที่อยู่บ้านเลขที่"},
         "reporter_phone_number": {"label": "เบอร์โทรศัพท์"},
-        "code": {"label": "Code"},
+        "code": {"label": "รหัส"},
+        "reporting_date": {"label": "วันที่แจ้งหาย"},
+        "phone_number": {"label": "เบอร์โทรศัพท์"},
     },
     exclude=[
+        "source",
         "created_by",
         "updated_by",
         "created_date",
@@ -50,7 +53,14 @@ BaseMissingPersonForm = model_form(
 
 class MissingPersonForm(BaseMissingPersonForm):
     title_name = SelectField("คำนำหน้า", choices=[])
+    reporter_title_name = SelectField("คำนำหน้า", choices=[])
     missing_person_status = SelectField("สถานะ", choices=[])
+    reporting_date = DateTimeLocalField(
+        "วันที่แจ้งหาย/เสียชีวิต",
+        default=datetime.now,
+        format="%Y-%m-%dT%H:%M",
+        render_kw={"placeholder": "เลือกวันที่และเวลา / Select Date and Time"},
+    )
     body_received_date = DateTimeLocalField(
         "วันที่รับศพ",
         default=datetime.now,
