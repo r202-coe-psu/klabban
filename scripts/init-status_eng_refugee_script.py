@@ -16,6 +16,7 @@ def initialize_refugee_status():
         if refugee.status == "active":
             print(f"Set status for refugee '{refugee.name}' to 'back_home'")
             refugee.status = "back_home"
+            refugee.updated_date = datetime.datetime.now()
             refugee.back_home_date = datetime.datetime.now()
             count += 1
             refugee.status_log.append(
