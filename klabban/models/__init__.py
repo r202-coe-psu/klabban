@@ -13,7 +13,8 @@ from klabban.models.oauth2 import OAuth2Token
 from klabban.models.export_refugee_files import ExportRefugeeFile
 from klabban.models.import_refugee_files import ImportRefugeeFile
 from klabban.models.report import Report, STATUS_CHOICES
-from klabban.models.missing_persons import MissingPerson, ImportMissingPerson
+from klabban.models.missing_persons import MissingPerson
+from klabban.models.import_missing_person_files import ImportMissingPersonFile
 
 
 import mongoengine as me
