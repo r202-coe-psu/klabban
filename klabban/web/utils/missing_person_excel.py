@@ -118,11 +118,68 @@ def get_template():
         "ตำบลผู้แจ้ง": ["ช้างเผือก", "ช้างเผือก"],
         "ที่อยู่บ้านเลขที่ผู้แจ้ง": ["456/78 ถนนห้วยแก้ว", "789/12 ถนนห้วยแก้ว"],
         "เบอร์โทรศัพท์ผู้แจ้ง": ["0898765432", "0887654321"],
-        "CODE": ["HY74/68 PSU", "HY75/69 PSU"],
+        "CODE": ["CM01/25", "CM02/25"],
     }
 
     df_missing = pd.DataFrame(missing_data)
     df_death = pd.DataFrame(death_data)
+
+    # ========== กำหนด dtype ให้แต่ละคอลัมน์ ==========
+
+    # คอลัมน์ที่เป็น string/text
+    text_columns = [
+        "คำนำหน้าชื่อคนหาย/เสียชีวิต",
+        "ชื่อคนหาย/เสียชีวิต",
+        "นามสกุลคนหาย/เสียชีวิต",
+        "เบอร์โทรศัพท์คนหาย/เสียชีวิต",
+        "หมายเลขบัตรประชาชนคนหาย/เสียชีวิต",
+        "ประเทศคนหาย/เสียชีวิต",
+        "จังหวัดคนหาย/เสียชีวิต",
+        "อำเภอคนหาย/เสียชีวิต",
+        "ตำบลคนหาย/เสียชีวิต",
+        "ที่อยู่บ้านเลขที่คนหาย/เสียชีวิต",
+        "ลักษณะรูปพรรณ",
+        "เก็บดีเอ็นเอญาติ",
+        "คำให้การ/สอบปากคำ",
+        "วันที่รับศพ",
+        "ความสัมพันธ์กับผู้หาย/เสียชีวิต",
+        "คำนำหน้าชื่อผู้แจ้ง",
+        "ชื่อผู้แจ้ง",
+        "นามสกุลผู้แจ้ง",
+        "หมายเลขบัตรประชาชนผู้แจ้ง",
+        "ประเทศผู้แจ้ง",
+        "จังหวัดผู้แจ้ง",
+        "อำเภอผู้แจ้ง",
+        "ตำบลผู้แจ้ง",
+        "ที่อยู่บ้านเลขที่ผู้แจ้ง",
+        "เบอร์โทรศัพท์ผู้แจ้ง",
+        "CODE",
+        "วันที่มาเเจ้งเหตุ",
+    ]
+
+    # คอลัมน์ที่เป็นตัวเลข
+    numeric_columns = [
+        "อายุคนหาย/เสียชีวิต",
+        "อายุผู้แจ้ง",
+    ]
+
+    # แปลง dtype สำหรับ Sheet ผู้สูญหาย
+    for col in text_columns:
+        if col in df_missing.columns:
+            df_missing[col] = df_missing[col].astype(str)
+
+    for col in numeric_columns:
+        if col in df_missing.columns:
+            df_missing[col] = df_missing[col].astype("Int64")  # nullable integer
+
+    # แปลง dtype สำหรับ Sheet ผู้เสียชีวิต
+    for col in text_columns:
+        if col in df_death.columns:
+            df_death[col] = df_death[col].astype(str)
+
+    for col in numeric_columns:
+        if col in df_death.columns:
+            df_death[col] = df_death[col].astype("Int64")
 
     output = BytesIO()
     with pd.ExcelWriter(
@@ -145,15 +202,20 @@ def get_template():
             {"bold": True, "bg_color": "#4472C4", "font_color": "white", "border": 1}
         )
 
+        # Format สำหรับ text (text alignment)
+        text_format = workbook.add_format({"num_format": "@"})  # @ = text format
+
+        # Format สำหรับตัวเลข
+        number_format = workbook.add_format({"num_format": "0"})
+
         # สร้าง Choices sheet
         sheet_choices = "Choices_ตัวเลือกห้ามลบ"
         list_sheet = workbook.add_worksheet(sheet_choices)
         list_sheet.hide()
 
         # Validation choices
-        status_choices = [choice[1] for choice in MISSING_PERSON_STATUS_CHOICES]
         title_choices = [choice[1] for choice in TITLE_NAME_CHOICES if choice[1] != "-"]
-        dna_choices = ["เก็บเเล้ว"]
+        dna_choices = ["เก็บเแล้ว"]
 
         validations = {
             "คำนำหน้าชื่อคนหาย/เสียชีวิต": title_choices,
@@ -170,15 +232,29 @@ def get_template():
         for col_num, value in enumerate(df_missing.columns.values):
             worksheet_missing.write(0, col_num, value, header_format)
 
-        # ข้อมูลตัวอย่าง
+        # เขียนข้อมูลพร้อม format
         for row_num in range(len(df_missing)):
-            for col_num in range(len(df_missing.columns)):
-                worksheet_missing.write(
-                    row_num + 1, col_num, df_missing.iloc[row_num, col_num]
-                )
+            for col_num, col_name in enumerate(df_missing.columns):
+                value = df_missing.iloc[row_num, col_num]
 
-        # Data validation สำหรับ Sheet 1
-        first_row, last_row = 2, 10000  # แถว 3-10000 (index 2-9999)
+                # เลือก format ตามประเภทคอลัมน์
+                if col_name in numeric_columns:
+                    worksheet_missing.write(row_num + 1, col_num, value, number_format)
+                elif col_name in [
+                    "หมายเลขบัตรประชาชนคนหาย/เสียชีวิต",
+                    "หมายเลขบัตรประชาชนผู้แจ้ง",
+                    "เบอร์โทรศัพท์คนหาย/เสียชีวิต",
+                    "เบอร์โทรศัพท์ผู้แจ้ง",
+                ]:
+                    # บังคับให้เป็น text สำหรับเลขบัตรประชาชนและเบอร์โทร
+                    worksheet_missing.write_string(
+                        row_num + 1, col_num, str(value), text_format
+                    )
+                else:
+                    worksheet_missing.write(row_num + 1, col_num, value)
+
+        # Data validation
+        first_row, last_row = 2, 10000
 
         for column_name, source in validations.items():
             if column_name not in df_missing.columns:
@@ -186,14 +262,12 @@ def get_template():
 
             col_idx = df_missing.columns.get_loc(column_name)
 
-            # เขียน choices ลง list_sheet
             start_row = list_row
             for val in source:
                 list_sheet.write(list_row, 0, val)
                 list_row += 1
             end_row = list_row - 1
 
-            # ใช้ช่วง reference
             rng = f"={sheet_choices}!$A${start_row+1}:$A${end_row+1}"
             worksheet_missing.data_validation(
                 first_row=first_row,
@@ -203,10 +277,22 @@ def get_template():
                 options={"validate": "list", "source": rng},
             )
 
-        # ปรับความกว้างคอลัมน์
+        # ปรับความกว้างคอลัมน์และกำหนด format
         for i, col in enumerate(df_missing.columns):
             max_len = max(df_missing[col].astype(str).apply(len).max(), len(col)) + 2
-            worksheet_missing.set_column(i, i, max_len)
+
+            # กำหนด format สำหรับ column ทั้งคอลัมน์
+            if col in [
+                "หมายเลขบัตรประชาชนคนหาย/เสียชีวิต",
+                "หมายเลขบัตรประชาชนผู้แจ้ง",
+                "เบอร์โทรศัพท์คนหาย/เสียชีวิต",
+                "เบอร์โทรศัพท์ผู้แจ้ง",
+            ]:
+                worksheet_missing.set_column(i, i, max_len, text_format)
+            elif col in numeric_columns:
+                worksheet_missing.set_column(i, i, max_len, number_format)
+            else:
+                worksheet_missing.set_column(i, i, max_len)
 
         # ========== จัด Format และ Validation สำหรับ Sheet 2: ผู้เสียชีวิต ==========
         worksheet_death = writer.sheets["ผู้เสียชีวิต"]
@@ -215,21 +301,32 @@ def get_template():
         for col_num, value in enumerate(df_death.columns.values):
             worksheet_death.write(0, col_num, value, header_format)
 
-        # ข้อมูลตัวอย่าง
+        # เขียนข้อมูลพร้อม format
         for row_num in range(len(df_death)):
-            for col_num in range(len(df_death.columns)):
-                worksheet_death.write(
-                    row_num + 1, col_num, df_death.iloc[row_num, col_num]
-                )
+            for col_num, col_name in enumerate(df_death.columns):
+                value = df_death.iloc[row_num, col_num]
 
-        # Data validation สำหรับ Sheet 2 (ใช้ choices เดียวกับ Sheet 1)
+                if col_name in numeric_columns:
+                    worksheet_death.write(row_num + 1, col_num, value, number_format)
+                elif col_name in [
+                    "หมายเลขบัตรประชาชนคนหาย/เสียชีวิต",
+                    "หมายเลขบัตรประชาชนผู้แจ้ง",
+                    "เบอร์โทรศัพท์คนหาย/เสียชีวิต",
+                    "เบอร์โทรศัพท์ผู้แจ้ง",
+                ]:
+                    worksheet_death.write_string(
+                        row_num + 1, col_num, str(value), text_format
+                    )
+                else:
+                    worksheet_death.write(row_num + 1, col_num, value)
+
+        # Data validation
         for column_name, source in validations.items():
             if column_name not in df_death.columns:
                 continue
 
             col_idx = df_death.columns.get_loc(column_name)
 
-            # หา range ของ choices ที่เขียนไว้แล้ว
             start_idx = 0
             for i, (key, _) in enumerate(validations.items()):
                 if key == column_name:
@@ -247,10 +344,21 @@ def get_template():
                 options={"validate": "list", "source": rng},
             )
 
-        # ปรับความกว้างคอลัมน์
+        # ปรับความกว้างคอลัมน์และกำหนด format
         for i, col in enumerate(df_death.columns):
             max_len = max(df_death[col].astype(str).apply(len).max(), len(col)) + 2
-            worksheet_death.set_column(i, i, max_len)
+
+            if col in [
+                "หมายเลขบัตรประชาชนคนหาย/เสียชีวิต",
+                "หมายเลขบัตรประชาชนผู้แจ้ง",
+                "เบอร์โทรศัพท์คนหาย/เสียชีวิต",
+                "เบอร์โทรศัพท์ผู้แจ้ง",
+            ]:
+                worksheet_death.set_column(i, i, max_len, text_format)
+            elif col in numeric_columns:
+                worksheet_death.set_column(i, i, max_len, number_format)
+            else:
+                worksheet_death.set_column(i, i, max_len)
 
     output.seek(0)
     return output
@@ -388,17 +496,12 @@ def validate_dataframe(df, sheet_name):
                     )
 
         # ตรวจสอบเฉพาะ sheet ผู้เสียชีวิต - ต้องมีวันที่รับศพ
-        if sheet_type == "death":
-            if pd.isna(row.get("วันที่รับศพ")) or str(row.get("วันที่รับศพ")).strip() == "":
-                row_errors.append("ขาดวันที่รับศพ (จำเป็นสำหรับผู้เสียชีวิต)")
-            else:
-                # ตรวจสอบรูปแบบวันที่
-                if not isinstance(row.get("วันที่รับศพ"), datetime.datetime):
-                    date_str = str(row.get("วันที่รับศพ")).strip()
-                    try:
-                        pd.to_datetime(date_str, format="%d/%m/%Y", dayfirst=True)
-                    except:
-                        row_errors.append("รูปแบบวันที่รับศพไม่ถูกต้อง ต้องเป็น DD/MM/YYYY")
+        if pd.notna(row.get("วันที่รับศพ")) and sheet_type == "death":
+            date_str = str(row.get("วันที่รับศพ")).strip()
+            try:
+                datetime.datetime.strptime(date_str, "%d/%m/%Y")
+            except ValueError:
+                row_errors.append("วันที่รับศพไม่ถูกต้อง ต้องอยู่ในรูปแบบ วัน/เดือน/ปี (dd/mm/yyyy)")
 
         # ตรวจสอบอายุ
         if pd.notna(row.get("อายุคนหาย/เสียชีวิต")):
@@ -418,32 +521,33 @@ def validate_dataframe(df, sheet_name):
                 row_errors.append("อายุผู้แจ้งต้องเป็นตัวเลข")
 
         # ตรวจสอบเลขบัตรประชาชน
-        if pd.notna(row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต")):
-            id_number = (
-                str(row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต")).strip().split(".")[0]
-            )
-            if id_number and not id_number.isdigit():
-                row_errors.append("หมายเลขบัตรประชาชนคนหาย/เสียชีวิตต้องเป็นตัวเลขเท่านั้น")
-            elif id_number and len(id_number) != 13:
-                row_errors.append("หมายเลขบัตรประชาชนคนหาย/เสียชีวิตต้องมี 13 หลัก")
+        # if pd.notna(row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต")):
+        #     id_number = (
+        #         str(row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต")).strip().split(".")[0]
+        #     )
+        #     if id_number and not id_number.isdigit():
+        #         row_errors.append("หมายเลขบัตรประชาชนคนหาย/เสียชีวิตต้องเป็นตัวเลขเท่านั้น")
+        #     elif id_number and len(id_number) != 13:
+        #         row_errors.append("หมายเลขบัตรประชาชนคนหาย/เสียชีวิตต้องมี 13 หลัก")
 
-        if pd.notna(row.get("หมายเลขบัตรประชาชนผู้แจ้ง")):
-            id_number = str(row.get("หมายเลขบัตรประชาชนผู้แจ้ง")).strip().split(".")[0]
-            if id_number and not id_number.isdigit():
-                row_errors.append("หมายเลขบัตรประชาชนผู้แจ้งต้องเป็นตัวเลขเท่านั้น")
-            elif id_number and len(id_number) != 13:
-                row_errors.append("หมายเลขบัตรประชาชนผู้แจ้งต้องมี 13 หลัก")
+        # if pd.notna(row.get("หมายเลขบัตรประชาชนผู้แจ้ง")):
+        #     id_number = str(row.get("หมายเลขบัตรประชาชนผู้แจ้ง")).strip().split(".")[0]
 
-        # ตรวจสอบเบอร์โทร
-        if pd.notna(row.get("เบอร์โทรศัพท์คนหาย/เสียชีวิต")):
-            phone = re.sub(r"\D", "", str(row.get("เบอร์โทรศัพท์คนหาย/เสียชีวิต")))
-            if phone and len(phone) not in [9, 10]:
-                row_errors.append("เบอร์โทรศัพท์คนหาย/เสียชีวิตต้องมี 9-10 หลัก")
+        #     if id_number and not id_number.isdigit():
+        #         row_errors.append("หมายเลขบัตรประชาชนผู้แจ้งต้องเป็นตัวเลขเท่านั้น")
+        #     elif id_number and len(id_number) != 13:
+        #         row_errors.append("หมายเลขบัตรประชาชนผู้แจ้งต้องมี 13 หลัก")
 
-        if pd.notna(row.get("เบอร์โทรศัพท์ผู้แจ้ง")):
-            phone = re.sub(r"\D", "", str(row.get("เบอร์โทรศัพท์ผู้แจ้ง")))
-            if phone and len(phone) not in [9, 10]:
-                row_errors.append("เบอร์โทรศัพท์ผู้แจ้งต้องมี 9-10 หลัก")
+        # # ตรวจสอบเบอร์โทร
+        # if pd.notna(row.get("เบอร์โทรศัพท์คนหาย/เสียชีวิต")):
+        #     phone = re.sub(r"\D", "", str(row.get("เบอร์โทรศัพท์คนหาย/เสียชีวิต")))
+        #     if phone and len(phone) not in [9, 10]:
+        #         row_errors.append("เบอร์โทรศัพท์คนหาย/เสียชีวิตต้องมี 9-10 หลัก")
+
+        # if pd.notna(row.get("เบอร์โทรศัพท์ผู้แจ้ง")):
+        #     phone = re.sub(r"\D", "", str(row.get("เบอร์โทรศัพท์ผู้แจ้ง")))
+        #     if phone and len(phone) not in [9, 10]:
+        #         row_errors.append("เบอร์โทรศัพท์ผู้แจ้งต้องมี 9-10 หลัก")
 
         if row_errors:
             errors.append(f"[{sheet_name}] แถวที่ {index + 2}: {', '.join(row_errors)}")
@@ -482,7 +586,9 @@ def write_missing_persons_from_import_file(file, current_user, source):
     if file.filename.endswith(".xlsx"):
         excel_file = pd.ExcelFile(file)
         sheet_names = excel_file.sheet_names
-        valid_sheets = [s for s in sheet_names if not s.startswith("Choices_")]
+        print(sheet_names)
+
+        valid_sheets = ["ผู้สูญหาย", "ผู้เสียชีวิต"]
     else:
         valid_sheets = ["CSV"]
 
@@ -524,16 +630,16 @@ def process_missing_person_dataframe(df, current_user, sheet_name, source, sheet
 
     for index, row in df.iterrows():
         try:
+            reporting_date = None
             if pd.notna(row.get("วันที่มาเเจ้งเหตุ")):
                 if isinstance(row.get("วันที่มาเเจ้งเหตุ"), datetime.datetime):
                     reporting_date = row.get("วันที่มาเเจ้งเหตุ")
                 else:
                     date_str = str(row.get("วันที่มาเเจ้งเหตุ")).strip()
-                    reporting_date = pd.to_datetime(
-                        date_str, format="%d/%m/%Y", dayfirst=True
-                    )
-            else:
-                reporting_date = None
+                    if date_str and date_str.lower() not in ["nan", "none", ""]:
+                        reporting_date = pd.to_datetime(
+                            date_str, format="%d/%m/%Y", dayfirst=True
+                        )
             # แปลงคำนำหน้าชื่อจากภาษาไทยเป็น key
             title_name = ""
             if pd.notna(row.get("คำนำหน้าชื่อคนหาย/เสียชีวิต")):
@@ -631,7 +737,9 @@ def process_missing_person_dataframe(df, current_user, sheet_name, source, sheet
                 "original_data": {
                     # ข้อมูลคนหาย/เสียชีวิต
                     "missing_person": {
-                        "reporting_date": reporting_date.isoformat(),
+                        "reporting_date": (
+                            reporting_date.isoformat() if reporting_date else None
+                        ),
                         "title_name": format_str(row.get("คำนำหน้าชื่อคนหาย/เสียชีวิต")),
                         "first_name": missing_first_name,
                         "last_name": missing_last_name,
