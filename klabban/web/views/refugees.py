@@ -91,7 +91,14 @@ def change_status(refugee_id):
     if refugee.status == "active":
         refugee.status = "back_home"
         refugee.back_home_date = datetime.now()
-        flash(f"สถานะของ **{refugee.name}** ถูกเปลี่ยนเป็น 'กลับบ้านแล้ว' สำเร็จ.", "success")
+        if current_user.is_authenticated and (
+            "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles
+        ):
+            flash(
+                f"สถานะของ **{refugee.name}** ถูกเปลี่ยนเป็น 'กลับบ้านแล้ว' สำเร็จ.", "success"
+            )
+        else:
+            flash(refugee.name, "custom_refugee_change_status_success")
 
     elif refugee.status == "back_home":
         refugee.status = "active"
@@ -352,6 +359,7 @@ def view_description():
 
     query = query.filter(
         description__ne="",
+        description__exists=True,
         status__ne="back_home",
     )
 

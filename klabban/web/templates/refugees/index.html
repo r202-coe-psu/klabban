@@ -91,6 +91,7 @@
     {% if view_mode == 'grid' %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {% for refugee in refugees_pagination.items %}
+        {% set change_status_dialog_id = "%s-change-status-dialog" | format(refugee.id) %}
       <div>
         <div class="card bg-base-100 shadow-md min-h-[170px]">
           <div class="card-body p-4">
@@ -108,11 +109,11 @@
               <div class="card-actions flex-nowrap items-start justify-end">
                 {{ render_refugee_toolbar(refugee) }}
                 {{ dialog.DisactiveDialog(
-                                    id="%s-disactive-dialog" | format(refugee.id),
-                                    title="ยืนยันการลบรายการผู้อพยพ",
-                                    body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                                    url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
-                                )}}
+                    id="%s-disactive-dialog" | format(refugee.id),
+                    title="ยืนยันการลบรายการผู้อพยพ",
+                    body="คุณต้องการที่จะลบรายการผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+                    url=url_for("refugees.delete_refugee", refugee_id=refugee.id)
+                )}}
               </div>
               {% endif %}
             </h2>
@@ -141,18 +142,9 @@
             </div>
             <div class="flex items-center gap-2">
               {{ render_refugee_status(refugee.status) }}
-              <button onclick="$('#{{refugee.id}}-change_status-dialog-mobile-grid')[0].showModal()" class="text-blue-500">
+              <button onclick="$('#{{ change_status_dialog_id }}')[0].showModal()" class="text-blue-500">
                 <i class="ph ph-arrows-clockwise"></i>
               </button>
-            {{ dialog.ChangeStatusDialog(
-                id="%s-change_status-dialog-mobile-grid" | format(refugee.id),
-                title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
-                body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                action_button_href=url_for("refugees.change_status", refugee_id=refugee.id, **request.args),
-                refugee_name=refugee.name,
-                bypass=(current_user.roles[0] in ["refugee_camp_staff", "admin"]) if current_user.is_authenticated else false,
-                refugee_id=refugee.id
-              )}}
             </div>
           </div>
         </div>
@@ -163,6 +155,7 @@
     <!-- Mobile: Card View for better readability -->
     <div class="block md:hidden space-y-3">
       {% for refugee in refugees_pagination.items %}
+      {% set change_status_dialog_id = "%s-change-status-dialog" | format(refugee.id) %}
       <div class="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
         <div class="flex justify-between items-start mb-3">
           <div class="flex-1">
@@ -195,18 +188,9 @@
             <span class="text-gray-500">สถานะ:</span>
             <div class="flex items-center gap-2">
               {{ render_refugee_status(refugee.status) }}
-              <button onclick="$('#{{refugee.id}}-change_status-dialog-mobile')[0].showModal()" class="text-blue-500">
+              <button onclick="$('#{{ change_status_dialog_id }}')[0].showModal()" class="text-blue-500">
                 <i class="ph ph-arrows-clockwise"></i>
               </button>
-              {{ dialog.ChangeStatusDialog(
-                id="%s-change_status-dialog-mobile" | format(refugee.id),
-                title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
-                body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-                action_button_href=url_for("refugees.change_status", refugee_id=refugee.id, **request.args),
-                refugee_name=refugee.name,
-                bypass=(current_user.roles[0] in ["refugee_camp_staff", "admin"]) if current_user.is_authenticated else false,
-                refugee_id=refugee.id
-              )}}
             </div>
           </div>
           
@@ -280,6 +264,7 @@
 
         <tbody>
           {% for refugee in refugees_pagination.items %}
+          {% set change_status_dialog_id = "%s-change-status-dialog" | format(refugee.id) %}
           <tr class="border-b border-gray-200 hover:bg-gray-50">
 
             <!-- ลำดับ -->
@@ -316,7 +301,7 @@
             <td class="px-3 py-3">
               <div class="flex items-center gap-2">
                 {{ render_refugee_status(refugee.status) }}
-                <button onclick="$('#{{refugee.id}}-change_status-dialog-desktop')[0].showModal()" class="text-blue-500 hover:text-blue-700">
+                <button onclick="$('#{{ change_status_dialog_id }}')[0].showModal()" class="text-blue-500 hover:text-blue-700">
                   <i class="ph ph-arrows-clockwise"></i>
                 </button>
               </div>
@@ -379,17 +364,8 @@
     </div>
     
     <!-- Dialogs for Desktop Table (outside hidden wrapper) -->
-    <div class="hidden md:block">
-      {% for refugee in refugees_pagination.items %}
-        {{ dialog.ChangeStatusDialog(
-          id="%s-change_status-dialog-desktop" | format(refugee.id),
-          title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
-          body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
-          action_button_href=url_for("refugees.change_status", refugee_id=refugee.id, **request.args),
-          refugee_name=refugee.name,
-          bypass=(current_user.roles[0] in ["refugee_camp_staff", "admin"]) if current_user.is_authenticated else false,
-          refugee_id=refugee.id
-        )}}
+    {% for refugee in refugees_pagination.items %}
+      <div class="hidden md:block">
         {{ dialog.DisactiveDialog(
           id="%s-disactive-dialog-desktop" | format(refugee.id),
           title="ยืนยันการลบรายการผู้อพยพ",
@@ -406,9 +382,22 @@
           change_camp_form=change_camp_form,
           current_camp_id=refugee.refugee_camp.id
         )}}
+      </div>
       {% endfor %}
-    </div>
     {% endif %}
+    {# ใช้สำหรับ Render Dialog ของแต่ละ Refugees #}
+    {% for refugee in refugees_pagination.items %}
+      {% set change_status_dialog_id = "%s-change-status-dialog" | format(refugee.id) %}
+      {{ dialog.ChangeStatusDialog(
+          id=change_status_dialog_id,
+          title="ยืนยันการเปลี่ยนสถานะผู้อพยพ",
+          body="คุณต้องการที่จะเปลี่ยนสถานะผู้อพยพชื่อ <b>%s</b> ใช่หรือไม่?" | format(refugee.name),
+          action_button_href=url_for("refugees.change_status", refugee_id=refugee.id, **request.args),
+          refugee_name=refugee.name,
+          bypass=(current_user.roles[0] in ["refugee_camp_staff", "admin"]) if current_user.is_authenticated else false,
+          refugee_id=refugee.id
+      )}}
+    {% endfor %}
     {% if search_form.search.data and not refugees_pagination.items %}
     <div class="mt-4 py-4 text-center text-gray-500 italic">
       ไม่พบผู้อพยพที่ตรงกับคำค้นหา
