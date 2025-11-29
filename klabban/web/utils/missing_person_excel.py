@@ -8,6 +8,11 @@ from openpyxl import load_workbook
 from io import BytesIO
 from klabban.models.refugees import REFUGEE_STATUS_CHOICES, GENDER
 from flask import flash
+from klabban.models.missing_persons import (
+    MISSING_PERSON_STATUS_CHOICES,
+    TITLE_NAME_CHOICES,
+)
+
 
 REQUIRE_HEADERS = [
     "ชื่อคนหาย/เสียชีวิต",
@@ -49,11 +54,6 @@ HEADER = [
     "CODE",
 ]
 
-MISSING_PERSON_STATUS_CHOICES = [
-    ("missing", "สูญหาย"),
-    ("death", "เสียชีวิต"),
-]
-
 
 def get_template():
     example_data = {
@@ -67,7 +67,7 @@ def get_template():
         "อำเภอคนหาย/เสียชีวิต": ["บางรัก"],
         "ตำบลคนหาย/เสียชีวิต": ["สี่พระยา"],
         "ที่อยู่บ้านเลขที่คนหาย/เสียชีวิต": ["123/45 ถนนสุขุมวิท"],
-        "สถานะ": ["missing"],
+        "สถานะ": ["สูญหาย"],
         "ลักษณะรูปพรรณ": ["สูง 170 ซม. ผิวขาว"],
         "คำให้การ/สอบปากคำ": ["ออกไปทำงานแล้วหลับมาไม่พบ"],
         "วันที่รับศพ": [""],
@@ -114,54 +114,56 @@ def get_template():
             for col_num in range(len(df.columns)):
                 worksheet.write(row_num + 1, col_num, df.iloc[row_num, col_num])
 
-        # ช่วงข้อมูลที่อนุญาตให้กรอก (เริ่มจากแถวที่ 3 เพราะแถว 1-2 เป็นตัวอย่าง)
+        # ช่วงข้อมูลที่อนุญาตให้กรอก (เริ่มจากแถวที่ 3)
         first_row, last_row = 3, 10000
 
         # source data
-        # status_choices = [choice[1] for choice in REFUGEE_STATUS_CHOICES]
-        # gender_choices = [choice[1] for choice in GENDER]
+        status_choices = [choice[1] for choice in MISSING_PERSON_STATUS_CHOICES]
+        title_choices = [choice[1] for choice in TITLE_NAME_CHOICES if choice[1] != "-"]
 
-        # validations = {
-        #     "สถานะ": status_choices,
-        #     "เพศ": gender_choices,
-        # }
+        validations = {
+            "สถานะ": status_choices,
+            "คำนำหน้าชื่อคนหาย/เสียชีวิต": title_choices,
+            "คำนำหน้าชื่อผู้แจ้ง": title_choices,
+        }
+
         sheet_choices = "Choices_ตัวเลือกห้ามลบ"
         list_sheet = workbook.add_worksheet(sheet_choices)
         list_sheet.hide()  # ซ่อน sheet choices
         list_row = 0
 
         # loop สร้าง validation
-        # for column_name, source in validations.items():
-        #     col_idx = df.columns.get_loc(column_name)
+        for column_name, source in validations.items():
+            col_idx = df.columns.get_loc(column_name)
 
-        #     # join string เพื่อเช็กความยาว
-        #     joined = ",".join(map(str, source))
-        #     if len(joined) > 255:
-        #         # เขียนลง Lists sheet
-        #         start_row = list_row
-        #         for i, val in enumerate(source):
-        #             list_sheet.write(list_row, 0, val)
-        #             list_row += 1
-        #         end_row = list_row - 1
+            # join string เพื่อเช็กความยาว
+            joined = ",".join(map(str, source))
+            if len(joined) > 255:
+                # เขียนลง Lists sheet
+                start_row = list_row
+                for i, val in enumerate(source):
+                    list_sheet.write(list_row, 0, val)
+                    list_row += 1
+                end_row = list_row - 1
 
-        #         # ใช้ช่วง reference
-        #         rng = f"={sheet_choices}!$A${start_row+1}:$A${end_row+1}"
-        #         worksheet.data_validation(
-        #             first_row=first_row,
-        #             first_col=col_idx,
-        #             last_row=last_row,
-        #             last_col=col_idx,
-        #             options={"validate": "list", "source": rng},
-        #         )
-        #     else:
-        #         # กรณีไม่เกิน 255 ใช้ list ได้เลย
-        #         worksheet.data_validation(
-        #             first_row=first_row,
-        #             first_col=col_idx,
-        #             last_row=last_row,
-        #             last_col=col_idx,
-        #             options={"validate": "list", "source": list(source)},
-        #         )
+                # ใช้ช่วง reference
+                rng = f"={sheet_choices}!$A${start_row+1}:$A${end_row+1}"
+                worksheet.data_validation(
+                    first_row=first_row,
+                    first_col=col_idx,
+                    last_row=last_row,
+                    last_col=col_idx,
+                    options={"validate": "list", "source": rng},
+                )
+            else:
+                # กรณีไม่เกิน 255 ใช้ list ได้เลย
+                worksheet.data_validation(
+                    first_row=first_row,
+                    first_col=col_idx,
+                    last_row=last_row,
+                    last_col=col_idx,
+                    options={"validate": "list", "source": list(source)},
+                )
 
         # ปรับความกว้างคอลัมน์อัตโนมัติ
         for i, col in enumerate(df.columns):
@@ -283,6 +285,34 @@ def validate_dataframe(df, sheet_name):
         if pd.isna(row.get("นามสกุลผู้แจ้ง")) or str(row.get("นามสกุลผู้แจ้ง")).strip() == "":
             row_errors.append("ขาดนามสกุลผู้แจ้ง")
 
+        # ตรวจสอบคำนำหน้าชื่อคนหาย/เสียชีวิต
+        if pd.notna(row.get("คำนำหน้าชื่อคนหาย/เสียชีวิต")):
+            title = str(row.get("คำนำหน้าชื่อคนหาย/เสียชีวิต")).strip()
+            if title:
+                valid_titles = [choice[0] for choice in TITLE_NAME_CHOICES if choice[0]]
+                valid_titles_thai = [
+                    choice[1] for choice in TITLE_NAME_CHOICES if choice[1] != "-"
+                ]
+
+                if title not in valid_titles and title not in valid_titles_thai:
+                    row_errors.append(
+                        f"คำนำหน้าชื่อคนหาย/เสียชีวิตไม่ถูกต้อง ต้องเป็น: {', '.join(valid_titles_thai)}"
+                    )
+
+        # ตรวจสอบคำนำหน้าชื่อผู้แจ้ง
+        if pd.notna(row.get("คำนำหน้าชื่อผู้แจ้ง")):
+            title = str(row.get("คำนำหน้าชื่อผู้แจ้ง")).strip()
+            if title:
+                valid_titles = [choice[0] for choice in TITLE_NAME_CHOICES if choice[0]]
+                valid_titles_thai = [
+                    choice[1] for choice in TITLE_NAME_CHOICES if choice[1] != "-"
+                ]
+
+                if title not in valid_titles and title not in valid_titles_thai:
+                    row_errors.append(
+                        f"คำนำหน้าชื่อผู้แจ้งไม่ถูกต้อง ต้องเป็น: {', '.join(valid_titles_thai)}"
+                    )
+
         # ตรวจสอบสถานะ
         if pd.notna(row.get("สถานะ")):
             status = str(row.get("สถานะ")).strip().lower()
@@ -393,6 +423,26 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
 
     for index, row in df.iterrows():
         try:
+            # แปลงคำนำหน้าชื่อจากภาษาไทยเป็น key
+            title_name = ""
+            if pd.notna(row.get("คำนำหน้าชื่อคนหาย/เสียชีวิต")):
+                title_str = str(row.get("คำนำหน้าชื่อคนหาย/เสียชีวิต")).strip()
+                for key, value in TITLE_NAME_CHOICES:
+                    if value.lower() == title_str or key.lower() == title_str:
+                        title_name = key
+                        break
+            print(f"title name, '{title_name}'")
+
+            # เเปลงคำนำหน้าชื่อผู้แจ้งจากภาษาไทยเป็น key
+            reporter_title_name = ""
+            if pd.notna(row.get("คำนำหน้าชื่อผู้แจ้ง")):
+                title_str = str(row.get("คำนำหน้าชื่อผู้แจ้ง")).strip()
+                for key, value in TITLE_NAME_CHOICES:
+                    if value.lower() == title_str or key.lower() == title_str:
+                        reporter_title_name = key
+                        break
+            print(f"reporter_title_name name, '{reporter_title_name}'")
+
             # แปลงสถานะจากภาษาไทยเป็น key
             status = "missing"  # default
             if pd.notna(row.get("สถานะ")):
@@ -445,6 +495,54 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
             missing_last_name = format_str(row.get("นามสกุลคนหาย/เสียชีวิต"))
             missing_id_number = format_str(row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต"))
 
+            # สร้าง metadata จากข้อมูลใน Excel
+            excel_metadata = {
+                "imported_from_excel_file": True,
+                "sheet_name": sheet_name,
+                "import_date": datetime.datetime.now().isoformat(),
+                "row_number": index + 2,
+                "original_data": {
+                    # ข้อมูลคนหาย/เสียชีวิต
+                    "missing_person": {
+                        "title_name": format_str(row.get("คำนำหน้าชื่อคนหาย/เสียชีวิต")),
+                        "first_name": missing_first_name,
+                        "last_name": missing_last_name,
+                        "age": missing_age,
+                        "identification_number": missing_id_number,
+                        "country": format_str(row.get("ประเทศคนหาย/เสียชีวิต")),
+                        "province": format_str(row.get("จังหวัดคนหาย/เสียชีวิต")),
+                        "district": format_str(row.get("อำเภอคนหาย/เสียชีวิต")),
+                        "subdistrict": format_str(row.get("ตำบลคนหาย/เสียชีวิต")),
+                        "address": format_str(row.get("ที่อยู่บ้านเลขที่คนหาย/เสียชีวิต")),
+                        "status": format_str(row.get("สถานะ")),
+                    },
+                    # ข้อมูลเพิ่มเติม
+                    "additional_info": {
+                        "physical_mark": format_str(row.get("ลักษณะรูปพรรณ")),
+                        "statement": format_str(row.get("คำให้การ/สอบปากคำ")),
+                        "body_received_date": format_str(row.get("วันที่รับศพ")),
+                        "relationship": format_str(row.get("ความสัมพันธ์กับผู้หาย/เสียชีวิต")),
+                    },
+                    # ข้อมูลผู้แจ้ง
+                    "reporter": {
+                        "title_name": format_str(row.get("คำนำหน้าชื่อผู้แจ้ง")),
+                        "first_name": format_str(row.get("ชื่อผู้แจ้ง")),
+                        "last_name": format_str(row.get("นามสกุลผู้แจ้ง")),
+                        "age": reporter_age,
+                        "identification_number": format_str(
+                            row.get("หมายเลขบัตรประชาชนผู้แจ้ง")
+                        ),
+                        "country": format_str(row.get("ประเทศผู้แจ้ง")),
+                        "province": format_str(row.get("จังหวัดผู้แจ้ง")),
+                        "district": format_str(row.get("อำเภอผู้แจ้ง")),
+                        "subdistrict": format_str(row.get("ตำบลผู้แจ้ง")),
+                        "address": format_str(row.get("ที่อยู่บ้านเลขที่ผู้แจ้ง")),
+                        "phone": format_str(row.get("เบอร์โทรศัพท์ผู้แจ้ง")),
+                    },
+                    "code": format_str(row.get("CODE")),
+                },
+            }
+
             # ตรวจสอบว่ามีข้อมูลซ้ำหรือไม่
             existing_person = check_existing_missing_person(
                 first_name=missing_first_name,
@@ -454,9 +552,7 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
 
             if existing_person:
                 # Update ข้อมูลเดิม
-                existing_person.title_name = format_str(
-                    row.get("คำนำหน้าชื่อคนหาย/เสียชีวิต")
-                )
+                existing_person.title_name = title_name
                 existing_person.first_name = missing_first_name
                 existing_person.last_name = missing_last_name
                 existing_person.age = missing_age
@@ -479,9 +575,7 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
                 existing_person.deceased_relationship = format_str(
                     row.get("ความสัมพันธ์กับผู้หาย/เสียชีวิต")
                 )
-                existing_person.reporter_title_name = format_str(
-                    row.get("คำนำหน้าชื่อผู้แจ้ง")
-                )
+                existing_person.reporter_title_name = reporter_title_name
                 existing_person.reporter_first_name = format_str(row.get("ชื่อผู้แจ้ง"))
                 existing_person.reporter_last_name = format_str(row.get("นามสกุลผู้แจ้ง"))
                 existing_person.reporter_age = reporter_age
@@ -504,6 +598,25 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
                 existing_person.reporter_phone_number = reporter_phone
                 existing_person.code = format_str(row.get("CODE"))
 
+                # อัปเดต metadata แต่เก็บประวัติเก่าไว้
+                if not existing_person.metadata:
+                    existing_person.metadata = {}
+
+                # เก็บประวัติการ update
+                if "import_history" not in existing_person.metadata:
+                    existing_person.metadata["import_history"] = []
+
+                existing_person.metadata["import_history"].append(
+                    {
+                        "updated_date": datetime.datetime.now().isoformat(),
+                        "sheet_name": sheet_name,
+                        "row_number": index + 2,
+                    }
+                )
+
+                # อัปเดต metadata ปัจจุบัน
+                existing_person.metadata.update(excel_metadata)
+
                 existing_person.updated_by = current_user
                 existing_person.updated_date = datetime.datetime.now()
                 existing_person.save()
@@ -513,7 +626,7 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
                 # สร้างใหม่
                 missing_person = models.MissingPerson(
                     # ข้อมูลคนหาย/เสียชีวิต
-                    title_name=format_str(row.get("คำนำหน้าชื่อคนหาย/เสียชีวิต")),
+                    title_name=title_name,
                     first_name=missing_first_name,
                     last_name=missing_last_name,
                     age=missing_age,
@@ -544,10 +657,8 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
                     reporter_address_info=format_str(row.get("ที่อยู่บ้านเลขที่ผู้แจ้ง")),
                     reporter_phone_number=reporter_phone,
                     code=format_str(row.get("CODE")),
-                    metadata={
-                        "imported_from_excel_file": True,
-                        "sheet_name": sheet_name,
-                    },
+                    # เก็บ metadata ที่สร้างไว้
+                    metadata=excel_metadata,
                     status="active",
                     created_by=current_user,
                     created_date=datetime.datetime.now(),

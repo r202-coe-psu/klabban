@@ -3,11 +3,11 @@ import mongoengine as me
 
 TITLE_NAME_CHOICES = (
     ("", "-"),
-    ("Mr.", "นาย"),
-    ("Mrs.", "นาง"),
-    ("Ms.", "นางสาว"),
-    ("Master", "เด็กชาย"),
-    ("Miss", "เด็กหญิง"),
+    ("นาย", "นาย"),
+    ("นาง", "นาง"),
+    ("นางสาว", "นางสาว"),
+    ("เด็กชาย", "เด็กชาย"),
+    ("เด็กหญิง", "เด็กหญิง"),
 )
 
 MISSING_PERSON_STATUS_CHOICES = (
@@ -22,7 +22,7 @@ class MissingPerson(me.Document):
         "indexes": ["created_date"],
     }
     # section: missing person information
-    title_name = me.StringField(choices=TITLE_NAME_CHOICES)  # คำนำหน้าชื่อคนหาย/เสียชีวิต
+    title_name = me.StringField()  # คำนำหน้าชื่อคนหาย/เสียชีวิต
     first_name = me.StringField(required=True, max_length=255)  # ชื่อคนหาย/เสียชีวิต
     last_name = me.StringField(required=True, max_length=255)  # นามสกุลคนหาย/เสียชีวิต
     age = me.IntField()  # อายุคนหาย/เสียชีวิต
@@ -44,7 +44,7 @@ class MissingPerson(me.Document):
     deceased_relationship = me.StringField(max_length=255)  # ความสัมพันธ์กับผู้หาย/เสียชีวิต
 
     # section: reporter information
-    reporter_title_name = me.StringField(choices=TITLE_NAME_CHOICES)  # คำนำหน้าชื่อผู้แจ้ง
+    reporter_title_name = me.StringField()  # คำนำหน้าชื่อผู้แจ้ง
     reporter_first_name = me.StringField(max_length=255)  # ชื่อผู้แจ้ง
     reporter_last_name = me.StringField(max_length=255)  # นามสกุลผู้แจ้ง
     reporter_age = me.IntField()  # อายุผู้แจ้ง
