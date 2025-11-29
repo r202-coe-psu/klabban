@@ -123,7 +123,14 @@ def change_status(refugee_id):
         ip_address=request.headers.get("X-Forwarded-For", request.remote_addr),
     )
     refugee.status_log.append(log)
+    refugee.updated_by = (
+        current_user._get_current_object() if current_user.is_authenticated else None
+    )
     refugee.save()
+
+    next = request.args.get("next")
+    if next:
+        return redirect(next)
 
     return redirect(url_for("refugees.index", **request.args))
 
@@ -258,6 +265,10 @@ def change_camp(refugee_id, camp_id):
     refugee.camp_log.append(camp_log)
     refugee.save()
 
+    next = request.args.get("next")
+    if next:
+        return redirect(next)
+
     return redirect(url_for("refugees.index", **request.args))
 
 
@@ -300,7 +311,6 @@ def delete_refugee(refugee_id):
     if next:
         return redirect(next)
 
-    print("--->", next)
     return redirect(url_for("refugees.index"))
 
 
