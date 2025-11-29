@@ -82,6 +82,12 @@
           </a>
         </li>
         {% endif %}
+        <li>
+          <a class="{{ 'drawer-menu-active' if '/manuals' in request.path else '' }}" href="{{ url_for('manuals.index') }}">
+            <i class="ph ph-book text-lg"></i>
+            คู่มือ
+          </a>
+        </li>
       </ul>
       <ul class="mt-auto menu gap-2 w-full px-2 pb-4">
         {% if current_user.is_authenticated %}

@@ -31,7 +31,7 @@
                 <i class="ph ph-users text-base"></i>
                 ผู้อพยพทั้งหมด
               </p>
-              <p class="text-4xl font-bold mt-1 text-blue-600">{{ total_refugees }}</p>
+              <p class="text-4xl font-bold mt-1 text-blue-600">{{ total_refugees | format_number }}</p>
             </div>
             <div class="bg-blue-100 text-blue-600 p-3 rounded-xl">
               <i class="ph ph-users text-2xl"></i>
@@ -218,7 +218,6 @@
   </div>
 </div>
 <script>
-  // ดึงข้อมูลจาก Jinja2 มาใส่ตัวแปร JavaScript
   const labels = [
     {% for date_stat in daily_stats %}
   "{{ date_stat.label }}",
@@ -236,6 +235,7 @@
   console.log(ctx);
   const cfg = {
     type: 'bar',
+    plugins: [ChartDataLabels],
     data: {
       labels: labels, // ใช้วันที่จาก Backend
       datasets: [{
@@ -246,19 +246,39 @@
         borderWidth: 1,
         borderRadius: 4,// ทำให้หัวแท่งกราฟมนเล็กน้อย
         maxBarThickness: 60, // กำหนดความกว้างสูงสุดของแท่งกราฟ
+        datalabels: {
+          color: '#666'
+        }
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 20, 
+        }
+      },
       plugins: {
         legend: {
-          display: false // ซ่อน Legend เพราะมีหัวข้อแล้ว (ถ้าต้องการ)
+          display: false
         },
         title: {
           display: true,
           text: 'สถิติการลงทะเบียนรายวัน',
-          font: { size: 16, family: "'Sarabun', sans-serif" }
+          font: { size: 16, family: "'Sarabun', sans-serif" },
+          padding: { top: 0, bottom: 40 }
+
+        },
+        datalabels: {
+          anchor: 'end',  // ยึดที่ "ขอบบนสุด" ของแท่ง
+          align: 'end',   // ดันตัวเลข "ออกไปด้านนอก" (ขึ้นข้างบน)
+          offset: 4,      // เว้นระยะห่างจากแท่ง
+          color: '#666',  // สีเทา
+          font: {
+            size: 14,
+            weight: 'normal' 
+          }
         }
       },
       scales: {
@@ -274,32 +294,7 @@
           }
         }
       }
-    },
-    plugins: {
-      legend: {
-        display: false
-      },
-      title: {
-        display: true,
-        text: 'สถิติการลงทะเบียนรายวัน',
-        font: { size: 16, family: "'Sarabun', sans-serif" },
-        padding: { bottom: 20 }
-      },
-      // 3. ตั้งค่าตัวเลขบนแท่งกราฟ
-      datalabels: {
-        anchor: 'end',   // ยึดจุดที่ปลายแท่ง
-        align: 'top',    // ดันตัวเลขขึ้นไปด้านบน
-        color: '#444',   // สีตัวอักษร
-        font: {
-          weight: 'bold',
-          size: 14       // ขนาดตัวอักษร
-        },
-        formatter: function(value) {
-          // จัด Format ตัวเลข (เผื่อมีหลักพันใส่ลูกน้ำ)
-          return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
-      }
-    },
+    }
   };
   const registrationChart = new Chart(ctx, cfg);
 </script>
