@@ -9,18 +9,18 @@ BaseMissingPersonForm = model_form(
     models.MissingPerson,
     FlaskForm,
     field_args={
-        "title_name": {"label": "คำนำหน้าชื่อคนหาย/เสียชีวิต"},
-        "first_name": {"label": "ชื่อคนหาย/เสียชีวิต"},
-        "last_name": {"label": "นามสกุลคนหาย/เสียชีวิต"},
-        "age": {"label": "อายุคนหาย/เสียชีวิต"},
+        "title_name": {"label": "คำนำหน้าชื่อ"},
+        "first_name": {"label": "ชื่อ"},
+        "last_name": {"label": "นามสกุล"},
+        "age": {"label": "อายุ"},
         "identification_number": {"label": "หมายเลขบัตรประชาชน"},
-        "country": {"label": "ประเทศของคนหาย/เสียชีวิต"},
-        "province_info": {"label": "จังหวัดของคนหาย/เสียชีวิต"},
-        "district_info": {"label": "อําเภอของคนหาย/เสียชีวิต"},
-        "subdistrict_info": {"label": "ตําบลของคนหาย/เสียชีวิต"},
-        "address_info": {"label": "ที่อยู่บ้านเลขที่ของคนหาย/เสียชีวิต"},
-        "missing_person_status": {"label": "สถานะคนหาย/เสียชีวิต"},
-        "physical_mark": {"label": "ลักษณะรูปพรรณของคนหาย/เสียชีวิต"},
+        "country": {"label": "ประเทศของ"},
+        "province_info": {"label": "จังหวัดของ"},
+        "district_info": {"label": "อําเภอของ"},
+        "subdistrict_info": {"label": "ตําบลของ"},
+        "address_info": {"label": "ที่อยู่บ้านเลขที่ของ"},
+        "missing_person_status": {"label": "สถานะ"},
+        "physical_mark": {"label": "ลักษณะรูปพรรณของ"},
         "statement": {"label": "สอบปากคําจากผู้แจ้ง/คําให้การ"},
         "body_received_date": {"label": "วันที่รับศพ"},
         "deceased_relationship": {"label": "ความสัมพันธ์กับผู้หาย/เสียชีวิต"},
@@ -48,8 +48,8 @@ BaseMissingPersonForm = model_form(
 
 
 class MissingPersonForm(BaseMissingPersonForm):
-    title_name = SelectField("คำนำหน้าชื่อคนหาย/เสียชีวิต", choices=[])
-    country = SelectField("ประเทศของคนหาย/เสียชีวิต", choices=[])
+    title_name = SelectField("คำนำหน้าชื่อ", choices=[])
+    country = SelectField("ประเทศของ", choices=[])
     reporter_country = SelectField("ประเทศของผู้แจ้ง", choices=[])
     body_received_date = DateTimeLocalField(
         "วันที่รับศพ",
@@ -62,7 +62,7 @@ class MissingPersonForm(BaseMissingPersonForm):
 
 class MissingPersonImportForm(FlaskForm):
     file = FileField(
-        "ไฟล์นำเข้าข้อมูลคนหาย/เสียชีวิต (.xlsx)",
+        "ไฟล์นำเข้าข้อมูล (.xlsx)",
         validators=[
             FileRequired(),
             FileAllowed(["xlsx"], "เฉพาะไฟล์ .xlsx เท่านั้น"),
@@ -77,7 +77,7 @@ class MissingPersonSearchForm(FlaskForm):
         render_kw={"placeholder": "ค้นหาจาก ชื่อ นามสกุล หรือ หมายเลขบัตรประชาชน"},
     )
     status = SelectField(
-        "สถานะคนหาย/เสียชีวิต",
+        "สถานะ",
         choices=[
             ("", "ทั้งหมด"),
             ("missing", "คนหาย"),

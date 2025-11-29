@@ -5,53 +5,111 @@
 
 
 {% if 'edit' in request.path %}
-  {% set title_page="แก้ไขผู้อพยพ / Edit Migrant" %}
+  {% set title_page="แก้ไขผู้สูญหาย - เสียชีวิต" %}
 {% else %}
-  {% set title_page="เพิ่มผู้อพยพ / Create Migrant" %}
+  {% set title_page="เพิ่มผู้สูญหาย - เสียชีวิต" %}
 {% endif %}
 
 {% block content %}
 <form class="bg-white rounded-lg p-4" method="POST"
   action="{{ url_for('missing_persons.create_or_edit', missing_person_id=missing_person.id) }}">
   {{ form.csrf_token }}
-  <div class="grid grid-cols-2 gap-x-4">
+  <h1 class="font-bold text-xl">ข้อมูลผู้สูญหาย/เสียชีวิต</h1>
+  <div class="grid grid-cols-12 gap-x-4">
+    
     {# section: missing person information #}
-    {{ renderer.base_render(form.title_name) }}
-    {{ renderer.base_render(form.first_name) }}
-    {{ renderer.base_render(form.last_name) }}
-    {{ renderer.base_render(form.age) }}
-    {{ renderer.base_render(form.identification_number) }}
-    {{ SelectCountryDialog(form.country) }}
+    <div class="col-span-2">
+      {{ renderer.base_render(form.title_name) }}
+    </div>
+    <div class="col-span-3">
+
+      {{ renderer.base_render(form.first_name) }}
+    </div>
+    <div class="col-span-3">
+      {{ renderer.base_render(form.last_name) }}
+    </div>
+    <div class="col-span-1">
+      {{ renderer.base_render(form.age) }}
+    </div>
+    <div class="col-span-3">
+      {{ renderer.base_render(form.identification_number) }}
+    </div>
+    <div class="col-span-3">
+      {{ SelectCountryDialog(form.country) }}
+    </div>
+    <div class="col-span-2">
     {{ renderer.base_render(form.province_info) }}
+    </div>
+    <div class="col-span-2">
     {{ renderer.base_render(form.district_info) }}
+    </div>
+    <div class="col-span-2">
     {{ renderer.base_render(form.subdistrict_info) }}
+    </div>
+    <div class="col-span-3">
     {{ renderer.base_render(form.address_info) }}
+    </div>
+    <div class="col-span-2">
     {{ renderer.base_render(form.missing_person_status) }}
+    </div>
+    <div class="col-span-2">
+    {{ renderer.base_render(form.code) }}
+    </div>
+    <div class="col-span-3">
+      {{ renderer.base_render(form.body_received_date) }}
+    </div>
+
 
     {# section: additional information #}
-    {{ renderer.render_text_area_field(form.physical_mark) }}
-    {{ renderer.render_text_area_field(form.statement)}}
-    {{ renderer.base_render(form.body_received_date) }}
-    {{ renderer.base_render(form.deceased_relationship)}}
-
-    {# section: reporter #}
-    {{ renderer.base_render(form.reporter_first_name) }}
-    {{ renderer.base_render(form.reporter_last_name) }}
-    {{ renderer.base_render(form.reporter_age) }}
-    {{ renderer.base_render(form.reporter_identification_number) }}
-    {{ SelectCountryDialog(form.reporter_country) }}
-    {{ renderer.base_render(form.reporter_province_info) }}
-    {{ renderer.base_render(form.reporter_district_info) }}
-    {{ renderer.base_render(form.reporter_subdistrict_info) }}
-    {{ renderer.base_render(form.reporter_address_info) }}
-    {{ renderer.base_render(form.reporter_phone_number) }}
-    {{ renderer.base_render(form.code) }}
-
-    {#
-    <div class="col-span-2">
-      {{ renderer.render_text_area_field(form.remark) }}
+  </div>
+  <div>
+    <div class="col-span-3">
+      {{ renderer.render_text_area_field(form.deceased_relationship)}}
     </div>
-    #}
+    <div class="col-span-3">
+      {{ renderer.render_text_area_field(form.physical_mark) }}
+    </div>
+    <div class="col-span-3">
+      {{ renderer.render_text_area_field(form.statement)}}
+    </div>
+
+  </div class="mt-12">
+  <h1 class="mt-8 font-bold text-xl">ข้อมูลผู้แจ้ง</h1>
+    <div class="grid grid-cols-12 gap-x-4">
+    {# section: reporter #}
+    <div class="col-span-2">
+      {{ renderer.base_render(form.reporter_title_name) }}
+    </div>
+    <div class="col-span-3">
+      {{ renderer.base_render(form.reporter_first_name) }}
+    </div>
+    <div class="col-span-3">
+      {{ renderer.base_render(form.reporter_last_name) }}
+    </div>
+    <div class="col-span-1">
+      {{ renderer.base_render(form.reporter_age) }}
+    </div>
+    <div class="col-span-3">
+      {{ renderer.base_render(form.reporter_identification_number) }}
+    </div>
+    <div class="col-span-3">
+      {{ SelectCountryDialog(form.reporter_country) }}
+    </div>
+    <div class="col-span-3">
+      {{ renderer.base_render(form.reporter_province_info) }}
+    </div>
+    <div class="col-span-3">
+      {{ renderer.base_render(form.reporter_district_info) }}
+    </div>
+    <div class="col-span-3">
+      {{ renderer.base_render(form.reporter_subdistrict_info) }}
+    </div>
+    <div class="col-span-3">
+      {{ renderer.base_render(form.reporter_address_info) }}
+    </div>
+    <div class="col-span-3">
+      {{ renderer.base_render(form.reporter_phone_number) }}
+    </div>
   </div>
   {% if duplicated_refugee %}
     <input type="hidden" id="is-confirm-duplicate" name="is_confirm" value="no" />

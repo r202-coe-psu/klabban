@@ -19,7 +19,7 @@ from klabban import models
 from klabban.web import forms, utils, redis_rq
 from klabban.web.utils.acl import roles_required
 from flask_mongoengine import Pagination
-
+from klabban.models.missing_persons import TITLE_NAME_CHOICES
 from bson import ObjectId
 
 module = Blueprint("missing_persons", __name__, url_prefix="/missing_persons")
