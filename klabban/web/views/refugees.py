@@ -13,7 +13,9 @@ module = Blueprint("refugees", __name__, url_prefix="/refugees")
 
 @caches.cache.memoize(timeout=60)
 def get_refugee_camp_choices():
-    camps = models.RefugeeCamp.objects(status__ne="deactive").order_by("name")
+    camps = models.RefugeeCamp.objects(
+        status__nin=["deactive", "inactive", "disactive"]
+    ).order_by("name")
     camp_choice = [(str(camp.id), camp.name) for camp in camps]
     active_camps = []
     for camp in camps:
@@ -46,20 +48,17 @@ def index():
     change_camp_form.refugee_camp.choices = camp_choice
     change_camp_form.refugee_camp.data = ""
 
-    query = models.Refugee.objects(id=None)
-    try:
-        if "refugee_camp_staff" in current_user.roles or "admin" in current_user.roles:
-            query = models.Refugee.objects(status__ne="deactive").order_by("name")
-    except Exception:
-        query = models.Refugee.objects(id=None)
-    if search or country:
-        query = models.Refugee.objects(status__ne="deactive").order_by("name")
+    query = models.Refugee.objects(
+        status__nin=["inactive", "deactive", "disactive"]
+    ).order_by("name")
+
     if search:
         query = query.filter(
             Q(name__icontains=search)
             | Q(nick_name__icontains=search)
             | Q(phone__icontains=search)
         )
+
     if refugee_camp_id:
         query = query.filter(refugee_camp=refugee_camp_id)
     if country:
@@ -68,6 +67,7 @@ def index():
         query = query.filter(status=status)
     if exclude_thai:
         query = query.filter(country__ne="Thailand")
+
     try:
         refugees_pagination = Pagination(query, page=page, per_page=per_page)
     except ValueError:
@@ -205,10 +205,11 @@ def create_or_edit(refugee_id):
     if current_user.is_authenticated:
         if not refugee_id:
             refugee.created_by = current_user._get_current_object()
+
         refugee.updated_by = current_user._get_current_object()
 
     user = current_user._get_current_object() if current_user.is_authenticated else None
-    ip_address = request.headers.get("X-Forwarded-For", request.remote_addr)
+    ip_address = request.headers.get("X-Real-IP", request.remote_addr)
 
     log = models.RefugeeStatusLog(
         status=refugee.status,
@@ -232,6 +233,9 @@ def create_or_edit(refugee_id):
 
     refugee.save()
 
+    next = request.args.get("next")
+    if next:
+        return redirect(next)
     return redirect(url_for("refugees.index"))
 
 
@@ -278,9 +282,25 @@ def delete_refugee(refugee_id):
         and refugee.refugee_camp.id != current_user.refugee_camp.id
     ):
         return abort(403)
+
+    ip_address = request.headers.get("X-Real-IP", request.remote_addr)
     if refugee:
-        refugee.status = "deactive"
+        refugee.status = "inactive"
+        refugee.updated_by = current_user._get_current_object()
+        refugee.updated_date = datetime.now()
         refugee.save()
+
+        log = models.RefugeeStatusLog(
+            status=refugee.status,
+            changed_by=current_user._get_current_object(),
+            ip_address=ip_address,
+        )
+
+    next = request.args.get("next")
+    if next:
+        return redirect(next)
+
+    print("--->", next)
     return redirect(url_for("refugees.index"))
 
 

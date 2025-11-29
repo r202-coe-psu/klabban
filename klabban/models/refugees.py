@@ -6,6 +6,7 @@ REFUGEE_STATUS_CHOICES = [
     ("active", "กำลังพักพิง"),
     ("back_home", "กลับบ้านแล้ว"),
     ("deactive", "ปิดการใช้งาน"),
+    ("inactive", "ปิดการใช้งาน"),
 ]
 
 NOTE_STATUS_CHOICES = [("unread", "ยังไม่อ่าน"), ("read", "อ่านแล้ว")]
@@ -50,7 +51,7 @@ class Refugee(me.Document):
     nick_name = me.StringField(max_length=255)
     nationality = me.StringField(max_length=128)
     ethnicity = me.StringField(max_length=128)
-    country = me.StringField(max_length=128)
+    country = me.StringField(max_length=128, default="Thailand")
     age = me.IntField()
     address = me.StringField(max_length=512)
     pets = me.StringField(max_length=512)
