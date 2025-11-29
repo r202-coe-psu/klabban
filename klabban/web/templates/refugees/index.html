@@ -400,7 +400,7 @@
     {% endfor %}
     {% if search_form.search.data and not refugees_pagination.items %}
     <div class="mt-4 py-4 text-center text-gray-500 italic">
-      ไม่พบผู้อพยพที่ตรงกับคำค้นหา
+      ไม่พบผู้อพยพที่ตรงกับคำค้นหา ดูคู่มือได้ที่ <a href="{{ url_for('manuals.index') }}" class="link link-primary">คู่มือ</a>
     </div>
     {% endif %}
     {{ paginations.render_pagination(

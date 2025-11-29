@@ -58,7 +58,7 @@
   </div>
   
   <!-- Search Card -->
-  <div class="card w-full max-w-5xl bg-white shadow-md border border-gray-200 rounded-2xl mb-10">
+  <div class="card w-full max-w-5xl bg-white shadow-md border border-gray-200 rounded-2xl mb-8">
     <div class="card-body p-6 md:p-8">
       <!-- Card Title -->
       <div class="mb-4">
@@ -93,8 +93,27 @@
     </div>
   </div>
   
+    <div class="flex justify-center w-full max-w-5xl bg-white border border-gray-300 rounded-xl shadow-lg p-2 md:p-4 ">
+      <div class="flex flex-col md:flex-row items-center gap-2 md:gap-4">
+        <span class="flex-shrink-0 font-medium text-gray-800">
+          หากท่านได้ออกจากศูนย์พักพิง กรุณากดปุ่ม
+        </span>
+
+        <img 
+          src="{{ url_for('static', filename='images/manual/change_status.png') }}"
+          alt="change_status"
+          class="h-10 w-10 rounded-lg shadow-md flex-shrink-0"
+        />
+        
+        <span class="mt-2 md:mt-0 text-gray-700">
+          หลังสถานะผู้อพยพเพื่อยืนยันการออก หรือทำตามคู่มือได้ที่ 
+          <a href="{{ url_for('manuals.index') }}" class="text-blue-600 hover:underline">คู่มือ</a>
+        </span>
+      </div>
+    </div>
+
   <!-- Section Header -->
-  <div class="w-full max-w-5xl mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+  <div class="w-full max-w-5xl mb-6 mt-4 flex flex-col md:flex-row items-center justify-between gap-4">
     <div class="text-center md:text-left">
       <div class="flex items-center gap-3 justify-center md:justify-start mb-1">
         <div class="w-1 h-8 bg-blue-600 rounded-full hidden md:block"></div>
