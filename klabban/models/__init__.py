@@ -11,6 +11,8 @@ from klabban.models.refugee_camps import RefugeeCamp
 from klabban.models.oauth2 import OAuth2Token
 from klabban.models.export_refugee_files import ExportRefugeeFile
 from klabban.models.import_refugee_files import ImportRefugeeFile
+from klabban.models.missing_persons import MissingPerson, TITLE_NAME_CHOICES
+from klabban.models.import_missing_person_files import ImportMissingPersonFile
 from klabban.models.reports import (
     Report,
     REPORT_STATUS_CHOICES,
@@ -29,6 +31,9 @@ __all__ = [
     "OAuth2Token",
     "ExportRefugeeFile",
     "RefugeeCampsLog",
+    "RefugeeNoteLog",
+    "ImportRefugeeFile",
+    "MissingPerson",
     "Report",
 ]
 

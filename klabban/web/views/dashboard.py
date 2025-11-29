@@ -85,7 +85,9 @@ def admin_dashboard():
     now = datetime.datetime.utcnow()
     seven_days_ago = now - datetime.timedelta(days=7)
 
-    total_refugees = models.Refugee.objects(status__ne="deactive").sum("people_count")
+    total_refugees = models.Refugee.objects(
+        status__nin=["inactive", "deactive", "disactive"]
+    ).sum("people_count")
     active_refugees = models.Refugee.objects(status="active").sum("people_count")
     returned_refugees = models.Refugee.objects(status="back_home").sum("people_count")
     active_camps = models.RefugeeCamp.objects(status__ne="inactive").count()

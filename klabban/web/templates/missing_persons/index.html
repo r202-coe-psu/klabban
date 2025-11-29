@@ -1,0 +1,346 @@
+{% extends "/base/default_page.html" %}
+{% import "base/html_renderer.html" as renderer %}
+{% import "/components/dialogs.html" as dialog %}
+{% import "/components/paginations.html" as paginations %}
+
+{% set title_page="รายชื่อผู้สูญหาย - เสียชีวิต" %}
+
+{% block content %}
+
+<div id="export-missing-person-modal-container"></div>
+<div id="import-missing-person-modal-container"></div>
+
+<div class="bg-white rounded-3xl border border-gray-300">
+  <div class="overflow-x-auto p-6">
+    <div class="flex flex-row max-sm:flex-col w-full sm:items-end justify-between mb-2 gap-4">
+      <form method="GET" class="flex-1">
+        <div class="text-xl font-medium text-gray-700 flex justify-between items-center w-full">
+          <p>รายชื่อผู้สูญหาย - เสียชีวิต</p>
+        </div>
+        <div class="grid grid-cols-5 max-md:grid-cols-2 max-sm:grid-cols-1 gap-x-4 items-center">
+          <div class="col-span-3">
+            {{ renderer.base_render(search_form.search) }}
+          </div>
+          {{ renderer.base_render(search_form.status) }}
+          
+          <button type="submit" class="btn btn-primary text-white sm:mt-8 max-sm:mt-3">
+            <span class="ph ph-magnifying-glass text-lg"></span>
+            ค้นหา / Search
+          </button>
+        </div>
+      </form>
+      {% if 'officer' in current_user.roles %}
+      <div class="justify-end flex flex-col gap-2 w-fit">
+        <button hx-get="{{ url_for('missing_persons.import_missing_person_modal') }}" 
+          hx-target="#import-missing-person-modal-container"
+          hx-trigger="click" 
+          hx-swap="innerHTML" 
+          class="btn bg-green-400 text-white">
+          <span class="ph ph-file-xls text-lg"></span>
+          นำเข้าข้อมูลผู้สูญหาย - เสียชีวิต
+        </button>
+        
+        <a class="btn btn-primary text-white mb-1" href="{{ url_for('missing_persons.create_or_edit', **request.args) }}">
+          <span class="material-symbols-outlined text-sm">add</span>
+          เพิ่มผู้สูญหาย - เสียชีวิต
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+    {% set args = request.args.to_dict() %}
+    {% set _ = args.pop('view_mode', None) %}
+    <div class="w-full flex justify-end mb-4">
+      <div class="max-sm:w-full max-sm:grid grid-cols-2 border border-gray-300 rounded p-1 w-fit">
+        <a href="{{ url_for('missing_persons.index', view_mode='grid', **args) }}"
+          class="btn {{ 'bg-black text-white' if view_mode == 'grid' else ''}}">
+          ดูแบบการ์ด
+          <span class="text-lg ph ph-squares-four"></span>
+        </a>
+        <a href="{{ url_for('missing_persons.index', view_mode='list', **args) }}"
+          class="btn {{ 'bg-black text-white' if view_mode == 'list' else ''}}">
+          ดูแบบตาราง
+          <span class="text-lg ph ph-list-dashes"></span>
+        </a>
+      </div>
+    </div>
+
+    {% if view_mode == 'grid' %}
+    <!-- Grid View -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for person in missing_persons_pagination.items %}
+      <div>
+        <div class="card bg-base-100 shadow-md min-h-[170px]">
+          <div class="card-body p-4">
+            <h2 class="card-title flex items-start justify-between gap-2">
+              <div>
+                {{ loop.index + (missing_persons_pagination.page - 1) * missing_persons_pagination.per_page }}. 
+                {{ person.first_name }} {{ person.last_name }}
+              </div>
+              
+              {% if 'officer' in current_user.roles %}
+              <div class="card-actions flex-nowrap items-start justify-end">
+                {{ render_person_toolbar(person) }}
+                {{ dialog.DisactiveDialog(
+                  id="%s-disactive-dialog" | format(person.id),
+                  title="ยืนยันการลบรายการผู้สูญหาย - เสียชีวิต",
+                  body="คุณต้องการที่จะลบรายการผู้สูญหาย - เสียชีวิตชื่อ <b>%s %s</b> ใช่หรือไม่?" | format(person.first_name, person.last_name),
+                  url=url_for("missing_persons.delete", missing_person_id=person.id)
+                )}}
+              </div>
+              {% endif %}
+            </h2>
+
+            <div class="space-y-2 text-sm">
+              <div>
+                <span class="text-gray-500">สถานะ:</span>
+                {{ render_person_status(person.missing_person_status) }}
+              </div>
+              
+              {% if person.age %}
+              <div>
+                <span class="text-gray-500">อายุ:</span>
+                <span>{{ person.age }} ปี</span>
+              </div>
+              {% endif %}
+              
+              {% if person.province_info %}
+              <div>
+                <span class="text-gray-500">จังหวัด:</span>
+                <span>{{ person.province_info }}</span>
+              </div>
+              {% endif %}
+              
+              {% if person.reporter_first_name %}
+              <div>
+                <span class="text-gray-500">ผู้แจ้ง:</span>
+                <span>{{ person.reporter_first_name }} {{ person.reporter_last_name }}</span>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Mobile: Card View -->
+    <div class="block md:hidden space-y-3">
+      {% for person in missing_persons_pagination.items %}
+      <div class="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+        <div class="flex justify-between items-start mb-3">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-semibold text-gray-400 text-sm">
+                #{{ loop.index + (missing_persons_pagination.page - 1) * missing_persons_pagination.per_page }}
+              </span>
+              <h3 class="font-bold text-lg">{{ person.first_name }} {{ person.last_name }}</h3>
+            </div>
+          </div>
+          
+          {% if 'officer' in current_user.roles %}
+          <div class="flex gap-1">
+            {{ render_person_toolbar(person) }}
+            {{ dialog.DisactiveDialog(
+              id="%s-disactive-dialog-mobile" | format(person.id),
+              title="ยืนยันการลบรายการผู้สูญหาย - เสียชีวิต",
+              body="คุณต้องการที่จะลบรายการผู้สูญหาย - เสียชีวิตชื่อ <b>%s %s</b> ใช่หรือไม่?" | format(person.first_name, person.last_name),
+              url=url_for("missing_persons.delete", missing_person_id=person.id)
+            )}}
+          </div>
+          {% endif %}
+        </div>
+        
+        <div class="space-y-2 text-sm">
+          <div>
+            <span class="text-gray-500">สถานะ:</span>
+            {{ render_person_status(person.missing_person_status) }}
+          </div>
+          
+          {% if person.age %}
+          <div>
+            <span class="text-gray-500">อายุ:</span>
+            <span class="font-medium">{{ person.age }} ปี</span>
+          </div>
+          {% endif %}
+          
+          {% if person.identification_number %}
+          <div>
+            <span class="text-gray-500">เลขบัตรประชาชน:</span>
+            <span class="font-medium">{{ person.identification_number }}</span>
+          </div>
+          {% endif %}
+          
+          {% if person.province_info %}
+          <div>
+            <span class="text-gray-500">จังหวัด:</span>
+            <span class="font-medium">{{ person.province_info }}</span>
+          </div>
+          {% endif %}
+          
+          {% if person.reporter_first_name %}
+          <div>
+            <span class="text-gray-500">ผู้แจ้ง:</span>
+            <span class="font-medium">{{ person.reporter_first_name }} {{ person.reporter_last_name }}</span>
+          </div>
+          {% endif %}
+          
+          <div>
+            <span class="text-gray-500">อัปเดต:</span>
+            <span class="font-medium">{{ person.updated_date.strftime("%d %B %Y") }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <!-- Desktop: Table View -->
+    <div class="hidden md:block overflow-x-auto">
+      <table class="table w-full text-sm border border-gray-200">
+        <thead class="text-gray-700 bg-gray-50">
+          <tr>
+            <th class="text-center px-3 py-3">ลำดับ</th>
+            <th class="text-left px-3 py-3 min-w-[150px]">ชื่อ-นามสกุล</th>
+            <th class="text-left px-3 py-3 min-w-[100px]">อายุ</th>
+            <th class="text-left px-3 py-3 min-w-[130px]">เลขบัตรประชาชน</th>
+            <th class="text-left px-3 py-3 min-w-[120px]">สถานะ</th>
+            <th class="text-left px-3 py-3 min-w-[120px]">จังหวัด</th>
+            <th class="text-left px-3 py-3 min-w-[150px] hidden lg:table-cell">ผู้แจ้ง</th>
+            <th class="text-left px-3 py-3 min-w-[120px] hidden lg:table-cell">อัปเดตล่าสุด</th>
+            {% if 'officer' in current_user.roles %}
+            <th class="text-right px-3 py-3 min-w-[120px]">จัดการ</th>
+            {% endif %}
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for person in missing_persons_pagination.items %}
+          <tr class="{{ 'bg-red-50' if person.missing_person_status == 'death' else 'bg-orange-50' if person.missing_person_status == 'missing' else '' }} border-b border-gray-200 hover:bg-gray-50">            
+            <td class="text-center px-3 py-3">
+              {{ loop.index + (missing_persons_pagination.page - 1) * missing_persons_pagination.per_page }}
+            </td>
+
+            <td class="px-3 py-3">
+              {{ person.title_name if person.title_name else '' }} {{ person.first_name }} {{ person.last_name }}
+            </td>
+
+            <td class="px-3 py-3">
+              {{ person.age if person.age else '-' }}
+            </td>
+
+            <td class="px-3 py-3">
+              {{ person.identification_number if person.identification_number else '-' }}
+            </td>
+
+            <td class="px-3 py-3">
+              {{ render_person_status(person.missing_person_status) }}
+            </td>
+
+            <td class="px-3 py-3">
+              {{ person.province_info if person.province_info else '-' }}
+            </td>
+
+            <td class="px-3 py-3 hidden lg:table-cell">
+              {% if person.reporter_first_name %}
+                {{ person.reporter_first_name }} {{ person.reporter_last_name }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+
+            <td class="px-3 py-3 hidden lg:table-cell">
+              {% if 'officer' in current_user.roles %}
+              <div class="cursor-pointer tooltip tooltip-left bg-white text-black">
+                <div class="tooltip-content text-start grid">
+                  <div class="space-y-1">
+                    <div class="flex gap-1">
+                      <div class="font-medium">ผู้สร้าง:</div>
+                      <div>{{ person.created_by.get_fullname() if person.created_by else "ไม่พบผู้สร้าง" }}</div>
+                    </div>
+                    <div class="flex gap-1">
+                      <div class="font-medium">ผู้แก้ไข:</div>
+                      <div>{{ person.updated_by.get_fullname() if person.updated_by else "ไม่พบผู้แก้ไข" }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="tooltip tooltip-left">
+                  {{ person.updated_date.strftime("%d %b %Y") }} 
+                </div>
+              </div>
+              {% else %}
+              <div>
+                {{ person.updated_date.strftime("%d %b %Y") }}
+              </div>
+              {% endif %}
+            </td>
+
+            {% if 'officer' in current_user.roles %}
+            <td class="px-3 py-3">
+              <div class="flex gap-1 justify-end">
+                {{ render_person_toolbar(person, '-desktop') }}
+              </div>
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Dialogs for Desktop Table -->
+    {% if 'officer' in current_user.roles %}
+    <div class="hidden md:block">
+      {% for person in missing_persons_pagination.items %}
+        {{ dialog.DisactiveDialog(
+          id="%s-disactive-dialog-desktop" | format(person.id),
+          title="ยืนยันการลบรายการผู้สูญหาย - เสียชีวิต",
+          body="คุณต้องการที่จะลบรายการผู้สูญหาย - เสียชีวิตชื่อ <b>%s %s</b> ใช่หรือไม่?" | format(person.first_name, person.last_name),
+          url=url_for("missing_persons.delete", missing_person_id=person.id)
+        )}}
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if search_form.search.data and not missing_persons_pagination.items %}
+    <div class="mt-4 py-4 text-center text-gray-500 italic">
+      ไม่พบผู้สูญหาย - เสียชีวิตที่ตรงกับคำค้นหา
+    </div>
+    {% endif %}
+
+    {{ paginations.render_pagination(
+      pagination=missing_persons_pagination,
+      endpoint='missing_persons.index',
+      key_page='page',
+      kwargs=request.args.to_dict()
+    ) }}
+  </div>
+</div>
+
+{% endblock %}
+
+{% macro render_person_toolbar(person, suffix='') %}
+<a href="{{ url_for('missing_persons.view', missing_person_id=person.id, **request.args) }}"
+  class="size-8 btn btn-outline btn-sm border-gray-300 text-green-600 hover:bg-green-100">
+  <span class="material-symbols-outlined">visibility</span>
+</a>
+
+<a href="{{ url_for('missing_persons.create_or_edit', missing_person_id=person.id) }}"
+  class="size-8 btn btn-outline btn-sm text-gray-600 border-gray-300">
+  <span class="material-symbols-outlined">edit_square</span>
+</a>
+<button class="size-8 btn btn-outline btn-sm border-gray-300 text-error hover:bg-red-100"
+  onclick="$('#{{person.id}}-disactive-dialog{{suffix}}')[0].showModal()">
+  <span class="material-symbols-outlined">delete</span>
+</button>
+{% endmacro %}
+
+{% macro render_person_status(status) %}
+<div class="border rounded-lg py-1 px-2 text-xs md:text-sm font-medium whitespace-nowrap w-fit 
+    {{ 'text-orange-500 border-orange-500 bg-orange-50' if status == 'missing' else '' }}
+    {{ 'text-red-500 border-red-500 bg-red-50' if status == 'death' else '' }}">
+  {{ 'สูญหาย' if status == 'missing' else '' }}
+  {{ 'เสียชีวิต' if status == 'death' else '' }}
+</div>
+{% endmacro %}
