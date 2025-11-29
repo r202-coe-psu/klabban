@@ -165,6 +165,7 @@ def import_missing_person_modal():
             args=(
                 import_missing_person_file,
                 current_user._get_current_object(),
+                form.source.data if form.source.data else "",
             ),
             timeout=3600,
             job_timeout=1200,
@@ -185,7 +186,7 @@ def download_template():
     return send_file(
         output,
         as_attachment=True,
-        download_name="ข้อมูลผู้สูญหาย.xlsx",
+        download_name="ข้อมูลผู้สูญหาย-เสียชีวิต.xlsx",
     )
 
 

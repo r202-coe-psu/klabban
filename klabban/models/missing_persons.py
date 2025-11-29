@@ -22,14 +22,14 @@ class MissingPerson(me.Document):
         "indexes": ["created_date"],
     }
     # section: missing person information
+    reporting_date = me.DateTimeField()
     title_name = me.StringField()  # คำนำหน้าชื่อคนหาย/เสียชีวิต
     first_name = me.StringField(required=True, max_length=255)  # ชื่อคนหาย/เสียชีวิต
-    last_name = me.StringField(required=True, max_length=255)  # นามสกุลคนหาย/เสียชีวิต
+    last_name = me.StringField(max_length=255)  # นามสกุลคนหาย/เสียชีวิต
     age = me.IntField()  # อายุคนหาย/เสียชีวิต
     identification_number = me.StringField(max_length=100)  # หมายเลขบัตรประชาชน
-    country = me.StringField(
-        default="Thailand", max_length=100
-    )  # ประเทศของคนหาย/เสียชีวิต
+    phone_number = me.StringField(max_length=20)  # เบอร์โทรศัพท์คนหาย/เสียชีวิต
+    country = me.StringField(default="ไทย", max_length=100)  # ประเทศของคนหาย/เสียชีวิต
     province_info = me.StringField(max_length=255)  # จังหวัดของคนหาย/เสียชีวิต
     district_info = me.StringField(max_length=255)  # อําเภอของคนหาย/เสียชีวิต
     subdistrict_info = me.StringField(max_length=255)  # ตําบลของคนหาย/เสียชีวิต
@@ -57,7 +57,9 @@ class MissingPerson(me.Document):
     reporter_subdistrict_info = me.StringField(max_length=255)  # ตําบลของผู้แจ้ง
     reporter_address_info = me.StringField(max_length=512)  # ที่อยู่บ้านเลขที่ของผู้แจ้ง
     reporter_phone_number = me.StringField(max_length=20)  # เบอร์โทรศัพท์ผู้แจ้ง
+    is_dna_collected = me.BooleanField(default=False)  # เก็บตัวอย่างดีเอ็นเอหรือไม่
     code = me.StringField(max_length=255)  # CODE
+    source = me.StringField()  # แหล่งที่มาของข้อมูล เช่น หน่วยงานที่รายงาน
     metadata = me.DictField()  # ข้อมูลเสริม
     status = me.StringField(
         choices=("active", "inactive"), default="active"
