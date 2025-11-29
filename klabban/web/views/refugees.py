@@ -50,7 +50,7 @@ def index():
     try:
         if "refugee_camp_staff" in current_user.roles or "admin" in current_user.roles:
             query = models.Refugee.objects(status__ne="deactive").order_by("name")
-    except Exception:   
+    except Exception:
         query = models.Refugee.objects(id=None)
     if search or country:
         query = models.Refugee.objects(status__ne="deactive").order_by("name")
@@ -91,7 +91,14 @@ def change_status(refugee_id):
     if refugee.status == "active":
         refugee.status = "back_home"
         refugee.back_home_date = datetime.now()
-        flash(f"สถานะของ **{refugee.name}** ถูกเปลี่ยนเป็น 'กลับบ้านแล้ว' สำเร็จ.", "success")
+        if current_user.is_authenticated and (
+            "admin" in current_user.roles or "refugee_camp_staff" in current_user.roles
+        ):
+            flash(
+                f"สถานะของ **{refugee.name}** ถูกเปลี่ยนเป็น 'กลับบ้านแล้ว' สำเร็จ.", "success"
+            )
+        else:
+            flash(refugee.name, "custom_refugee_change_status_success")
 
     elif refugee.status == "back_home":
         refugee.status = "active"
@@ -227,6 +234,7 @@ def create_or_edit(refugee_id):
 
     return redirect(url_for("refugees.index"))
 
+
 @module.route("/<refugee_id>/change_camp/<camp_id>", methods=["POST", "GET"])
 @roles_required(["admin", "refugee_camp_staff"])
 def change_camp(refugee_id, camp_id):
@@ -247,7 +255,6 @@ def change_camp(refugee_id, camp_id):
     refugee.save()
 
     return redirect(url_for("refugees.index", **request.args))
-
 
 
 @module.route("/<refugee_id>", methods=["GET"])
@@ -275,3 +282,132 @@ def delete_refugee(refugee_id):
         refugee.status = "deactive"
         refugee.save()
     return redirect(url_for("refugees.index"))
+
+
+# ผู้อพยพไม่สามารถกดยืนยันชื่อได้(Error) ให้ทิ้ง note ไว้ให้ผู้ดูแลระบบมาตรวจสอบที่หลัง
+@module.route("/description/create/<refugee_id>", methods=["GET", "POST"])
+def create_description(refugee_id):
+    if refugee_id:
+        refugee = models.Refugee.objects.get(id=refugee_id)
+        form = forms.refugees.RefugeeNoteForm(obj=refugee)
+
+    if not form.validate_on_submit():
+        return render_template("refugees/note_on_validation_fail.html", form=form)
+
+    ip_address = request.headers.get("X-Forwarded-For", request.remote_addr)
+
+    log = models.RefugeeNoteLog(
+        ip_address=ip_address,
+    )
+
+    refugee.description = form.description.data
+    # refugee.updated_by = (
+    #     current_user._get_current_object() if current_user.is_authenticated else None
+    # )
+
+    refugee.note_log.append(log)
+    refugee.save()
+
+    flash(f"แจ้งปัญหาการเปลี่ยนสถานะผู้อพยพสำเร็จ", "success")
+
+    return redirect(url_for("refugees.index"))
+
+
+# หน้าแสดงผู้อพยพที่มีการส่ง description
+@module.route("/view_descriptions")
+@roles_required(["admin", "refugee_camp_staff"])
+def view_description():
+
+    page = request.args.get("page", 1, type=int)
+    per_page = 50  # จำนวนรายการต่อหน้า
+    camp_choice, active_camps = get_refugee_camp_choices()
+
+    search_form = forms.refugees.RefugeeSearchForm(request.args)
+    search_form.refugee_camp.choices = [("", "ทั้งหมด")] + active_camps
+    search = search_form.search.data
+    refugee_camp_id = search_form.refugee_camp.data
+    country = search_form.country.data
+    status = search_form.status.data
+    exclude_thai = request.args.get("exclude_thai", None)
+
+    change_camp_form = forms.refugees.ChangeRefugeeCampForm()
+    change_camp_form.refugee_camp.choices = camp_choice
+    change_camp_form.refugee_camp.data = ""
+
+    query = models.Refugee.objects(id=None)
+    try:
+        if "refugee_camp_staff" in current_user.roles or "admin" in current_user.roles:
+            query = models.Refugee.objects(status__ne="deactive").order_by("name")
+    except Exception:
+        query = models.Refugee.objects(id=None)
+    if search or country:
+        query = models.Refugee.objects(status__ne="deactive").order_by("name")
+    if search:
+        query = query.filter(
+            Q(name__icontains=search)
+            | Q(nick_name__icontains=search)
+            | Q(phone__icontains=search)
+        )
+    if refugee_camp_id:
+        query = query.filter(refugee_camp=refugee_camp_id)
+    if country:
+        query = query.filter(country__icontains=country)
+    if status:
+        query = query.filter(status=status)
+    if exclude_thai:
+        query = query.filter(country__ne="Thailand")
+
+    query = query.filter(
+        description__ne="",
+        status__ne="back_home",
+    )
+
+    try:
+        refugees_pagination = Pagination(query, page=page, per_page=per_page)
+    except ValueError:
+        refugees_pagination = Pagination(query, page=1, per_page=per_page)
+
+    return render_template(
+        "refugees/view_description.html",
+        refugees_pagination=refugees_pagination,
+        search_form=search_form,
+        change_camp_form=change_camp_form,
+    )
+
+
+# เพิ่ม status ว่าอ่าน description ที่ผู้อพผลส่งมาหรือยัง
+@module.route("/change_status_description/<refugee_id>")
+def change_status_description(refugee_id):
+
+    refugee = models.Refugee.objects.get(id=refugee_id)
+
+    if refugee:
+        if refugee.note_status == "unread":
+            refugee.note_status = "read"
+
+        else:
+            refugee.note_status = "unread"
+
+        refugee.save()
+
+    return redirect(url_for("refugees.view_description"))
+
+
+# @module.route("/staff/note/create", methods=["GET", "POST"], defaults={"refugee_id": None})
+# staff สามารถเพิ่ม note ไว้ในกรณีที่ผู้อพยพคนนี้มีปัญหา
+@module.route("add_staff_note/<refugee_id>/", methods=["GET", "POST"])
+def add_staff_note(refugee_id):
+    if refugee_id:
+        refugee = models.Refugee.objects.get(id=refugee_id)
+        form = forms.refugees.RefugeeNoteForm(obj=refugee)
+
+        if not form.validate_on_submit():
+            return render_template("refugees/add_staff_note.html", form=form)
+
+        refugee.staff_note = form.staff_note.data
+
+        refugee.save()
+
+        flash(f"เพิ่ม note สำหรับ {refugee.name} สำเร็จ", "success")
+
+    return redirect(url_for("refugees.view_description"))

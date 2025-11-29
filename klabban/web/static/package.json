@@ -19,9 +19,11 @@
     "@highlightjs/cdn-assets": "^11.11.1",
     "@phosphor-icons/web": "^2.1.2",
     "@tailwindcss/cli": "^4.1.10",
+    "cally": "^0.8.0",
+    "chart.js": "^4.5.1",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "htmx.org": "^1.9.12",
     "jquery": "^3.7.1",
-    "cally": "^0.8.0",
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
