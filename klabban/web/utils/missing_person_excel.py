@@ -357,7 +357,7 @@ def validate_dataframe(df, sheet_name):
                 row_errors.append("หมายเลขบัตรประชาชนคนหาย/เสียชีวิตต้องมี 13 หลัก")
 
         if pd.notna(row.get("หมายเลขบัตรประชาชนผู้แจ้ง")):
-            id_number = str(row.get("หมายเลขบัตรประชาชนผู้แจ้ง")).strip()
+            id_number = str(row.get("หมายเลขบัตรประชาชนผู้แจ้ง")).strip().split(".")[0]
             if id_number and not id_number.isdigit():
                 row_errors.append("หมายเลขบัตรประชาชนผู้แจ้งต้องเป็นตัวเลขเท่านั้น")
             elif id_number and len(id_number) != 13:
@@ -434,7 +434,6 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
                     if value.lower() == title_str or key.lower() == title_str:
                         title_name = key
                         break
-            print(f"title name, '{title_name}'")
 
             # เเปลงคำนำหน้าชื่อผู้แจ้งจากภาษาไทยเป็น key
             reporter_title_name = ""
@@ -444,7 +443,6 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
                     if value.lower() == title_str or key.lower() == title_str:
                         reporter_title_name = key
                         break
-            print(f"reporter_title_name name, '{reporter_title_name}'")
 
             # แปลงสถานะจากภาษาไทยเป็น key
             status = "missing"  # default
@@ -496,7 +494,9 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
             # ข้อมูลคนหาย/เสียชีวิต
             missing_first_name = format_str(row.get("ชื่อคนหาย/เสียชีวิต"))
             missing_last_name = format_str(row.get("นามสกุลคนหาย/เสียชีวิต"))
-            missing_id_number = format_str(row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต"))
+            missing_id_number = format_str(
+                row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต")
+            ).split(".")[0]
 
             # สร้าง metadata จากข้อมูลใน Excel
             excel_metadata = {
@@ -652,7 +652,7 @@ def process_missing_person_dataframe(df, current_user, sheet_name):
                     reporter_age=reporter_age,
                     reporter_identification_number=format_str(
                         row.get("หมายเลขบัตรประชาชนผู้แจ้ง")
-                    ),
+                    ).split(".")[0],
                     reporter_country=format_str(row.get("ประเทศผู้แจ้ง")) or "Thailand",
                     reporter_province_info=format_str(row.get("จังหวัดผู้แจ้ง")),
                     reporter_district_info=format_str(row.get("อำเภอผู้แจ้ง")),
