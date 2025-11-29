@@ -19,7 +19,7 @@ def get_refugee_camp_choices():
     for camp in camps:
         # Count refugees in this camp
         refugee_count = models.Refugee.objects(
-            refugee_camp=camp.id, status="active"
+            refugee_camp=camp.id, status__nin=["inactive", "deactive", "disactive"]
         ).count()
         if refugee_count > 0:
             active_camps.append((str(camp.id), camp.name))
