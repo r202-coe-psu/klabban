@@ -25,6 +25,8 @@ from bson import ObjectId
 module = Blueprint("missing_persons", __name__, url_prefix="/missing_persons")
 
 
+@login_required
+@roles_required(["officer"])
 @module.route("/")
 def index():
     view_mode = request.args.get("view_mode", "list")
@@ -60,6 +62,8 @@ def index():
     )
 
 
+@login_required
+@roles_required(["officer"])
 @module.route("/create", methods=["GET", "POST"], defaults={"missing_person_id": None})
 def create_or_edit_missing_person(missing_person_id=None):
     form = forms.missing_persons.MissingPersonForm()
@@ -88,6 +92,8 @@ def create_or_edit_missing_person(missing_person_id=None):
     )
 
 
+@login_required
+@roles_required(["officer"])
 @module.route("/<missing_person_id>/view", methods=["GET"])
 def view_missing_person(missing_person_id):
     missing_person = models.MissingPerson.objects.get(id=missing_person_id)
@@ -96,8 +102,9 @@ def view_missing_person(missing_person_id):
     )
 
 
+@login_required
+@roles_required(["officer"])
 @module.route("/<missing_person_id>/delete", methods=["POST"])
-@roles_required(["admin", "refugee_camp_staff"])
 def delete_missing_person(missing_person_id):
     missing_person = models.MissingPerson.objects.get(id=missing_person_id)
     missing_person.status = "deactive"
@@ -109,6 +116,8 @@ def delete_missing_person(missing_person_id):
     return redirect(url_for("missing_persons.index"))
 
 
+@login_required
+@roles_required(["officer"])
 @module.route("/import_missing_person_modal", methods=["GET"])
 def import_missing_person_modal():
     form = forms.missing_persons.MissingPersonImportForm()
@@ -117,6 +126,8 @@ def import_missing_person_modal():
     )
 
 
+@login_required
+@roles_required(["officer"])
 @module.route("/export_missing_person_modal", methods=["GET"])
 def export_missing_person_modal():
     form = forms.missing_persons.MissingPersonExportForm()
