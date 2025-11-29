@@ -104,10 +104,18 @@
               </div>
               {% endif %}
               
-              {% if person.province_info %}
+              {% if person.code %}
               <div>
-                <span class="text-gray-500">จังหวัด:</span>
-                <span>{{ person.province_info }}</span>
+                <span class="text-gray-500">รหัส:</span>
+                <span>
+                  {% if person.code %}
+              <badge class="badge badge-primary badge-outline font-bold">
+              {{ person.code }}
+              </badge>
+              {% else %}
+              -
+              {% endif %}
+                </span>
               </div>
               {% endif %}
               
@@ -172,10 +180,18 @@
           </div>
           {% endif %}
           
-          {% if person.province_info %}
+          {% if person.code %}
           <div>
-            <span class="text-gray-500">จังหวัด:</span>
-            <span class="font-medium">{{ person.province_info }}</span>
+            <span class="text-gray-500">รหัส:</span>
+            <span class="font-medium">
+              {% if person.code %}
+              <badge class="badge badge-primary badge-outline font-bold">
+              {{ person.code }}
+              </badge>
+              {% else %}
+              -
+              {% endif %}
+            </span>
           </div>
           {% endif %}
           
@@ -205,7 +221,7 @@
             <th class="text-left px-3 py-3 min-w-[100px]">อายุ</th>
             <th class="text-left px-3 py-3 min-w-[130px]">เลขบัตรประชาชน</th>
             <th class="text-left px-3 py-3 min-w-[120px]">สถานะ</th>
-            <th class="text-left px-3 py-3 min-w-[120px]">จังหวัด</th>
+            <th class="text-left px-3 py-3 min-w-[160px]">รหัส</th>
             <th class="text-left px-3 py-3 min-w-[150px] hidden lg:table-cell">ผู้แจ้ง</th>
             <th class="text-left px-3 py-3 min-w-[120px] hidden lg:table-cell">อัปเดตล่าสุด</th>
             {% if 'officer' in current_user.roles %}
@@ -216,7 +232,7 @@
 
         <tbody>
           {% for person in missing_persons_pagination.items %}
-          <tr class="{{ 'bg-red-50' if person.missing_person_status == 'death' else 'bg-orange-50' if person.missing_person_status == 'missing' else '' }} border-b border-gray-200 hover:bg-gray-50">            
+          <tr class="h-[50px] {{ 'bg-red-50' if person.missing_person_status == 'death' else 'bg-orange-50' if person.missing_person_status == 'missing' else '' }} border-b border-gray-200 hover:bg-gray-50">            
             <td class="text-center px-3 py-3">
               {{ loop.index + (missing_persons_pagination.page - 1) * missing_persons_pagination.per_page }}
             </td>
@@ -238,7 +254,13 @@
             </td>
 
             <td class="px-3 py-3">
-              {{ person.province_info if person.province_info else '-' }}
+              {% if person.code %}
+              <badge class="badge badge-primary badge-outline font-bold">
+              {{ person.code }}
+              </badge>
+              {% else %}
+              -
+              {% endif %}
             </td>
 
             <td class="px-3 py-3 hidden lg:table-cell">
