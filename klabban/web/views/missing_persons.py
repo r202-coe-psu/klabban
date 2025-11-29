@@ -41,7 +41,7 @@ def index():
     search = search_form.search.data
     status = search_form.status.data
 
-    query = models.MissingPerson.objects()
+    query = models.MissingPerson.objects(status__ne="inactive")
 
     if search:
         query &= Q(
@@ -115,7 +115,7 @@ def view(missing_person_id):
 @roles_required(["officer"])
 def delete(missing_person_id):
     missing_person = models.MissingPerson.objects.get(id=missing_person_id)
-    missing_person.status = "deactive"
+    missing_person.status = "inactive"
     missing_person.updated_date = datetime.datetime.now()
     missing_person.updater = current_user._get_current_object()
     missing_person.save()

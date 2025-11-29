@@ -60,7 +60,7 @@ class MissingPerson(me.Document):
     code = me.StringField(max_length=255)  # CODE
     metadata = me.DictField()  # ข้อมูลเสริม
     status = me.StringField(
-        choices=("active", "disactive"), default="active"
+        choices=("active", "inactive"), default="active"
     )  # สถานะข้อมูล
 
     created_by = me.ReferenceField(
