@@ -63,21 +63,24 @@ def create_or_edit_user(user_id):
             (str(camp.id), camp.name) for camp in refugee_camps
         ]
         print("All refugee camps:", form.refugee_camp.choices)
-        form.role.choices = USER_ROLES
+        form.roles.choices = USER_ROLES
 
     elif "refugee_camp_staff" in current_user.roles:
+        if not current_user.refugee_camp:
+            flash("คุณไม่มีศูนย์พักพิงที่ถูกกำหนด โปรดติดต่อผู้ดูแลระบบ", "error")
+            return redirect(url_for("users.index"))
+
         form.refugee_camp.choices = [
             (str(current_user.refugee_camp.id), current_user.refugee_camp.name)
         ]
-        print("Refugee camp staff, limited choices:", form.refugee_camp.choices)
-        form.role.choices = [
+
+        form.roles.choices = [
             ("refugee_camp_staff", "เจ้าหน้าที่ศูนย์พักพิง"),
             ("user", "ผู้ใช้งานทั่วไป"),
         ]
-
     if not form.validate_on_submit():
-        print("Form errors:", form.errors)
-        form.role.data = user.roles[0] if user.roles else "user"
+        form.roles.data = [role for role in user.roles]
+
         return render_template("/users/create_or_edit.html", form=form, user_id=user_id)
 
     if (
@@ -87,7 +90,7 @@ def create_or_edit_user(user_id):
         flash("ชื่อบัญชีนี้มีผู้ใช้งานแล้ว กรุณาเปลี่ยนชื่อบัญชีใหม่", "error")
         return render_template("/users/create_or_edit.html", form=form, user_id=user_id)
 
-    if "refugee_camp_staff" == form.role.data:
+    if "refugee_camp_staff" in form.roles.data:
         if not form.refugee_camp.data:
             flash("กรุณาเลือกศูนย์พักพิงสำหรับเจ้าหน้าที่ศูนย์พักพิง", "error")
             return render_template(
@@ -98,7 +101,7 @@ def create_or_edit_user(user_id):
     if not user_id and form.password.data:
         user.set_password(form.password.data)
     user.refugee_camp = models.RefugeeCamp.objects.get(id=form.refugee_camp.data)
-    user.roles = [form.role.data]
+    user.roles = [role for role in form.roles.data]
     user.save()
 
     return redirect(url_for("users.index"))
