@@ -39,7 +39,7 @@ class CreateUserForm(BaseCreateUserForm):
         [validators.DataRequired(), validators.Length(min=6)],
         description="รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร",
     )
-    role = SelectField(
+    roles = SelectMultipleField(
         "บทบาทผู้ใช้งาน",
         choices=USER_ROLES,
         coerce=str,
@@ -52,7 +52,7 @@ class CreateUserForm(BaseCreateUserForm):
 
 
 class EditUserForm(BaseCreateUserForm):
-    role = SelectField(
+    roles = SelectMultipleField(
         "บทบาทผู้ใช้งาน",
         choices=USER_ROLES,
         coerce=str,
