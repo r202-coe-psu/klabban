@@ -71,7 +71,34 @@
   {% include "base/sidebar.html" %}
 </div>
 {% for category, message in get_flashed_messages(with_categories=true) %}
-{{ render_toast(message, category) }}
+  {% if category == "custom_refugee_change_status_success" %}
+    <script>
+      window.onload = function() {
+        document.getElementById('custom_refugee_change_status_success').showModal();
+      }
+    </script>
+    <dialog class="modal" id="custom_refugee_change_status_success">
+      <form method="dialog" class="modal-box">
+       <div class="text-center">
+          <div class="text-4xl mb-3">🏡</div>
+          <h2 class="text-xl font-semibold mb-2">
+            ขอให้เดินทางกลับบ้านอย่างปลอดภัย
+          </h2>
+          <p class="text-gray-600 mb-4">
+            หากคุณต้องการความช่วยเหลือเพิ่มเติม สามารถติดต่อเราได้ทุกเวลา ทีมงานพร้อมให้การสนับสนุนครับ
+          </p>
+          <button
+            class="px-5 py-2 rounded-lg text-white bg-[#0288D1] hover:bg-[#0273AF] transition"
+            onclick="closePopup()"
+          >
+            ขอบคุณ
+          </button>
+        </div>
+      </form>
+    </dialog>
+  {% else %}
+    {{ render_toast(message, category) }}
+  {% endif %}
 {% endfor %}
 
 {% endblock body %}
