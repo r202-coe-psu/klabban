@@ -314,7 +314,10 @@ def delete_refugee(refugee_id):
 
 @module.route("/report/create", methods=["GET", "POST"])
 def create_report():
+    report_type = request.args.get("type", None)
     form = forms.reports.ReportNoteForm()
+    if report_type:
+        form.report_type.data = report_type
 
     if not form.validate_on_submit():
         return render_template("refugees/add_refugee_report.html", form=form)
@@ -336,6 +339,7 @@ def create_report():
 
     return redirect(url_for("refugees.index"))
 
+
 # หน้าแสดงผู้อพยพที่มีการส่ง description
 @module.route("/view_reports")
 @roles_required(["admin", "refugee_camp_staff"])
@@ -353,8 +357,7 @@ def view_reports():
     query = models.Report.objects(status__ne="inactive").order_by("name")
     if search:
         query = query.filter(
-            Q(title__icontains=search)
-            | Q(phone_number__icontains=search)
+            Q(title__icontains=search) | Q(phone_number__icontains=search)
         )
     if status:
         query = query.filter(report_status=status)
@@ -407,8 +410,10 @@ def add_staff_note(report_id):
         form = forms.reports.ReportStaffNoteForm(obj=report)
 
         if not form.validate_on_submit():
-            return render_template("refugees/add_staff_note.html",report=report, form=form)
-        
+            return render_template(
+                "refugees/add_staff_note.html", report=report, form=form
+            )
+
         report.staff_note = form.staff_note.data
         report.staff = current_user._get_current_object()
         report.save()
