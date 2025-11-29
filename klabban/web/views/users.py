@@ -66,6 +66,10 @@ def create_or_edit_user(user_id):
         form.roles.choices = USER_ROLES
 
     elif "refugee_camp_staff" in current_user.roles:
+        if not current_user.refugee_camp:
+            flash("คุณไม่มีศูนย์พักพิงที่ถูกกำหนด โปรดติดต่อผู้ดูแลระบบ", "error")
+            return redirect(url_for("users.index"))
+
         form.refugee_camp.choices = [
             (str(current_user.refugee_camp.id), current_user.refugee_camp.name)
         ]
