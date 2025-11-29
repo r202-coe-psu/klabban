@@ -29,6 +29,7 @@ __all__ = [
     "RefugeeCampsLog",
     "RefugeeNoteLog",
     "ImportRefugeeFile",
+    "MissingPerson",
 ]
 
 db = MongoEngine()

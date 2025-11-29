@@ -45,7 +45,8 @@ def index():
 
     if search:
         query &= Q(
-            Q(first_name__icontains=search)
+            Q(title_name__icontains=search)
+            | Q(first_name__icontains=search)
             | Q(last_name__icontains=search)
             | Q(identification_number__icontains=search)
         )
@@ -68,6 +69,7 @@ def index():
 @login_required
 @roles_required(["officer"])
 @module.route("/create", methods=["GET", "POST"], defaults={"missing_person_id": None})
+@module.route("/<missing_person_id>/edit", methods=["GET", "POST"])
 def create_or_edit(missing_person_id=None):
     form = forms.missing_persons.MissingPersonForm()
     missing_person = models.MissingPerson()
