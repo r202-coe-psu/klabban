@@ -133,7 +133,7 @@ def main():
         # Read the current sheet
         df = pd.read_excel(path, sheet_name=sheet_name)
         # print(f"Shape: {df.shape}")
-        # print("Columns:", df.columns.tolist())
+        print("Columns:", df.columns.tolist())
 
         # Process the sheet data similar to the original logic
         # You can add sheet-specific processing here if needed
@@ -141,7 +141,16 @@ def main():
         # Combine columns 'ชื่อ-สกุล', 'Unnamed: 2', 'Unnamed: 3' into 'ชื่อ - นามสกุล'
         # Convert all columns to string and replace NaN with empty string
         df = df.astype(str).replace("nan", "")
-        df["name"] = df.iloc[:, 1:4].apply(
+
+        # Check if 'ชื่อ - นามสกุล' column exists and print its column number
+        col_index = 1
+        if "ชื่อ - สกุล" in df.columns:
+            col_index = df.columns.get_loc("ชื่อ - สกุล")
+            print(f"Column 'ชื่อ - สกุล' is at index: {col_index}")
+        else:
+            print("Column 'ชื่อ - สกุล' not found in this sheet")
+
+        df["name"] = df.iloc[:, col_index : col_index + 4].apply(
             lambda x: " ".join(x.dropna().astype(str).str.strip()), axis=1
         )
 
@@ -156,7 +165,7 @@ def main():
         if "ญาติ" in df.columns:
             df["ญาติ"] = df["ญาติ"].astype(str).str.contains("/", na=False)
 
-        # print("after rename", df.columns)
+        print("after rename", df.columns)
 
         sheet_data = []
         for i, row in df.iterrows():
