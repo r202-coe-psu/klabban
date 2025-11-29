@@ -385,6 +385,7 @@
       </div>
       {% endfor %}
     {% endif %}
+    {# ใช้สำหรับ Render Dialog ของแต่ละ Refugees #}
     {% for refugee in refugees_pagination.items %}
       {% set change_status_dialog_id = "%s-change-status-dialog" | format(refugee.id) %}
       {{ dialog.ChangeStatusDialog(
