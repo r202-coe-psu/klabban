@@ -2,7 +2,7 @@ import datetime
 import mongoengine as me
 
 
-class ImportMissingPersonFile(me.document):
+class ImportMissingPersonFile(me.Document):
     meta = {
         "collection": "import_missing_person_files",
         "indexes": ["created_date"],
