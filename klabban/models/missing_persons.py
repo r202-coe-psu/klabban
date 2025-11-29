@@ -42,6 +42,7 @@ class MissingPerson(me.Document):
     reporter_phone_number = me.StringField()  # เบอร์โทรศัพท์ผู้แจ้ง
 
     code = me.StringField()  # CODE
+    metadata = me.DictField()  # ข้อมูลเสริม
     status = me.StringField(
         choices=("active", "disactive"), default="active"
     )  # สถานะข้อมูล
