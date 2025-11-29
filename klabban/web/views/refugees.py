@@ -13,15 +13,13 @@ module = Blueprint("refugees", __name__, url_prefix="/refugees")
 
 @caches.cache.memoize(timeout=60)
 def get_refugee_camp_choices():
-    camps = models.RefugeeCamp.objects(
-        status__nin=["deactive", "inactive", "disactive"]
-    ).order_by("name")
+    camps = models.RefugeeCamp.objects(status__ne=["inactive"]).order_by("name")
     camp_choice = [(str(camp.id), camp.name) for camp in camps]
     active_camps = []
     for camp in camps:
         # Count refugees in this camp
         refugee_count = models.Refugee.objects(
-            refugee_camp=camp.id, status__ne="deactive"
+            refugee_camp=camp.id, status="active"
         ).count()
         if refugee_count > 0:
             active_camps.append((str(camp.id), camp.name))
@@ -123,7 +121,14 @@ def change_status(refugee_id):
         ip_address=request.headers.get("X-Forwarded-For", request.remote_addr),
     )
     refugee.status_log.append(log)
+    refugee.updated_by = (
+        current_user._get_current_object() if current_user.is_authenticated else None
+    )
     refugee.save()
+
+    next = request.args.get("next")
+    if next:
+        return redirect(next)
 
     return redirect(url_for("refugees.index", **request.args))
 
@@ -258,6 +263,10 @@ def change_camp(refugee_id, camp_id):
     refugee.camp_log.append(camp_log)
     refugee.save()
 
+    next = request.args.get("next")
+    if next:
+        return redirect(next)
+
     return redirect(url_for("refugees.index", **request.args))
 
 
@@ -300,7 +309,6 @@ def delete_refugee(refugee_id):
     if next:
         return redirect(next)
 
-    print("--->", next)
     return redirect(url_for("refugees.index"))
 
 

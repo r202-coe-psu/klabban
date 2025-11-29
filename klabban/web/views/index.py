@@ -10,7 +10,7 @@ module = Blueprint("index", __name__)
 
 @module.route("/")
 def index():
-    refugee_camps = models.RefugeeCamp.objects(status="active")
+    refugee_camps = models.RefugeeCamp.objects(status__ne="inactive")
 
     # Count refugees for each camp (only active refugees) and attach to camp object
     for camp in refugee_camps:

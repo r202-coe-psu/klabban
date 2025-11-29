@@ -137,11 +137,17 @@
             <!-- Header Section -->
             <div class="{% if refugee_camp.description or refugee_camp.contact_info %}mb-4{% else %}mb-3{% endif %}">
                 <div class="flex justify-between items-start gap-2 mb-3">
-                    <h2 class="card-title text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-2">{{ refugee_camp.name }}</h2>
+                    <h2 class="card-title text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-2">
+                      {{ refugee_camp.name }} 
+                      {% if refugee_camp.status == 'closed' %} 
+                        <span class="text-base font-normal text-gray-500">(ปิดศูนย์พักพิง)</span>
+                      {% endif %}
+
+                    </h2>
                     <!-- Status Indicator -->
                     <span class="relative flex h-3 w-3 mt-1.5 shrink-0">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{'bg-green-400' if refugee_camp.status == 'active' else 'bg-red-400' }} opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 {{'bg-green-500' if refugee_camp.status == 'active' else 'bg-red-500' }}"></span>
                     </span>
                 </div>
                 
