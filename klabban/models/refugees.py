@@ -6,6 +6,7 @@ REFUGEE_STATUS_CHOICES = [
     ("active", "กำลังพักพิง"),
     ("back_home", "กลับบ้านแล้ว"),
     ("deactive", "ปิดการใช้งาน"),
+    ("inactive", "ปิดการใช้งาน"),
 ]
 
 NOTE_STATUS_CHOICES = [("unread", "ยังไม่อ่าน"), ("read", "อ่านแล้ว")]
