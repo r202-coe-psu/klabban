@@ -347,7 +347,10 @@ def validate_dataframe(df, sheet_name):
 
         # ตรวจสอบเลขบัตรประชาชน
         if pd.notna(row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต")):
-            id_number = str(int(row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต"))).strip()
+            # กัน กรณีเลขบัตรประชาชนมี .0 ต่อท้าย (จาก Excel)
+            id_number = (
+                str(row.get("หมายเลขบัตรประชาชนคนหาย/เสียชีวิต")).strip().split(".")[0]
+            )
             if id_number and not id_number.isdigit():
                 row_errors.append("หมายเลขบัตรประชาชนคนหาย/เสียชีวิตต้องเป็นตัวเลขเท่านั้น")
             elif id_number and len(id_number) != 13:
