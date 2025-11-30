@@ -205,13 +205,7 @@ def validate_import_file(import_refugee_file, file, refugee_camp_param):
 
         # ตรวจสอบว่าศูนย์พักพิงมีอยู่ในระบบหรือไม่
         if pd.notna(row.get("ศูนย์พักพิง")):
-            if refugee_camp_param != "all":
-                camp_name = str(row.get("ศูนย์พักพิง")).strip()
-                if camp_name != refugee_camp_param:
-                    error_rows.append(
-                        f"แถวที่ {index + 2}: ศูนย์พักพิงไม่ตรงกับที่เลือก ({refugee_camp_param})"
-                    )
-            else:
+            if refugee_camp_param == "all":
                 camp_name = str(row.get("ศูนย์พักพิง")).strip()
                 refugee_camp = get_refugee_camp_from_name(camp_name)
                 if not refugee_camp:
@@ -221,6 +215,12 @@ def validate_import_file(import_refugee_file, file, refugee_camp_param):
                 elif refugee_camp.status != "active":
                     error_rows.append(
                         f"แถวที่ {index + 2}: ศูนย์พักพิง '{camp_name}' ไม่ได้เปิดใช้งาน"
+                    )
+            else:
+                camp_name = str(row.get("ศูนย์พักพิง")).strip()
+                if camp_name != refugee_camp_param.name:
+                    error_rows.append(
+                        f"แถวที่ {index + 2}: ศูนย์พักพิงไม่ตรงกับที่เลือก ({refugee_camp_param.name})"
                     )
 
         # ตรวจสอบรูปแบบวันที่ลงทะเบียน
