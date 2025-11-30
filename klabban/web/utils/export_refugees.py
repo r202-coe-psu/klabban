@@ -5,6 +5,7 @@ from openpyxl import Workbook
 # สมมติว่า models อยู่ที่ models.py
 from klabban.models.refugees import Refugee, REFUGEE_STATUS_CHOICES, GENDER
 from klabban.models.export_refugee_files import ExportRefugeeFile
+from klabban.web.utils.config import REFUGEE_HEADER, REFUGEE_REQUIRE_HEADER
 from klabban import models
 
 
@@ -22,29 +23,10 @@ def process_refugee_export(refugee_camp_id, current_user):
     # 2. สร้าง Workbook และ Worksheet
     wb = Workbook()
     ws = wb.active
-    ws.title = "Refugee Data"
+    ws.title = "ข้อมูลผู้อพยพ"
 
     # 3. กำหนด Header (ชื่อคอลัมน์)
-    headers = [
-        "ชื่อ-นามสกุล",
-        "ชื่อเล่น",
-        "สถานะ",
-        "เพศ",
-        "อายุ",
-        "สัญชาติ",
-        "เชื้อชาติ",
-        "ประเทศต้นทาง",
-        "เบอร์โทร",
-        "โรคประจำตัว",
-        "ที่อยู่",
-        "สัตว์เลี้ยง",
-        "จำนวนคน (รวม)",
-        "ผู้ติดต่อฉุกเฉิน",
-        "หมายเหตุ",
-        "วันที่ลงทะเบียน",
-        "วันที่คาดว่าจะพัก (วัน)",
-        "วันที่กลับบ้าน",
-    ]
+    headers = REFUGEE_HEADER
     ws.append(headers)
 
     # 4. วนลูปใส่ข้อมูล
@@ -66,22 +48,24 @@ def process_refugee_export(refugee_camp_id, current_user):
         row = [
             r.name,
             r.nick_name or "-",
-            status_display,
-            gender_display,
-            r.age or 0,
+            r.identification_number or "-",
+            r.address or "-",
+            r.phone or "-",
             r.nationality or "-",
             r.ethnicity or "-",
             r.country or "-",
-            r.phone or "-",
+            r.age or 0,
+            gender_display,
             r.congenital_disease or "-",
-            r.address or "-",
-            r.pets or "-",
             r.people_count,
+            r.pets or "-",
+            r.expected_days or "",
             r.emergency_contact or "-",
             r.remark or "-",
             reg_date,
-            r.expected_days or "",
             back_date,
+            status_display,
+            r.refugee_camp.name if r.refugee_camp else "-",
         ]
         ws.append(row)
 

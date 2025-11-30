@@ -45,7 +45,7 @@ class MissingPerson(me.Document):
 
     # section: reporter information
     reporter_title_name = me.StringField()  # คำนำหน้าชื่อผู้แจ้ง
-    reporter_first_name = me.StringField(max_length=255)  # ชื่อผู้แจ้ง
+    reporter_first_name = me.StringField(max_length=255, required=True)  # ชื่อผู้แจ้ง
     reporter_last_name = me.StringField(max_length=255)  # นามสกุลผู้แจ้ง
     reporter_age = me.IntField()  # อายุผู้แจ้ง
     reporter_identification_number = me.StringField(
