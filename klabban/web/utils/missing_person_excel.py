@@ -467,19 +467,6 @@ def validate_dataframe(df, sheet_name):
         if pd.isna(row.get("ชื่อผู้แจ้ง")) or str(row.get("ชื่อผู้แจ้ง")).strip() == "":
             row_errors.append("ขาดชื่อผู้แจ้ง")
 
-        if pd.notna(row.get("คำนำหน้าชื่อผู้แจ้ง")):
-            title = str(row.get("คำนำหน้าชื่อผู้แจ้ง")).strip()
-            if title:
-                valid_titles = [choice[0] for choice in TITLE_NAME_CHOICES if choice[0]]
-                valid_titles_thai = [
-                    choice[1] for choice in TITLE_NAME_CHOICES if choice[1] != "-"
-                ]
-
-                if title not in valid_titles and title not in valid_titles_thai:
-                    row_errors.append(
-                        f"คำนำหน้าชื่อผู้แจ้งไม่ถูกต้อง ต้องเป็น: {', '.join(valid_titles_thai)}"
-                    )
-
         # ตรวจสอบเฉพาะ sheet ผู้เสียชีวิต - ต้องมีวันที่รับศพ
         if pd.notna(row.get("วันที่รับศพ")) and sheet_type == "death":
             date_str = str(row.get("วันที่รับศพ")).strip()
