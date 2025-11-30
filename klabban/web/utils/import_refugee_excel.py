@@ -8,35 +8,7 @@ from openpyxl import load_workbook
 from io import BytesIO
 from klabban.models.refugees import REFUGEE_STATUS_CHOICES, GENDER
 from flask import flash
-
-REQUIRE_HEADER = [
-    "ชื่อ-นามสกุล",
-    "วันที่ลงทะเบียน",
-    "ศูนย์พักพิง",
-]
-
-HEADER = [
-    "ชื่อเล่น",
-    "ชื่อ-นามสกุล",
-    "เลขบัตรประจำตัวประชาชน",
-    "ที่อยู่",
-    "เบอร์โทรศัพท์",
-    "สัญชาติ",
-    "เชื้อชาติ",
-    "ประเทศ",
-    "อายุ",
-    "เพศ",
-    "โรคประจำตัว",
-    "จำนวนคน",
-    "สัตว์เลี้ยง",
-    "จำนวนวันที่คาดว่าจะพัก",
-    "กรณีติดต่อฉุกเฉิน",
-    "หมายเหตุ",
-    "วันที่ลงทะเบียน",
-    "วันที่กลับบ้าน",
-    "สถานะ",
-    "ศูนย์พักพิง",
-]
+from klabban.web.utils.config import REFUGEE_REQUIRE_HEADER, REFUGEE_HEADER
 
 
 def get_template():
@@ -63,7 +35,7 @@ def get_template():
             "นายสมศักดิ์ (พี่ชาย) 0811111111",
             "นางสาวสมใจ (น้องสาว) 0822222222",
         ],
-        "หมายเหตุ": ["ต้องการความช่วยเหลือด้านอาหาร", ""],
+        "หมายเหตุ": ["", ""],
         "วันที่ลงทะเบียน": ["01/12/2024", "15/12/2024"],
         "วันที่กลับบ้าน": ["", ""],
         "สถานะ": ["กำลังพักพิง", "กำลังพักพิง"],
@@ -169,13 +141,11 @@ def check_existing_refugee(
 
 
 def get_refugee_camp_from_name(name):
-    query = models.RefugeeCamp.objects(
-        name=name,
-    )
+    query = models.RefugeeCamp.objects(name=name, status="active")
     return query.first()
 
 
-def validate_import_file(import_refugee_file, file, refugee_camp):
+def validate_import_file(import_refugee_file, file, refugee_camp_param):
     if (
         file.filename
         and not file.filename.endswith(".xlsx")
@@ -189,7 +159,13 @@ def validate_import_file(import_refugee_file, file, refugee_camp):
 
     try:
         if file.filename.endswith(".xlsx"):
-            df = pd.read_excel(file)
+            # ตรวจสอบชื่อ sheet ก่อนอ่านข้อมูล
+            xl_file = pd.ExcelFile(file)
+            if "ข้อมูลผู้อพยพ" in xl_file.sheet_names:
+                df = pd.read_excel(file, sheet_name="ข้อมูลผู้อพยพ")
+            else:
+                # ถ้าไม่พบ sheet ที่ต้องการ ให้อ่าน sheet แรก
+                df = pd.read_excel(file, sheet_name=0)
         else:
             df = pd.read_csv(file)
 
@@ -203,7 +179,7 @@ def validate_import_file(import_refugee_file, file, refugee_camp):
 
     # ตรวจสอบ column ที่จำเป็น
     missed_columns = []
-    for col in REQUIRE_HEADER:
+    for col in REFUGEE_REQUIRE_HEADER:
         if col not in df.columns:
             missed_columns.append(col)
 
@@ -220,7 +196,7 @@ def validate_import_file(import_refugee_file, file, refugee_camp):
     for index, row in df.iterrows():
         missing_fields = []
 
-        for col in REQUIRE_HEADER:
+        for col in REFUGEE_REQUIRE_HEADER:
             if pd.isna(row[col]) or str(row[col]).strip() == "":
                 missing_fields.append(col)
 
@@ -229,11 +205,11 @@ def validate_import_file(import_refugee_file, file, refugee_camp):
 
         # ตรวจสอบว่าศูนย์พักพิงมีอยู่ในระบบหรือไม่
         if pd.notna(row.get("ศูนย์พักพิง")):
-            if refugee_camp != "all":
+            if refugee_camp_param != "all":
                 camp_name = str(row.get("ศูนย์พักพิง")).strip()
-                if camp_name != refugee_camp.name:
+                if camp_name != refugee_camp_param:
                     error_rows.append(
-                        f"แถวที่ {index + 2}: ศูนย์พักพิงไม่ตรงกับที่เลือก ({refugee_camp.name})"
+                        f"แถวที่ {index + 2}: ศูนย์พักพิงไม่ตรงกับที่เลือก ({refugee_camp_param})"
                     )
             else:
                 camp_name = str(row.get("ศูนย์พักพิง")).strip()
@@ -252,11 +228,20 @@ def validate_import_file(import_refugee_file, file, refugee_camp):
             if not isinstance(row.get("วันที่ลงทะเบียน"), datetime.datetime):
                 date_str = str(row.get("วันที่ลงทะเบียน")).strip()
                 try:
-                    # ตรวจสอบว่าเป็น format DD/MM/YYYY หรือไม่
-                    pd.to_datetime(date_str, format="%d/%m/%Y", dayfirst=True)
+                    # ลองหลายรูปแบบวันที่
+                    try:
+                        # รูปแบบ DD/MM/YYYY
+                        pd.to_datetime(date_str, format="%d/%m/%Y", dayfirst=True)
+                    except:
+                        try:
+                            # รูปแบบ YYYY-MM-DD HH:MM (จาก export)
+                            pd.to_datetime(date_str, format="%Y-%m-%d %H:%M")
+                        except:
+                            # รูปแบบ YYYY-MM-DD
+                            pd.to_datetime(date_str, format="%Y-%m-%d")
                 except:
                     error_rows.append(
-                        f"แถวที่ {index + 2}: รูปแบบวันที่ลงทะเบียนไม่ถูกต้อง ต้องเป็น DD/MM/YYYY เช่น 25/12/2024"
+                        f"แถวที่ {index + 2}: รูปแบบวันที่ลงทะเบียนไม่ถูกต้อง ต้องเป็น DD/MM/YYYY หรือ YYYY-MM-DD เช่น 25/12/2024 หรือ 2024-12-25"
                     )
 
         # ตรวจสอบรูปแบบวันที่กลับบ้าน (ถ้ามี)
@@ -265,10 +250,20 @@ def validate_import_file(import_refugee_file, file, refugee_camp):
                 date_str = str(row.get("วันที่กลับบ้าน")).strip()
                 if date_str:  # ถ้าไม่ใช่ค่าว่าง
                     try:
-                        pd.to_datetime(date_str, format="%d/%m/%Y", dayfirst=True)
+                        # ลองหลายรูปแบบวันที่
+                        try:
+                            # รูปแบบ DD/MM/YYYY
+                            pd.to_datetime(date_str, format="%d/%m/%Y", dayfirst=True)
+                        except:
+                            try:
+                                # รูปแบบ YYYY-MM-DD HH:MM (จาก export)
+                                pd.to_datetime(date_str, format="%Y-%m-%d %H:%M")
+                            except:
+                                # รูปแบบ YYYY-MM-DD
+                                pd.to_datetime(date_str, format="%Y-%m-%d")
                     except:
                         error_rows.append(
-                            f"แถวที่ {index + 2}: รูปแบบวันที่กลับบ้านไม่ถูกต้อง ต้องเป็น DD/MM/YYYY เช่น 25/12/2024"
+                            f"แถวที่ {index + 2}: รูปแบบวันที่กลับบ้านไม่ถูกต้อง ต้องเป็น DD/MM/YYYY หรือ YYYY-MM-DD เช่น 25/12/2024 หรือ 2024-12-25"
                         )
 
         # ตรวจสอบค่าตัวเลข
@@ -336,7 +331,13 @@ def write_refugees_from_import_file(
     source,
 ):
     if file.filename.endswith(".xlsx"):
-        df = pd.read_excel(file)
+        # ตรวจสอบชื่อ sheet ก่อนอ่านข้อมูล
+        xl_file = pd.ExcelFile(file)
+        if "ข้อมูลผู้อพยพ" in xl_file.sheet_names:
+            df = pd.read_excel(file, sheet_name="ข้อมูลผู้อพยพ")
+        else:
+            # ถ้าไม่พบ sheet ที่ต้องการ ให้อ่าน sheet แรก
+            df = pd.read_excel(file, sheet_name=0)
     else:
         df = pd.read_csv(file)
 
@@ -360,9 +361,23 @@ def write_refugees_from_import_file(
                     if isinstance(row.get("วันที่ลงทะเบียน"), datetime.datetime):
                         registration_date = row.get("วันที่ลงทะเบียน").date()
                     else:
-                        registration_date = pd.to_datetime(
-                            row.get("วันที่ลงทะเบียน"), format="%d/%m/%Y", dayfirst=True
-                        ).date()
+                        date_str = str(row.get("วันที่ลงทะเบียน")).strip()
+                        try:
+                            # รูปแบบ DD/MM/YYYY
+                            registration_date = pd.to_datetime(
+                                date_str, format="%d/%m/%Y", dayfirst=True
+                            ).date()
+                        except:
+                            try:
+                                # รูปแบบ YYYY-MM-DD HH:MM
+                                registration_date = pd.to_datetime(
+                                    date_str, format="%Y-%m-%d %H:%M"
+                                ).date()
+                            except:
+                                # รูปแบบ YYYY-MM-DD
+                                registration_date = pd.to_datetime(
+                                    date_str, format="%Y-%m-%d"
+                                ).date()
                 except:
                     registration_date = datetime.datetime.now().date()
             else:
@@ -374,9 +389,23 @@ def write_refugees_from_import_file(
                     if isinstance(row.get("วันที่กลับบ้าน"), datetime.datetime):
                         back_home_date = row.get("วันที่กลับบ้าน").date()
                     else:
-                        back_home_date = pd.to_datetime(
-                            row.get("วันที่กลับบ้าน"), format="%d/%m/%Y", dayfirst=True
-                        ).date()
+                        date_str = str(row.get("วันที่กลับบ้าน")).strip()
+                        try:
+                            # รูปแบบ DD/MM/YYYY
+                            back_home_date = pd.to_datetime(
+                                date_str, format="%d/%m/%Y", dayfirst=True
+                            ).date()
+                        except:
+                            try:
+                                # รูปแบบ YYYY-MM-DD HH:MM
+                                back_home_date = pd.to_datetime(
+                                    date_str, format="%Y-%m-%d %H:%M"
+                                ).date()
+                            except:
+                                # รูปแบบ YYYY-MM-DD
+                                back_home_date = pd.to_datetime(
+                                    date_str, format="%Y-%m-%d"
+                                ).date()
                 except:
                     back_home_date = None
 
