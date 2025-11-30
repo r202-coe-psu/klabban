@@ -468,7 +468,7 @@ def write_refugees_from_import_file(
                 if refugee_camp != "all":
                     refugee_camp_id = refugee_camp.id
 
-            if pd.notna(row.get("ชื่อ-นามสกุล")) and pd.notna(row.get("ชื่อเล่น")):
+            if pd.notna(row.get("ชื่อ-นามสกุล")):
                 existing_refugee = check_existing_refugee(
                     refugee_camp=refugee_camp_id,
                     name=str(row.get("ชื่อ-นามสกุล")).strip(),
