@@ -467,20 +467,6 @@ def validate_dataframe(df, sheet_name):
         if pd.isna(row.get("ชื่อผู้แจ้ง")) or str(row.get("ชื่อผู้แจ้ง")).strip() == "":
             row_errors.append("ขาดชื่อผู้แจ้ง")
 
-        # ตรวจสอบคำนำหน้าชื่อ
-        if pd.notna(row.get("คำนำหน้าชื่อคนหาย/เสียชีวิต")):
-            title = str(row.get("คำนำหน้าชื่อคนหาย/เสียชีวิต")).strip()
-            if title:
-                valid_titles = [choice[0] for choice in TITLE_NAME_CHOICES if choice[0]]
-                valid_titles_thai = [
-                    choice[1] for choice in TITLE_NAME_CHOICES if choice[1] != "-"
-                ]
-
-                if title not in valid_titles and title not in valid_titles_thai:
-                    row_errors.append(
-                        f"คำนำหน้าชื่อคนหาย/เสียชีวิตไม่ถูกต้อง ต้องเป็น: {', '.join(valid_titles_thai)}"
-                    )
-
         if pd.notna(row.get("คำนำหน้าชื่อผู้แจ้ง")):
             title = str(row.get("คำนำหน้าชื่อผู้แจ้ง")).strip()
             if title:
@@ -1278,6 +1264,7 @@ def process_missing_person_export(current_user):
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
         export_missing_person_file.file_name = filename
+
     else:
         export_missing_person_file.file.replace(
             output,
