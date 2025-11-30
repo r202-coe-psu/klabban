@@ -149,11 +149,15 @@ def import_missing_person_modal():
         )
 
     file = form.file.data
-
+    source = (
+        form.source.data
+        if form.source.data
+        else f'{current_user.get_fullname()}-upload-{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}'
+    )
     if file:
         import_missing_person_file = models.ImportMissingPersonFile(
             file_name=file.filename,
-            source=form.source.data if form.source.data else None,
+            source=source,
             created_by=current_user._get_current_object(),
             upload_status="pending",
         )
