@@ -25,7 +25,14 @@ def create_app():
             # convert string to dict
             config[k] = ast.literal_eval(v)
 
+        if v.lower() == "true":
+            config[k] = True
+        elif v.lower() == "false":
+            config[k] = False
+
     app.config.update(config)
+
+    print(app.config)
 
     views.register_blueprint(app)
     caches.init_cache(app)

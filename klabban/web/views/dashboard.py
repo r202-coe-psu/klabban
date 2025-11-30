@@ -142,7 +142,9 @@ def refugee_camp_dashboard():
         # ถ้าไม่ได้เป็นแอดมิน ให้เลือกศูนย์พักพิงของตัวเองโดยอัตโนมัติ
         refugee_camp = current_user.refugee_camp
     else:
-        refugee_camps = models.RefugeeCamp.objects(status__ne="inactive")
+        refugee_camps = models.RefugeeCamp.objects(
+            status__nin=["inactive", "disactive", "deactive"]
+        )
         form.refugee_camp.choices = [
             (str(camp.id), camp.name) for camp in refugee_camps
         ]
@@ -172,7 +174,9 @@ def refugee_camp_dashboard():
     now = datetime.datetime.utcnow()
     seven_days_ago = now - datetime.timedelta(days=7)
 
-    refugees = models.Refugee.objects(refugee_camp=refugee_camp, status__ne="deactive")
+    refugees = models.Refugee.objects(
+        refugee_camp=refugee_camp, status__nin=["inactive", "disactive", "deactive"]
+    )
 
     total_refugees = refugees.sum("people_count")
     active_refugees = refugees.filter(status="active").sum("people_count")
