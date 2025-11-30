@@ -58,11 +58,16 @@ def index():
     except ValueError:
         missing_persons_pagination = Pagination(query, page=1, per_page=per_page)
 
+    total_missing = query.count()
+    total_death = query.filter(missing_person_status="death").count()
+
     return render_template(
         "/missing_persons/index.html",
         missing_persons_pagination=missing_persons_pagination,
         search_form=search_form,
         view_mode=view_mode,
+        total_missing=total_missing,
+        total_death=total_death,
     )
 
 
