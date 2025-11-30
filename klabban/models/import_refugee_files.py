@@ -13,6 +13,7 @@ class ImportRefugeeFile(me.Document):
     file = me.FileField()
     file_name = me.StringField(required=True)
     record_count = me.IntField(default=0)
+    refugee_camp = me.ReferenceField("RefugeeCamp", required=True)
     source = me.StringField(max_length=255)
     error_messages = me.ListField(me.StringField())
     uploaded_date = me.DateTimeField(default=datetime.datetime.now)
