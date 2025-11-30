@@ -381,7 +381,7 @@ def write_refugees_from_import_file(
                 except:
                     registration_date = datetime.datetime.now().date()
             else:
-                registration_date = datetime.datetime.now().date()
+                registration_date = None
 
             back_home_date = None
             if pd.notna(row.get("วันที่กลับบ้าน")):

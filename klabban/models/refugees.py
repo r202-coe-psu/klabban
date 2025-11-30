@@ -61,11 +61,10 @@ class Refugee(me.Document):
     emergency_contact = me.StringField(max_length=255)
 
     remark = me.StringField()
-    registration_date = me.DateTimeField(default=datetime.datetime.now)
+    registration_date = me.DateTimeField()
     back_home_date = me.DateTimeField()
     is_public_searchable = me.BooleanField(default=True)
     source = me.StringField(max_length=255)
-
 
     # universal field
     metadata = me.DictField()
