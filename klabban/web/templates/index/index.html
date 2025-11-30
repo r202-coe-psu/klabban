@@ -16,34 +16,63 @@
 
 {% block content %}
 <main class="container mx-auto px-4 flex flex-col items-center mt-8 mb-16">
-  <!-- Hero Section -->
+  {# Hero Section #}
   <div class="text-center mb-10">
-    <!-- Main Title -->
+    {# Main Title #}
     <h1 class="text-5xl md:text-6xl font-bold mb-3 text-gray-800">
       HAKON
     </h1>
     
-    <!-- Subtitle -->
+    {# Subtitle #}
     <p class="text-lg md:text-xl text-gray-600 mb-1">เว็บไซต์สำหรับหาญาติในศูนย์พักพิง</p>
     
-    <!-- English Subtitle -->
+    {# English Subtitle #}
     <p class="text-sm text-gray-500">Migrant Family Reunification Platform</p>
   </div>
+  {# Warning Message Section #}
+  <div class="w-full max-w-5xl mb-6">
+    <div class="relative overflow-hidden rounded-xl bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-100 shadow-sm">
+      
+      {# Content #}
+      <div class="relative px-5 py-3 flex items-center justify-center gap-3">
+        {# Warning Icon #}
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-yellow-200">
+            <i class="ph-fill ph-megaphone text-lg text-yellow-500"></i>
+          </div>
+        </div>
+        
+        {# Warning Text #}
+        <div class="">
+          <p class="text-sm font-medium text-yellow-600 leading-relaxed">
+            ต้องการตามหาคนหายให้เข้าแจ้งรายชื่อกับพนักงานสอบสวนสถานีตำรวจภูธรจังหวัดสงขลา ที่อาคารเรียนรวมและหอสมุดสุขภาพคณะแพทย์ศาสตร์ มหาวิทยาลัยสงขลานครินทร์ ตั้งแต่เวลา 8.00 น. ถึง 18.00 น.
+            <i class="ph ph-map-pin"></i>
+            <a class="underline" href="https://maps.app.goo.gl/ictmcUp1JEYXEkZM7">
+              คลิกที่นี่เพื่อดูพิกัด</a>
+          </p>
+        </div>
+      </div>
+      
+      
+      <div class="absolute top-0 right-0 w-16 h-16 bg-yellow-100 rounded-full -mr-8 -mt-8 opacity-20"></div>
+      <div class="absolute bottom-0 left-0 w-12 h-12 bg-orange-100 rounded-full -ml-6 -mb-6 opacity-20"></div>
+    </div>
+  </div>
   
-  <!-- Warning Message Section -->
+  {# Warning Message Section #}
   <div class="w-full max-w-5xl mb-6">
     <div class="relative overflow-hidden rounded-xl bg-gradient-to-r from-red-50 to-orange-50 border border-red-100 shadow-sm">
       
-      <!-- Content -->
+      {# Content #}
       <div class="relative px-5 py-3 flex items-center justify-center gap-3">
-        <!-- Warning Icon -->
+        {# Warning Icon #}
         <div class="flex-shrink-0">
           <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-red-200">
             <i class="ph-fill ph-warning text-lg text-red-500"></i>
           </div>
         </div>
         
-        <!-- Warning Text -->
+        {# Warning Text #}
         <div class="text-center">
           <p class="text-sm font-medium text-red-600 leading-relaxed">
             ข้อมูลนี้สำหรับติดตามหาบุคคลสูญหายในสถานการณ์ภัยพิบัติเท่านั้น
@@ -52,23 +81,24 @@
         </div>
       </div>
       
+      
       <div class="absolute top-0 right-0 w-16 h-16 bg-red-100 rounded-full -mr-8 -mt-8 opacity-20"></div>
       <div class="absolute bottom-0 left-0 w-12 h-12 bg-orange-100 rounded-full -ml-6 -mb-6 opacity-20"></div>
     </div>
   </div>
   
-  <!-- Search Card -->
+  {# Search Card #}
   <div class="card w-full max-w-5xl bg-white shadow-md border border-gray-200 rounded-2xl mb-8">
     <div class="card-body p-6 md:p-8">
-      <!-- Card Title -->
+      {# Card Title #}
       <div class="mb-4">
         <h2 class="text-2xl font-semibold text-gray-800 mb-1">ค้นหาผู้อพยพ</h2>
         <p class="text-sm text-gray-500">Search for migrants</p>
       </div>
       
-      <!-- Search Form -->
+      {# Search Form #}
       <form action="{{ url_for('refugees.index') }}" method="get" class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
-        <!-- Search Input -->
+        {# Search Input #}
         <div class="flex-1">
           <input 
             type="text" 
@@ -79,7 +109,7 @@
           />
         </div>
 
-        <!-- Search Button -->
+        {# Search Button #}
         <div class="flex gap-2 md:w-auto shrink-0">
           <button 
             type="submit"
@@ -99,7 +129,7 @@
     <div class="bg-white border border-gray-300 rounded-xl shadow-lg">
       <div class="p-4 md:p-6">
         <div class="flex flex-col items-center text-center gap-4">
-          <!-- Main message section -->
+          {# Main message section #}
           <div class="flex flex-col lg:flex-row items-center gap-3 lg:gap-4">
             <div class="flex flex-row items-center gap-2">
               <span class="font-medium text-gray-800 text-sm md:text-base">
@@ -113,13 +143,13 @@
               />
             </div>
           
-          <span class="text-gray-700 text-sm md:text-base max-w-md lg:max-w-none">
-            หลังสถานะผู้อพยพเพื่อยืนยันการออก หรือทำตามคู่มือได้ที่ 
-            <a href="{{ url_for('manuals.index') }}" class="text-blue-600 hover:underline font-medium">คู่มือ</a>
-          </span>
+            <span class="text-gray-700 text-sm md:text-base max-w-md lg:max-w-none">
+              หลังสถานะผู้อพยพเพื่อยืนยันการออก หรือทำตามคู่มือได้ที่ 
+              <a href="{{ url_for('manuals.index') }}" class="text-blue-600 hover:underline font-medium">คู่มือ</a>
+            </span>
           </div>
           
-          <!-- Button section -->
+          {# Button section #}
           <div class="w-full max-w-sm">
             <a class="btn btn-error text-white w-full text-sm md:text-base py-3 md:py-4 h-auto min-h-0 rounded-lg shadow-sm hover:shadow-md transition-all duration-200" 
                href="{{ url_for('refugees.create_report', type='not_found') }}">
@@ -131,8 +161,9 @@
       </div>
     </div>
   </div>
+  
 
-  <!-- Section Header -->
+  {# Section Header #}
   <div class="w-full max-w-5xl mb-6 mt-4 flex flex-col md:flex-row items-center justify-between gap-4">
     <div class="text-center md:text-left">
       <div class="flex items-center gap-3 justify-center md:justify-start mb-1">
@@ -154,7 +185,7 @@
       {% for refugee_camp in refugee_camps %}
       <div class="card w-full bg-white shadow-sm hover:shadow-xl border border-gray-200 hover:border-blue-200 rounded-2xl transition-all duration-300 group h-full flex flex-col">
         <div class="card-body p-6 flex flex-col h-full">
-            <!-- Header Section -->
+            {# Header Section #}
             <div class="{% if refugee_camp.description or refugee_camp.contact_info %}mb-4{% else %}mb-3{% endif %}">
                 <div class="flex justify-between items-start gap-2 mb-3">
                     <h2 class="card-title text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-2">
@@ -164,7 +195,7 @@
                       {% endif %}
 
                     </h2>
-                    <!-- Status Indicator -->
+                    {# Status Indicator #}
                     <span class="relative flex h-3 w-3 mt-1.5 shrink-0">
                       {% if refugee_camp.status == 'active' %}
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -173,7 +204,7 @@
                     </span>
                 </div>
                 
-                <!-- Refugee Count Badge -->
+                {# Refugee Count Badge #}
                 <div class="{% if refugee_camp.description %}mb-4{% else %}mb-0{% endif %}">
                     <div class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg border border-blue-100 group-hover:bg-blue-100 group-hover:border-blue-200 transition-colors">
                         <i class="ph-fill ph-users text-lg"></i>
@@ -182,13 +213,13 @@
                     </div>
                 </div> 
 
-                <!-- Description -->
+                {# Description #}
                 {% if refugee_camp.description %}
                 <p class="text-sm text-gray-600 mt-4 line-clamp-3 leading-relaxed">{{ refugee_camp.description }}</p>
                 {% endif %}
             </div>
 
-            <!-- Contact Information -->
+            {# Contact Information #}
             {% if refugee_camp.contact_info %}
             <div class="mb-4 bg-gray-50 rounded-xl border border-gray-100 p-4">
                 <div class="flex items-start gap-3 text-sm">
@@ -214,7 +245,7 @@
             </div>
             {% endif %}
 
-            <!-- Action Buttons -->
+            {# Action Buttons #}
             <div class="flex flex-col gap-3 mt-auto {% if not refugee_camp.contact_info %}pt-4{% else %}pt-2{% endif %}">
                 {% if refugee_camp.other_link or refugee_camp.location_url %}
                 <div class="grid {% if refugee_camp.other_link and refugee_camp.location_url %}grid-cols-2{% else %}grid-cols-1{% endif %} gap-3 w-full">
