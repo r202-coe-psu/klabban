@@ -154,7 +154,25 @@
             <tr>
               <td class="font-medium">{{ refugee.name }}</td>
               <td>{{ refugee.refugee_camp.name if refugee.refugee_camp else "ไม่ระบุ" }}</td>
-              <td>{{ refugee.registration_date | format_thai_datetime_short_month }}</td>
+              <td>
+                <div class="cursor-pointer tooltip tooltip-left bg-white text-black">
+                  <div class="tooltip-content text-start grid">
+                    <div class="space-y-1">
+                      <div class="flex gap-1">
+                        <div class="font-medium">ผู้สร้าง:</div>
+                        <div>{{ refugee.created_by.get_fullname() if refugee.created_by else "ไม่พบคนสร้าง" }}</div>
+                      </div>
+                      <div class="flex gap-1">
+                        <div class="font-medium">ผู้แก้ไข:</div>
+                        <div>{{ refugee.updated_by.get_fullname() if refugee.updated_by else "ไม่พบคนแก้ไข" }}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tooltip tooltip-left">
+                    {{ refugee.registration_date | format_thai_datetime_short_month }}
+                  </div>
+                </div>
+              </td>
             </tr>
             {% endfor %}
           </tbody>

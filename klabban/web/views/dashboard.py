@@ -95,7 +95,7 @@ def admin_dashboard():
     recent_refugees = (
         models.Refugee.objects(status__ne="deactive")
         .order_by("-registration_date")
-        .limit(5)
+        .limit(10)
     )
     registrations_last_week = models.Refugee.objects(
         status__ne="deactive", registration_date__gte=seven_days_ago
@@ -178,7 +178,7 @@ def refugee_camp_dashboard():
     active_refugees = refugees.filter(status="active").sum("people_count")
     returned_refugees = refugees.filter(status="back_home").sum("people_count")
 
-    recent_refugees = refugees.order_by("-registration_date").limit(5)
+    recent_refugees = refugees.order_by("-registration_date").limit(10)
     registrations_last_week = refugees.filter(
         registration_date__gte=seven_days_ago
     ).sum("people_count")
