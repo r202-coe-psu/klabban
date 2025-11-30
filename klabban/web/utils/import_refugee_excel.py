@@ -432,7 +432,7 @@ def write_refugees_from_import_file(
                     expected_stay_days = None
 
             # แปลง gender
-            gender = "undefined"  # default
+            gender = "other"  # default
             if pd.notna(row.get("เพศ")):
                 gender_thai = str(row.get("เพศ")).strip()
                 for key, value in GENDER:
