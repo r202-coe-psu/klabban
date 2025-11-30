@@ -232,12 +232,12 @@
           
           <div>
             <span class="text-gray-500">ลงทะเบียน:</span>
-            <span class="font-medium">{{ refugee.registration_date.strftime("%d %B %Y") }}</span>
+            <span class="font-medium">{{ refugee.registration_date | format_thai_datetime_short_month }}</span>
           </div>
           
           <div>
             <span class="text-gray-500">อัปเดต:</span>
-            <span class="font-medium">{{ refugee.updated_date.strftime("%d %B %Y") }}</span>
+            <span class="font-medium">{{ refugee.updated_date | format_thai_datetime_short_month }}</span>
           </div>
         </div>
       </div>
@@ -287,7 +287,7 @@
           </td>
 
             <td class="px-3 py-3 hidden lg:table-cell">
-              {{ refugee.registration_date.strftime("%d %b %Y") }}
+              {{ refugee.registration_date | format_thai_datetime_short_month }}
             </td>
 
             {% if current_user.is_authenticated and ("admin" in current_user.roles or "refugee_camp_staff" in current_user.roles)%}

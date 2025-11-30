@@ -90,7 +90,7 @@ def format_thai_date_short_month(dt):
 
 def format_thai_datetime_short_month(dt):
     if not isinstance(dt, datetime.datetime):
-        return ""
+        return "-"
 
     thai_year = dt.year + 543
     thai_months = {

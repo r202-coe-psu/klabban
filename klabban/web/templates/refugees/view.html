@@ -97,7 +97,7 @@
             </div>
             <div>
                 <p class="text-gray-400 text-sm font-light">วันที่ลงทะเบียน / Registration Date:</p>
-                <p>{{ refugee.registration_date.strftime("%d %B %Y") or "-" }}</p>
+                <p>{{ refugee.registration_date | format_thai_datetime_short_month }}</p>
             </div>
             <div>
                 <p class="text-gray-400 text-sm font-light">วันที่กลับบ้าน / Return Home Date:</p>
