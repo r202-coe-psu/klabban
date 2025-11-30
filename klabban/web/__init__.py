@@ -32,8 +32,6 @@ def create_app():
 
     app.config.update(config)
 
-    print(app.config)
-
     views.register_blueprint(app)
     caches.init_cache(app)
     models.init_db(app)
