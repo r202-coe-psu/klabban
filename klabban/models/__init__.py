@@ -19,6 +19,7 @@ from klabban.models.reports import (
     REPORT_TYPE_CHOICES,
     STATUS_CHOICES,
 )
+from klabban.models.export_missing_person_file import ExportMissingPersonFile
 
 
 import mongoengine as me
@@ -35,6 +36,7 @@ __all__ = [
     "ImportRefugeeFile",
     "MissingPerson",
     "Report",
+    "ExportMissingPersonFile",
 ]
 
 db = MongoEngine()
