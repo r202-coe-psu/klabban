@@ -174,7 +174,6 @@ def import_refugee_modal():
     form.refugee_camp.choices = [("all", "ทั้งหมด")] + [
         (str(rc.id), rc.name) for rc in refugee_camps
     ]
-    print(form.refugee_camp.choices)
     # ดึง import logs
     import_logs = (
         models.ImportRefugeeFile.objects().order_by("-uploaded_date").limit(20)
@@ -196,10 +195,15 @@ def import_refugee_modal():
 
     file = form.excel_file.data
 
+    source = (
+        form.source.data
+        if form.source.data
+        else f'{current_user.get_fullname()}-upload-{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}'
+    )
     if file:
         import_refugee_file = models.ImportRefugeeFile(
             file_name=file.filename,
-            source=form.source.data if form.source.data else None,
+            source=source,
             created_by=current_user._get_current_object(),
             upload_status="pending",
         )
