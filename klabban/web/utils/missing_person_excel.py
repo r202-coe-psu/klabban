@@ -214,7 +214,7 @@ def get_template():
 
         # Validation choices
         title_choices = [choice[1] for choice in TITLE_NAME_CHOICES if choice[1] != "-"]
-        dna_choices = ["เก็บเแล้ว"]
+        dna_choices = ["เก็บเเล้ว"]
 
         validations = {
             "คำนำหน้าชื่อคนหาย/เสียชีวิต": title_choices,
@@ -1014,7 +1014,7 @@ def process_missing_person_export(current_user):
                 else ""
             ),
             "คำนำหน้าชื่อคนหาย/เสียชีวิต": dict(TITLE_NAME_CHOICES).get(
-                person.title_name, ""
+                person.title_name, "-"
             ),
             "ชื่อคนหาย/เสียชีวิต": person.first_name or "",
             "นามสกุลคนหาย/เสียชีวิต": person.last_name or "",
@@ -1036,7 +1036,7 @@ def process_missing_person_export(current_user):
             ),
             "ความสัมพันธ์กับผู้หาย/เสียชีวิต": person.deceased_relationship or "",
             "คำนำหน้าชื่อผู้แจ้ง": dict(TITLE_NAME_CHOICES).get(
-                person.reporter_title_name, ""
+                person.reporter_title_name, "-"
             ),
             "ชื่อผู้แจ้ง": person.reporter_first_name or "",
             "นามสกุลผู้แจ้ง": person.reporter_last_name or "",
@@ -1103,6 +1103,21 @@ def process_missing_person_export(current_user):
         # คอลัมน์ที่เป็นวันที่
         date_columns = ["วันที่มาเเจ้งเหตุ", "วันที่รับศพ"]
 
+        # ========== สร้าง Choices sheet ==========
+        sheet_choices = "Choices_ตัวเลือกห้ามลบ"
+
+        # Validation choices
+        title_choices = [choice[1] for choice in TITLE_NAME_CHOICES if choice[1] != "-"]
+        dna_choices = ["เก็บเเล้ว"]
+
+        validations = {
+            "คำนำหน้าชื่อคนหาย/เสียชีวิต": title_choices,
+            "คำนำหน้าชื่อผู้แจ้ง": title_choices,
+            "เก็บดีเอ็นเอญาติ": dna_choices,
+        }
+
+        # เขียน choices ลง hidden sheet
+
         # ========== Sheet 1: ผู้สูญหาย ==========
         if len(df_missing) > 0:
             worksheet_missing = workbook.add_worksheet("ผู้สูญหาย")
@@ -1132,10 +1147,37 @@ def process_missing_person_export(current_user):
                             row_num + 1, col_num, value, date_format
                         )
                     else:
-                        # เขียนปกติไม่มี format
                         worksheet_missing.write(row_num + 1, col_num, value)
 
-            # ปรับความกว้างคอลัมน์ โดยไม่กำหนด format
+            # ========== เพิ่ม Data validation ==========
+            first_row = 1  # เริ่มจากแถวแรกหลัง header
+            last_row = max(len(df_missing), 10000)  # จำนวนแถวที่มี + buffer
+
+            list_row_start = 0
+            for column_name, source in validations.items():
+                if column_name not in df_missing.columns:
+                    continue
+
+                col_idx = df_missing.columns.get_loc(column_name)
+
+                # หา range ของ choices ใน hidden sheet
+                start_row = list_row_start
+                end_row = list_row_start + len(source) - 1
+
+                rng = f"={sheet_choices}!$A${start_row+1}:$A${end_row+1}"
+
+                # ใช้ validation กับทุกแถว
+                worksheet_missing.data_validation(
+                    first_row=first_row,
+                    first_col=col_idx,
+                    last_row=last_row,
+                    last_col=col_idx,
+                    options={"validate": "list", "source": rng},
+                )
+
+                list_row_start += len(source)
+
+            # ปรับความกว้างคอลัมน์
             for i, col in enumerate(df_missing.columns):
                 max_len = max(
                     (
@@ -1145,7 +1187,7 @@ def process_missing_person_export(current_user):
                     ),
                     len(col),
                 )
-                worksheet_missing.set_column(i, i, max_len + 3)  # ไม่ใส่ format parameter
+                worksheet_missing.set_column(i, i, max_len + 3)
 
         # ========== Sheet 2: ผู้เสียชีวิต ==========
         if len(df_death) > 0:
@@ -1176,7 +1218,33 @@ def process_missing_person_export(current_user):
                     else:
                         worksheet_death.write(row_num + 1, col_num, value)
 
-            # ปรับความกว้างคอลัมน์ โดยไม่กำหนด format
+            # ========== เพิ่ม Data validation ==========
+            first_row = 1
+            last_row = max(len(df_death), 10000)
+
+            list_row_start = 0
+            for column_name, source in validations.items():
+                if column_name not in df_death.columns:
+                    continue
+
+                col_idx = df_death.columns.get_loc(column_name)
+
+                start_row = list_row_start
+                end_row = list_row_start + len(source) - 1
+
+                rng = f"={sheet_choices}!$A${start_row+1}:$A${end_row+1}"
+
+                worksheet_death.data_validation(
+                    first_row=first_row,
+                    first_col=col_idx,
+                    last_row=last_row,
+                    last_col=col_idx,
+                    options={"validate": "list", "source": rng},
+                )
+
+                list_row_start += len(source)
+
+            # ปรับความกว้างคอลัมน์
             for i, col in enumerate(df_death.columns):
                 max_len = max(
                     (
