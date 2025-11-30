@@ -213,7 +213,7 @@ def get_template():
         list_sheet.hide()
 
         # Validation choices
-        title_choices = [choice[1] for choice in TITLE_NAME_CHOICES if choice[1] != "-"]
+        title_choices = [choice[1] for choice in TITLE_NAME_CHOICES if choice[1]]
         dna_choices = ["เก็บเเล้ว"]
 
         validations = {
@@ -1000,7 +1000,7 @@ def process_missing_person_export(current_user):
                 else ""
             ),
             "คำนำหน้าชื่อคนหาย/เสียชีวิต": dict(TITLE_NAME_CHOICES).get(
-                person.title_name, "-"
+                person.title_name, ""
             ),
             "ชื่อคนหาย/เสียชีวิต": person.first_name or "",
             "นามสกุลคนหาย/เสียชีวิต": person.last_name or "",
@@ -1022,7 +1022,7 @@ def process_missing_person_export(current_user):
             ),
             "ความสัมพันธ์กับผู้หาย/เสียชีวิต": person.deceased_relationship or "",
             "คำนำหน้าชื่อผู้แจ้ง": dict(TITLE_NAME_CHOICES).get(
-                person.reporter_title_name, "-"
+                person.reporter_title_name, ""
             ),
             "ชื่อผู้แจ้ง": person.reporter_first_name or "",
             "นามสกุลผู้แจ้ง": person.reporter_last_name or "",
@@ -1037,7 +1037,6 @@ def process_missing_person_export(current_user):
             "CODE": person.code or "",
         }
 
-        # แยกตามสถานะ
         if person.missing_person_status == "death":
             death_list.append(data)
         else:
@@ -1089,20 +1088,9 @@ def process_missing_person_export(current_user):
         # คอลัมน์ที่เป็นวันที่
         date_columns = ["วันที่มาเเจ้งเหตุ", "วันที่รับศพ"]
 
-        # ========== สร้าง Choices sheet ==========
-        sheet_choices = "Choices_ตัวเลือกห้ามลบ"
-
-        # Validation choices
-        title_choices = [choice[1] for choice in TITLE_NAME_CHOICES if choice[1] != "-"]
+        # ========== Validation choices (ไม่ต้องสร้าง sheet แยก) ==========
+        title_choices = [choice[1] for choice in TITLE_NAME_CHOICES if choice[1]]
         dna_choices = ["เก็บเเล้ว"]
-
-        validations = {
-            "คำนำหน้าชื่อคนหาย/เสียชีวิต": title_choices,
-            "คำนำหน้าชื่อผู้แจ้ง": title_choices,
-            "เก็บดีเอ็นเอญาติ": dna_choices,
-        }
-
-        # เขียน choices ลง hidden sheet
 
         # ========== Sheet 1: ผู้สูญหาย ==========
         if len(df_missing) > 0:
@@ -1112,7 +1100,7 @@ def process_missing_person_export(current_user):
             for col_num, col_name in enumerate(df_missing.columns):
                 worksheet_missing.write(0, col_num, col_name, header_format)
 
-            # เขียนข้อมูลพร้อม format เฉพาะ cell
+            # เขียนข้อมูลพร้อม format
             for row_num in range(len(df_missing)):
                 for col_num, col_name in enumerate(df_missing.columns):
                     value = df_missing.iloc[row_num, col_num]
@@ -1135,33 +1123,42 @@ def process_missing_person_export(current_user):
                     else:
                         worksheet_missing.write(row_num + 1, col_num, value)
 
-            # ========== เพิ่ม Data validation ==========
-            first_row = 1  # เริ่มจากแถวแรกหลัง header
-            last_row = max(len(df_missing), 10000)  # จำนวนแถวที่มี + buffer
+            # ========== เพิ่ม Data validation (ใช้ list ตรง) ==========
+            first_row = 1
+            last_row = max(len(df_missing), 10000)
 
-            list_row_start = 0
-            for column_name, source in validations.items():
-                if column_name not in df_missing.columns:
-                    continue
-
-                col_idx = df_missing.columns.get_loc(column_name)
-
-                # หา range ของ choices ใน hidden sheet
-                start_row = list_row_start
-                end_row = list_row_start + len(source) - 1
-
-                rng = f"={sheet_choices}!$A${start_row+1}:$A${end_row+1}"
-
-                # ใช้ validation กับทุกแถว
+            # คำนำหน้าชื่อคนหาย/เสียชีวิต
+            if "คำนำหน้าชื่อคนหาย/เสียชีวิต" in df_missing.columns:
+                col_idx = df_missing.columns.get_loc("คำนำหน้าชื่อคนหาย/เสียชีวิต")
                 worksheet_missing.data_validation(
                     first_row=first_row,
                     first_col=col_idx,
                     last_row=last_row,
                     last_col=col_idx,
-                    options={"validate": "list", "source": rng},
+                    options={"validate": "list", "source": title_choices},
                 )
 
-                list_row_start += len(source)
+            # คำนำหน้าชื่อผู้แจ้ง
+            if "คำนำหน้าชื่อผู้แจ้ง" in df_missing.columns:
+                col_idx = df_missing.columns.get_loc("คำนำหน้าชื่อผู้แจ้ง")
+                worksheet_missing.data_validation(
+                    first_row=first_row,
+                    first_col=col_idx,
+                    last_row=last_row,
+                    last_col=col_idx,
+                    options={"validate": "list", "source": title_choices},
+                )
+
+            # เก็บดีเอ็นเอญาติ
+            if "เก็บดีเอ็นเอญาติ" in df_missing.columns:
+                col_idx = df_missing.columns.get_loc("เก็บดีเอ็นเอญาติ")
+                worksheet_missing.data_validation(
+                    first_row=first_row,
+                    first_col=col_idx,
+                    last_row=last_row,
+                    last_col=col_idx,
+                    options={"validate": "list", "source": dna_choices},
+                )
 
             # ปรับความกว้างคอลัมน์
             for i, col in enumerate(df_missing.columns):
@@ -1183,7 +1180,7 @@ def process_missing_person_export(current_user):
             for col_num, col_name in enumerate(df_death.columns):
                 worksheet_death.write(0, col_num, col_name, header_format)
 
-            # เขียนข้อมูลพร้อม format เฉพาะ cell
+            # เขียนข้อมูลพร้อม format
             for row_num in range(len(df_death)):
                 for col_num, col_name in enumerate(df_death.columns):
                     value = df_death.iloc[row_num, col_num]
@@ -1208,27 +1205,38 @@ def process_missing_person_export(current_user):
             first_row = 1
             last_row = max(len(df_death), 10000)
 
-            list_row_start = 0
-            for column_name, source in validations.items():
-                if column_name not in df_death.columns:
-                    continue
-
-                col_idx = df_death.columns.get_loc(column_name)
-
-                start_row = list_row_start
-                end_row = list_row_start + len(source) - 1
-
-                rng = f"={sheet_choices}!$A${start_row+1}:$A${end_row+1}"
-
+            # คำนำหน้าชื่อคนหาย/เสียชีวิต
+            if "คำนำหน้าชื่อคนหาย/เสียชีวิต" in df_death.columns:
+                col_idx = df_death.columns.get_loc("คำนำหน้าชื่อคนหาย/เสียชีวิต")
                 worksheet_death.data_validation(
                     first_row=first_row,
                     first_col=col_idx,
                     last_row=last_row,
                     last_col=col_idx,
-                    options={"validate": "list", "source": rng},
+                    options={"validate": "list", "source": title_choices},
                 )
 
-                list_row_start += len(source)
+            # คำนำหน้าชื่อผู้แจ้ง
+            if "คำนำหน้าชื่อผู้แจ้ง" in df_death.columns:
+                col_idx = df_death.columns.get_loc("คำนำหน้าชื่อผู้แจ้ง")
+                worksheet_death.data_validation(
+                    first_row=first_row,
+                    first_col=col_idx,
+                    last_row=last_row,
+                    last_col=col_idx,
+                    options={"validate": "list", "source": title_choices},
+                )
+
+            # เก็บดีเอ็นเอญาติ
+            if "เก็บดีเอ็นเอญาติ" in df_death.columns:
+                col_idx = df_death.columns.get_loc("เก็บดีเอ็นเอญาติ")
+                worksheet_death.data_validation(
+                    first_row=first_row,
+                    first_col=col_idx,
+                    last_row=last_row,
+                    last_col=col_idx,
+                    options={"validate": "list", "source": dna_choices},
+                )
 
             # ปรับความกว้างคอลัมน์
             for i, col in enumerate(df_death.columns):
@@ -1244,35 +1252,39 @@ def process_missing_person_export(current_user):
 
     output.seek(0)
 
-    # สร้างชื่อไฟล์
+    # บันทึกไฟล์
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"ข้อมูลผู้สูญหาย-เสียชีวิต_{timestamp}.xlsx"
+
     export_missing_person_file = models.ExportMissingPersonFile.objects(
         created_by=current_user
     ).first()
+
     if not export_missing_person_file:
         export_missing_person_file = models.ExportMissingPersonFile(
             created_by=current_user,
             created_date=datetime.datetime.now(),
         )
+
     export_missing_person_file.updated_date = datetime.datetime.now()
     export_missing_person_file.updated_by = current_user
+
     if not export_missing_person_file.file:
         export_missing_person_file.file.put(
             output,
             file_name=filename,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        export_missing_person_file.file_name = filename
-
+        export_missing_person_file.updated_date = datetime.datetime.now()
     else:
         export_missing_person_file.file.replace(
             output,
             file_name=filename,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        export_missing_person_file.file_name = filename
+        export_missing_person_file.updated_date = datetime.datetime.now()
 
+    export_missing_person_file.file_name = filename
     export_missing_person_file.save()
 
     return True
