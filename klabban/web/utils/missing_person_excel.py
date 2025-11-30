@@ -6,7 +6,6 @@ import xlsxwriter
 import re
 from openpyxl import load_workbook
 from io import BytesIO
-from klabban.models.refugees import REFUGEE_STATUS_CHOICES, GENDER
 from flask import flash
 from klabban.models.missing_persons import (
     MISSING_PERSON_STATUS_CHOICES,
@@ -996,3 +995,229 @@ def process_import_missing_person_file(
         import_missing_person_file.upload_status = "failed"
         import_missing_person_file.error_messages.append(f"เกิดข้อผิดพลาด: {str(e)}")
         import_missing_person_file.save()
+
+
+def process_missing_person_export(current_user):
+    """
+    Export missing persons to Excel with 2 sheets: ผู้สูญหาย และ ผู้เสียชีวิต
+    """
+    # แยกข้อมูลตามสถานะ
+    missing_persons = models.MissingPerson.objects(status="active")
+    missing_list = []
+    death_list = []
+
+    for person in missing_persons:
+        data = {
+            "วันที่มาเเจ้งเหตุ": (
+                person.reporting_date.strftime("%d/%m/%Y")
+                if person.reporting_date
+                else ""
+            ),
+            "คำนำหน้าชื่อคนหาย/เสียชีวิต": dict(TITLE_NAME_CHOICES).get(
+                person.title_name, ""
+            ),
+            "ชื่อคนหาย/เสียชีวิต": person.first_name or "",
+            "นามสกุลคนหาย/เสียชีวิต": person.last_name or "",
+            "อายุคนหาย/เสียชีวิต": person.age if person.age else "",
+            "เบอร์โทรศัพท์คนหาย/เสียชีวิต": person.phone_number or "",
+            "หมายเลขบัตรประชาชนคนหาย/เสียชีวิต": person.identification_number or "",
+            "ประเทศคนหาย/เสียชีวิต": person.country or "",
+            "จังหวัดคนหาย/เสียชีวิต": person.province_info or "",
+            "อำเภอคนหาย/เสียชีวิต": person.district_info or "",
+            "ตำบลคนหาย/เสียชีวิต": person.subdistrict_info or "",
+            "ที่อยู่บ้านเลขที่คนหาย/เสียชีวิต": person.address_info or "",
+            "ลักษณะรูปพรรณ": person.physical_mark or "",
+            "เก็บดีเอ็นเอญาติ": "เก็บเเล้ว" if person.is_dna_collected else "",
+            "คำให้การ/สอบปากคำ": person.statement or "",
+            "วันที่รับศพ": (
+                person.body_received_date.strftime("%d/%m/%Y")
+                if person.body_received_date
+                else ""
+            ),
+            "ความสัมพันธ์กับผู้หาย/เสียชีวิต": person.deceased_relationship or "",
+            "คำนำหน้าชื่อผู้แจ้ง": dict(TITLE_NAME_CHOICES).get(
+                person.reporter_title_name, ""
+            ),
+            "ชื่อผู้แจ้ง": person.reporter_first_name or "",
+            "นามสกุลผู้แจ้ง": person.reporter_last_name or "",
+            "อายุผู้แจ้ง": person.reporter_age if person.reporter_age else "",
+            "หมายเลขบัตรประชาชนผู้แจ้ง": person.reporter_identification_number or "",
+            "ประเทศผู้แจ้ง": person.reporter_country or "",
+            "จังหวัดผู้แจ้ง": person.reporter_province_info or "",
+            "อำเภอผู้แจ้ง": person.reporter_district_info or "",
+            "ตำบลผู้แจ้ง": person.reporter_subdistrict_info or "",
+            "ที่อยู่บ้านเลขที่ผู้แจ้ง": person.reporter_address_info or "",
+            "เบอร์โทรศัพท์ผู้แจ้ง": person.reporter_phone_number or "",
+            "CODE": person.code or "",
+        }
+
+        # แยกตามสถานะ
+        if person.missing_person_status == "death":
+            death_list.append(data)
+        else:
+            missing_list.append(data)
+
+    df_missing = (
+        pd.DataFrame(missing_list) if missing_list else pd.DataFrame(columns=HEADER)
+    )
+    df_death = pd.DataFrame(death_list) if death_list else pd.DataFrame(columns=HEADER)
+
+    df_missing = df_missing.reindex(columns=HEADER, fill_value="")
+    df_death = df_death.reindex(columns=HEADER, fill_value="")
+
+    # สร้าง Excel file
+    output = BytesIO()
+    with pd.ExcelWriter(
+        output,
+        engine="xlsxwriter",
+        date_format="dd/mm/yyyy",
+        datetime_format="dd/mm/yyyy",
+    ) as writer:
+        workbook: xlsxwriter.Workbook = writer.book
+
+        # Format definitions
+        header_format = workbook.add_format(
+            {
+                "bold": True,
+                "bg_color": "#4472C4",
+                "font_color": "white",
+                "align": "center",
+                "valign": "vcenter",
+            }
+        )
+        text_format = workbook.add_format({"num_format": "@"})
+        number_format = workbook.add_format({"num_format": "0"})
+        date_format = workbook.add_format({"num_format": "dd/mm/yyyy"})
+
+        # คอลัมน์ที่เป็นตัวเลข
+        numeric_columns = ["อายุคนหาย/เสียชีวิต", "อายุผู้แจ้ง"]
+
+        # คอลัมน์ที่เป็น text (บังคับ)
+        text_columns = [
+            "หมายเลขบัตรประชาชนคนหาย/เสียชีวิต",
+            "หมายเลขบัตรประชาชนผู้แจ้ง",
+            "เบอร์โทรศัพท์คนหาย/เสียชีวิต",
+            "เบอร์โทรศัพท์ผู้แจ้ง",
+        ]
+
+        # คอลัมน์ที่เป็นวันที่
+        date_columns = ["วันที่มาเเจ้งเหตุ", "วันที่รับศพ"]
+
+        # ========== Sheet 1: ผู้สูญหาย ==========
+        if len(df_missing) > 0:
+            worksheet_missing = workbook.add_worksheet("ผู้สูญหาย")
+
+            # เขียน header
+            for col_num, col_name in enumerate(df_missing.columns):
+                worksheet_missing.write(0, col_num, col_name, header_format)
+
+            # เขียนข้อมูลพร้อม format เฉพาะ cell
+            for row_num in range(len(df_missing)):
+                for col_num, col_name in enumerate(df_missing.columns):
+                    value = df_missing.iloc[row_num, col_num]
+
+                    if col_name in numeric_columns and value != "":
+                        try:
+                            worksheet_missing.write_number(
+                                row_num + 1, col_num, int(value), number_format
+                            )
+                        except:
+                            worksheet_missing.write(row_num + 1, col_num, value)
+                    elif col_name in text_columns:
+                        worksheet_missing.write_string(
+                            row_num + 1, col_num, str(value), text_format
+                        )
+                    elif col_name in date_columns and value != "":
+                        worksheet_missing.write(
+                            row_num + 1, col_num, value, date_format
+                        )
+                    else:
+                        # เขียนปกติไม่มี format
+                        worksheet_missing.write(row_num + 1, col_num, value)
+
+            # ปรับความกว้างคอลัมน์ โดยไม่กำหนด format
+            for i, col in enumerate(df_missing.columns):
+                max_len = max(
+                    (
+                        df_missing[col].astype(str).apply(len).max()
+                        if len(df_missing) > 0
+                        else 0
+                    ),
+                    len(col),
+                )
+                worksheet_missing.set_column(i, i, max_len + 3)  # ไม่ใส่ format parameter
+
+        # ========== Sheet 2: ผู้เสียชีวิต ==========
+        if len(df_death) > 0:
+            worksheet_death = workbook.add_worksheet("ผู้เสียชีวิต")
+
+            # เขียน header
+            for col_num, col_name in enumerate(df_death.columns):
+                worksheet_death.write(0, col_num, col_name, header_format)
+
+            # เขียนข้อมูลพร้อม format เฉพาะ cell
+            for row_num in range(len(df_death)):
+                for col_num, col_name in enumerate(df_death.columns):
+                    value = df_death.iloc[row_num, col_num]
+
+                    if col_name in numeric_columns and value != "":
+                        try:
+                            worksheet_death.write_number(
+                                row_num + 1, col_num, int(value), number_format
+                            )
+                        except:
+                            worksheet_death.write(row_num + 1, col_num, value)
+                    elif col_name in text_columns:
+                        worksheet_death.write_string(
+                            row_num + 1, col_num, str(value), text_format
+                        )
+                    elif col_name in date_columns and value != "":
+                        worksheet_death.write(row_num + 1, col_num, value, date_format)
+                    else:
+                        worksheet_death.write(row_num + 1, col_num, value)
+
+            # ปรับความกว้างคอลัมน์ โดยไม่กำหนด format
+            for i, col in enumerate(df_death.columns):
+                max_len = max(
+                    (
+                        df_death[col].astype(str).apply(len).max()
+                        if len(df_death) > 0
+                        else 0
+                    ),
+                    len(col),
+                )
+                worksheet_death.set_column(i, i, max_len + 3)
+
+    output.seek(0)
+
+    # สร้างชื่อไฟล์
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"ข้อมูลผู้สูญหาย-เสียชีวิต_{timestamp}.xlsx"
+    export_missing_person_file = models.ExportMissingPersonFile.objects(
+        created_by=current_user
+    ).first()
+    if not export_missing_person_file:
+        export_missing_person_file = models.ExportMissingPersonFile(
+            created_by=current_user,
+            created_date=datetime.datetime.now(),
+        )
+    export_missing_person_file.updated_date = datetime.datetime.now()
+    export_missing_person_file.updated_by = current_user
+    if not export_missing_person_file.file:
+        export_missing_person_file.file.put(
+            output,
+            file_name=filename,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        export_missing_person_file.file_name = filename
+    else:
+        export_missing_person_file.file.replace(
+            output,
+            file_name=filename,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        export_missing_person_file.file_name = filename
+
+    export_missing_person_file.save()
+
+    return True

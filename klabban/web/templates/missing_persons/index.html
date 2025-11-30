@@ -39,6 +39,14 @@
           <span class="ph ph-file-xls text-lg"></span>
           นำเข้าข้อมูลผู้สูญหาย - เสียชีวิต
         </button>
+        <button hx-get="{{ url_for('missing_persons.export_missing_person_modal') }}" 
+          hx-target="#export-missing-person-modal-container"
+          hx-trigger="click" 
+          hx-swap="innerHTML" 
+          class="btn btn-secondary text-white">
+          <span class="ph ph-file-xls text-lg"></span>
+          ส่งออกข้อมูลผู้สูญหาย - เสียชีวิต
+        </button>
         
         <a class="btn btn-primary text-white mb-1" href="{{ url_for('missing_persons.create_or_edit', **request.args) }}">
           <span class="material-symbols-outlined text-sm">add</span>
@@ -341,6 +349,7 @@
 </div>
 
 {% endblock %}
+
 
 {% macro render_person_toolbar(person, suffix='') %}
 <a href="{{ url_for('missing_persons.view', missing_person_id=person.id, **request.args) }}"

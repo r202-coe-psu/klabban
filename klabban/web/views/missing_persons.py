@@ -202,3 +202,47 @@ def get_import_errors(import_id):
         }
     except Exception as e:
         return {"errors": [str(e)]}, 404
+
+
+@module.route("/export")
+@roles_required(["officer"])
+def export_missing_person_data():
+    job_id = redis_rq.redis_queue.queue.enqueue(
+        utils.missing_person_excel.process_missing_person_export,
+        args=(current_user._get_current_object(),),
+        timeout=3600,
+        job_timeout=1200,
+    )
+    flash("ระบบกำลังสร้างไฟล์ส่งออกข้อมูลบุคคลสูญหาย กรุณารอสักครู่", "info")
+    return redirect(url_for("missing_persons.index"))
+
+
+@module.route("/export_missing_person_modal")
+@roles_required(["officer"])
+def export_missing_person_modal():
+    modal_id = uuid4()
+    exported_file = models.ExportMissingPersonFile.objects(
+        created_by=current_user._get_current_object()
+    ).first()
+    return render_template(
+        "/components/missing_person/export_missing_person_modal.html",
+        modal_id=modal_id,
+        exported_file=exported_file,
+    )
+
+
+@module.route("/download_exported_missing_person_file/<export_id>")
+@roles_required(["officer"])
+def download_exported_file(export_id):
+    export_missing_person_file = models.ExportMissingPersonFile.objects.get(
+        id=export_id
+    )
+    if not export_missing_person_file or not export_missing_person_file.file:
+        flash("ไม่พบไฟล์ที่ส่งออก กรุณาทำการส่งออกข้อมูลใหม่", "error")
+        return redirect(url_for("missing_persons.index"))
+
+    return send_file(
+        export_missing_person_file.file,
+        as_attachment=True,
+        download_name=f"{export_missing_person_file.file_name}",
+    )
