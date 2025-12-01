@@ -409,12 +409,9 @@ refugee_id=""
   });
   {# When submit add query string to action form <camp_id>#}
   
-  document.getElementById("{{ id }}-change_camp-submit").addEventListener("click", function() {
   var form = this.closest("form");
   var selectElement = select_field_{{ id }};
   
-  console.log("Looking for element ID:", "{{ id }}_select_field");
-  console.log("Select element found:", selectElement);
   var selectedCampId = selectElement ? selectElement.value : "";
 
   // Check if no camp is selected or if the default option is selected
@@ -427,8 +424,75 @@ refugee_id=""
   var baseAction = "{{ url_for('refugees.change_camp', refugee_id=refugee_id, camp_id='' ) }}";
   form.action = baseAction + selectedCampId + "?{{ request.query_string.decode('utf-8') }}";
 
-  console.log("Final form action:", form.action);
   form.submit();
 });
+</script>
+{% endmacro %}
+
+{% macro PrivacyNoticeDPOThai(
+  id="privacy_notice",
+  init_show=False,
+  click_outside_to_close=True
+) %}
+<dialog id="{{ id }}" class="modal modal-bottom sm:modal-middle">
+  <div class="modal-box max-w-6xl w-full max-h-[90vh] overflow-hidden">
+    {# Sticky close button #}
+    <button type="button" class="btn btn-sm btn-circle btn-ghost sticky top-2 right-2 float-right outline-none z-10 bg-white shadow-md hover:bg-gray-100"
+      onclick="document.getElementById('{{ id }}').close();">✕</button>
+    
+    {# Privacy notice content - PDF iframe #}
+    <div class="pr-8 clear-right h-full">
+      <iframe 
+        src="{{ url_for('static', filename='files/privacy-notice.pdf') }}" 
+        class="w-full h-[75vh] border-0 rounded-lg"
+        type="application/pdf"
+        title="Privacy Notice - คำประกาศเกี่ยวกับความเป็นส่วนตัว">
+        <p class="text-center text-gray-500 p-8">
+          Your browser does not support PDFs. 
+          <a href="{{ url_for('static', filename='files/privacy-notice.pdf') }}" 
+             target="_blank" 
+             class="text-blue-600 underline">
+            Click here to download the PDF file.
+          </a>
+        </p>
+      </iframe>
+    </div>
+    
+    {# Footer buttons #}
+    <div class="modal-action  border-gray-200 sticky bottom-0 bg-white">
+      <a href="{{ url_for('static', filename='files/privacy-notice.pdf') }}" 
+         target="_blank" 
+         class="btn btn-ghost">
+        เปิดในหน้าใหม่ / Open in New Tab
+      </a>
+      <button type="button" class="btn btn-ghost" 
+        onclick="document.getElementById('{{ id }}').close();">
+        ปิด / Close
+      </button>
+      <button type="button" class="btn btn-primary" 
+        onclick="document.getElementById('{{ id }}').close();">
+        รับทราบ / Acknowledged
+      </button>
+    </div>
+  </div>
+  
+  {% if click_outside_to_close %}
+  <form method="dialog" class="modal-backdrop">
+    <button type="button">กดเพื่อปิด</button>
+  </form>
+  {% endif %}
+</dialog>
+
+<script>
+  {% if init_show %}
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById("{{ id }}").showModal();
+  });
+  {% endif %}
+  
+  // Function to open privacy notice dialog
+  window.openPrivacyNotice = function() {
+    document.getElementById("{{ id }}").showModal();
+  };
 </script>
 {% endmacro %}
