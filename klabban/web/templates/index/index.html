@@ -323,6 +323,12 @@
 document.addEventListener('DOMContentLoaded', function() {
   const stickyButton = document.getElementById('privacy-sticky-button');
   
+  // Function to detect mobile device
+  function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           window.innerWidth <= 768;
+  }
+  
   // Function to hide sticky button
   function hidePrivacyButton() {
     if (stickyButton) {
@@ -340,7 +346,15 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Function to open privacy notice from sticky button
   window.openPrivacyNoticeSticky = function() {
-    document.getElementById('privacy_sticky_modal').showModal();
+    // Check if mobile device
+    if (isMobileDevice()) {
+      // Redirect to PDF on mobile
+      window.open("{{ url_for('static', filename='files/privacy-notice.pdf') }}", '_blank');
+      hidePrivacyButton();
+    } else {
+      // Show modal on desktop
+      document.getElementById('privacy_sticky_modal').showModal();
+    }
   };
   
   // Hide banner when any of the modal buttons are clicked
