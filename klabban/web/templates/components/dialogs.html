@@ -397,18 +397,16 @@ refugee_id=""
 
 <script>
   let select_field_{{ id }} = document.getElementById("{{ id }}_select_field");
-  console.log("Select field found:", select_field_{{ id }});
   select_field_{{ id }}.addEventListener('change', function() {
     // This function will execute when the selected option changes
     const selectedValue = this.value; // 'this' refers to the select element
-    console.log('Selected value:', selectedValue);
 
     // Perform DOM manipulation or other actions based on the selected value
     // Example: Update a paragraph with the selected value
     document.getElementById('outputParagraph').textContent = 'You selected: ' + selectedValue;
   });
   {# When submit add query string to action form <camp_id>#}
-  
+  document.getElementById("{{ id }}-change_camp-submit").addEventListener("click", function(event) {
   var form = this.closest("form");
   var selectElement = select_field_{{ id }};
   
