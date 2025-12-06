@@ -27,6 +27,7 @@ def get_refugee_camp_choices():
 
 
 @module.route("/")
+@roles_required(["admin", "refugee_camp_staff", "officer"])
 def index():
     view_mode = request.args.get("view_mode", "list")
 
@@ -81,6 +82,7 @@ def index():
 
 
 @module.route("/<refugee_id>/change_status/", methods=["POST", "GET"])
+@roles_required(["admin", "refugee_camp_staff"])
 def change_status(refugee_id):
     refugee = models.Refugee.objects.get(id=refugee_id)
     # name_confirmation = request.form.get("name_confirmation")
@@ -135,7 +137,7 @@ def change_status(refugee_id):
 
 @module.route("/create", methods=["GET", "POST"], defaults={"refugee_id": None})
 @module.route("/<refugee_id>/edit", methods=["GET", "POST"])
-# @roles_required(["admin", "refugee_camp_staff"])
+@roles_required(["admin", "refugee_camp_staff"])
 def create_or_edit(refugee_id):
     form = forms.refugees.RefugeeForm()
     refugee = models.Refugee()
@@ -313,6 +315,7 @@ def delete_refugee(refugee_id):
 
 
 @module.route("/report/create", methods=["GET", "POST"])
+@roles_required(["admin", "refugee_camp_staff"])
 def create_report():
     report_type = request.args.get("type", None)
     form = forms.reports.ReportNoteForm()
