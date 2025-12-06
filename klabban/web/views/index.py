@@ -2,6 +2,8 @@ import datetime
 
 from flask import Blueprint, redirect, render_template, url_for
 from flask_login import login_required
+from klabban.web import app
+from flask_login import current_user
 
 from klabban import models
 
@@ -10,6 +12,16 @@ module = Blueprint("index", __name__)
 
 @module.route("/")
 def index():
+    bypass = False
+    if current_user.is_authenticated:
+        bypass = (
+            current_user.is_admin()
+            or current_user.is_officer()
+            or current_user.is_refugee_camp_staff()
+        )
+    if app.config["CLOSE"] and not bypass:
+        return render_template("index/close.html")
+
     refugee_camps = models.RefugeeCamp.objects(status__ne="inactive")
 
     # Count refugees for each camp (only active refugees) and attach to camp object
