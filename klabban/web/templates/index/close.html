@@ -36,15 +36,16 @@
   </head>
 
   <body>
-    <div class="relative bg-[url(/static/images/close-banner.jpeg)] bg-center bg-no-repeat bg-cover h-screen w-screen">
-      <!-- Login button in upper right corner -->
+    <div class="relative bg-[url(/static/images/close-banner.jpeg)] bg-center bg-no-repeat bg-cover h-screen w-screen flex flex-col">
+      {# Login button in upper right corner #}
       <div class="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
         <a class="btn btn-outline border-white/20 text-white/50 hover:text-black rounded-full px-6 font-normal"
            href="{{ url_for('accounts.login') }}">สำหรับเจ้าหน้าที่</a>
       </div>
 
-      <div class="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col justify-between text-center text-white max-w-3xl w-full space-y-6 sm:space-y-8">
+      <div class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col justify-between text-center text-white max-w-4xl w-full space-y-6 sm:space-y-8">
+          <div class="h-[5vh]"></div>
           <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold drop-shadow-lg">
             เราจะผ่านพ้นช่วงเวลานี้ไปด้วยกัน
           </h1>
@@ -54,10 +55,38 @@
             ผู้อพยพในศูนย์พักพิงแบบสาธารณะ ทางทีมผู้พัฒนาจะปฏิบัติตามคําประกาศ
             เกี่ยวกับความเป็นส่วนตัวโดยเคร่งครัด
           </p>
-          <div class="h-[50vh]"></div>
+          <div class="h-[40vh]"></div>
           
           <div class="text-base sm:text-lg md:text-xl lg:text-2xl font-medium drop-shadow-md pt-4">
             hakon.psu.ac.th
+          </div>
+        </div>
+      </div>
+
+      {# Bottom Privacy Notice Section #}
+      <div class="bg-blue-600/90 backdrop-blur-sm border-t border-white/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            {# Left side - Content #}
+            <div class="flex items-start sm:items-center gap-2 sm:gap-3 text-white flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-1 min-w-0">
+                <i class="ph ph-shield-check text-lg sm:text-xl shrink-0"></i>
+                <div class="min-w-0 flex-1">
+                  <h3 class="font-semibold text-xs sm:text-sm leading-tight">นโยบายความเป็นส่วนตัว</h3>
+                  <p class="text-xs text-blue-100 leading-tight mt-0.5 hidden sm:block">เราใช้ข้อมูลของคุณเพื่อการช่วยเหลือในสถานการณ์ฉุกเฉิน</p>
+                  <p class="text-xs text-blue-100 leading-tight mt-0.5 sm:hidden">ข้อมูลสำหรับสถานการณ์ฉุกเฉิน</p>
+                </div>
+              </div>
+            </div>
+            
+            {# Right side - Action button #}
+            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
+              <a href="{{ url_for('static', filename='files/privacy-notice.pdf') }}" target="_blank"
+                 class="bg-white text-blue-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-50 transition-colors flex-1 sm:flex-none text-center">
+                <span class="sm:hidden">ข้อมูลเพิ่มเติม</span>
+                <span class="hidden sm:inline">ข้อมูลเพิ่มเติม</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
