@@ -315,7 +315,6 @@ def delete_refugee(refugee_id):
 
 
 @module.route("/report/create", methods=["GET", "POST"])
-@roles_required(["admin", "refugee_camp_staff"])
 def create_report():
     report_type = request.args.get("type", None)
     form = forms.reports.ReportNoteForm()
@@ -338,7 +337,9 @@ def create_report():
     )
     report.save()
 
-    flash(f"แจ้งปัญหาสำหรับผู้อพยพสำเร็จ", "success")
+    flash(f"แจ้งปัญหาสำเร็จ", "success")
+    if not current_user.is_authenticated:
+        return redirect(url_for("index.index"))
 
     return redirect(url_for("refugees.index"))
 

@@ -1,3 +1,5 @@
+{% from "components/toasts.html" import render_toast %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -38,9 +40,17 @@
   <body>
     <div class="relative bg-[url(/static/images/close-banner.jpeg)] bg-center bg-no-repeat bg-cover h-screen w-screen flex flex-col">
       {# Login button in upper right corner #}
-      <div class="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
+      <div class="flex flex-row gap-4 absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
         <a class="btn btn-outline border-white/20 text-white/50 hover:text-black rounded-full px-6 font-normal"
-           href="{{ url_for('accounts.login') }}">สำหรับเจ้าหน้าที่</a>
+           href="{{ url_for('refugees.create_report') }}">
+           <i class="ph ph-warning"></i>
+           ติดต่อสอบถาม/แจ้งปัญหา
+        </a>
+        <a class="btn btn-outline border-white/20 text-white/50 hover:text-black rounded-full px-6 font-normal"
+          href="{{ url_for('accounts.login') }}">
+          <i class="ph ph-user"></i>
+          สำหรับเจ้าหน้าที่
+          </a>
       </div>
 
       <div class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
@@ -119,6 +129,9 @@
         </div>
       </div>
     </div>
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+      {{ render_toast(message, category) }}
+    {% endfor %}
   </body>
   <script>
    function dismissPrivacyNotice() {
